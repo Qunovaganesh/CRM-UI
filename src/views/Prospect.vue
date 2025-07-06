@@ -1,13 +1,7 @@
 <template>
   <div class="prospect-page">
-    <!-- Floating Back Button -->
-    <div class="floating-back-button">
-      <button class="btn-floating-back" @click="$router.go(-1)">
-        ← Back
-      </button>
-    </div>
-
-    <div class="page-header">
+    <!-- Floating Header -->
+    <div class="floating-header">
       <div class="relationship-header">
         <h1>Prospect Management</h1>
         <div class="relationship-info">
@@ -23,6 +17,15 @@
       </div>
       <p>Manage terms & conditions and agreement generation</p>
     </div>
+
+    <!-- Floating Back Button -->
+    <div class="floating-back-button">
+      <button class="btn-floating-back" @click="$router.go(-1)">
+        ← Back
+      </button>
+    </div>
+
+    <div class="content-wrapper">
 
     <div class="prospect-content">
       <div class="terms-section">
@@ -147,6 +150,7 @@
         </div>
       </div>
     </div>
+    </div>
 
     <!-- Agreement Preview Modal -->
     <div v-if="showPreviewModal" class="modal-overlay" @click="closePreview">
@@ -239,7 +243,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor prospect, find matching manufacturer
-    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
   } else {
     // This is a manufacturer prospect
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -377,16 +381,16 @@ const convertToCustomer = () => {
     // Update manufacturer status
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
-      manufacturer.status = 'Customer';
+      manufacturer.status = 'Prospect'; // Keep as Prospect until payment is uploaded
       manufacturer.daysSinceStatus = 0;
     }
   } else {
     // Update distributor status
-    updateDistributorStatus(props.id, 'Customer');
+    updateDistributorStatus(props.id, 'Prospect'); // Keep as Prospect until payment is uploaded
   }
-  alert('Status updated to Customer! Redirecting...');
+  alert('Agreement signed! Status remains Prospect until payment is uploaded.');
   setTimeout(() => {
-    router.push({ name: 'Customer', params: { id: props.id } });
+    router.push({ name: 'Prospect', params: { id: props.id } });
   }, 1000);
 };
 
@@ -396,6 +400,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.floating-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.content-wrapper {
+  margin-top: 140px;
+  padding: 20px;
+}
+
 .floating-back-button {
   position: fixed;
   top: 20px;
@@ -425,7 +446,6 @@ onMounted(() => {
 .prospect-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .page-header {
@@ -819,6 +839,10 @@ onMounted(() => {
   .term-item {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+  
+  .content-wrapper {
+    margin-top: 160px;
   }
   
   .terms-container {

@@ -1,156 +1,150 @@
 <template>
   <div class="filter-controls">
-    <div class="entity-toggle">
-      <h3>Select Entity Type</h3>
-      <div class="radio-group">
-        <label>
-          <input 
-            type="radio" 
-            :value="'manufacturer'" 
-            v-model="internalSelectedEntity"
-          >
-          Manufacturer
-        </label>
-        <label>
-          <input 
-            type="radio" 
-            :value="'distributor'" 
-            v-model="internalSelectedEntity"
-          >
-          Distributor
-        </label>
+    <!-- Geographic Filters -->
+    <div class="filter-section">
+      <h3>Geographic Filters</h3>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>State</label>
+          <div class="multiselect-container">
+            <select 
+              multiple 
+              :value="internalFilters.state" 
+              @change="onLocationFilterChange('state', Array.from($event.target.selectedOptions).map(option => option.value))"
+              class="multiselect"
+            >
+              <option v-for="state in availableStates" :key="state" :value="state">
+                {{ state }}
+              </option>
+            </select>
+            <div class="selected-tags" v-if="internalFilters.state.length">
+              <span v-for="state in internalFilters.state" :key="state" class="tag">
+                {{ state }}
+                <button @click="removeFilter('state', state)" class="tag-remove">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>District</label>
+          <div class="multiselect-container">
+            <select 
+              multiple 
+              :value="internalFilters.district" 
+              @change="onLocationFilterChange('district', Array.from($event.target.selectedOptions).map(option => option.value))"
+              class="multiselect"
+            >
+              <option v-for="district in availableDistricts" :key="district" :value="district">
+                {{ district }}
+              </option>
+            </select>
+            <div class="selected-tags" v-if="internalFilters.district.length">
+              <span v-for="district in internalFilters.district" :key="district" class="tag">
+                {{ district }}
+                <button @click="removeFilter('district', district)" class="tag-remove">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>City</label>
+          <div class="multiselect-container">
+            <select 
+              multiple 
+              :value="internalFilters.city" 
+              @change="onLocationFilterChange('city', Array.from($event.target.selectedOptions).map(option => option.value))"
+              class="multiselect"
+            >
+              <option v-for="city in availableCities" :key="city" :value="city">
+                {{ city }}
+              </option>
+            </select>
+            <div class="selected-tags" v-if="internalFilters.city.length">
+              <span v-for="city in internalFilters.city" :key="city" class="tag">
+                {{ city }}
+                <button @click="removeFilter('city', city)" class="tag-remove">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="filters-grid">
-      <div class="filter-group">
-        <label>State</label>
-        <div class="multiselect-container">
-          <select 
-            multiple 
-            :value="internalFilters.state" 
-            @change="onLocationFilterChange('state', Array.from($event.target.selectedOptions).map(option => option.value))"
-            class="multiselect"
-          >
-            <option v-for="state in availableStates" :key="state" :value="state">
-              {{ state }}
-            </option>
-          </select>
-          <div class="selected-tags" v-if="internalFilters.state.length">
-            <span v-for="state in internalFilters.state" :key="state" class="tag">
-              {{ state }}
-              <button @click="removeFilter('state', state)" class="tag-remove">×</button>
-            </span>
+    <!-- Category Filters -->
+    <div class="filter-section">
+      <h3>Category Filters</h3>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Category</label>
+          <div class="multiselect-container">
+            <select 
+              multiple 
+              :value="internalFilters.category" 
+              @change="onCategoryFilterChange('category', Array.from($event.target.selectedOptions).map(option => option.value))"
+              class="multiselect"
+            >
+              <option v-for="category in availableCategories" :key="category" :value="category">
+                {{ category }}
+              </option>
+            </select>
+            <div class="selected-tags" v-if="internalFilters.category.length">
+              <span v-for="category in internalFilters.category" :key="category" class="tag">
+                {{ category }}
+                <button @click="removeFilter('category', category)" class="tag-remove">×</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>Sub Category</label>
+          <div class="multiselect-container">
+            <select 
+              multiple 
+              :value="internalFilters.subCategory" 
+              @change="onCategoryFilterChange('subCategory', Array.from($event.target.selectedOptions).map(option => option.value))"
+              class="multiselect"
+            >
+              <option v-for="subCategory in availableSubCategories" :key="subCategory" :value="subCategory">
+                {{ subCategory }}
+              </option>
+            </select>
+            <div class="selected-tags" v-if="internalFilters.subCategory.length">
+              <span v-for="subCategory in internalFilters.subCategory" :key="subCategory" class="tag">
+                {{ subCategory }}
+                <button @click="removeFilter('subCategory', subCategory)" class="tag-remove">×</button>
+              </span>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="filter-group">
-        <label>District</label>
-        <div class="multiselect-container">
-          <select 
-            multiple 
-            :value="internalFilters.district" 
-            @change="onLocationFilterChange('district', Array.from($event.target.selectedOptions).map(option => option.value))"
-            class="multiselect"
-          >
-            <option v-for="district in availableDistricts" :key="district" :value="district">
-              {{ district }}
-            </option>
-          </select>
-          <div class="selected-tags" v-if="internalFilters.district.length">
-            <span v-for="district in internalFilters.district" :key="district" class="tag">
-              {{ district }}
-              <button @click="removeFilter('district', district)" class="tag-remove">×</button>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>City</label>
-        <div class="multiselect-container">
-          <select 
-            multiple 
-            :value="internalFilters.city" 
-            @change="onLocationFilterChange('city', Array.from($event.target.selectedOptions).map(option => option.value))"
-            class="multiselect"
-          >
-            <option v-for="city in availableCities" :key="city" :value="city">
-              {{ city }}
-            </option>
-          </select>
-          <div class="selected-tags" v-if="internalFilters.city.length">
-            <span v-for="city in internalFilters.city" :key="city" class="tag">
-              {{ city }}
-              <button @click="removeFilter('city', city)" class="tag-remove">×</button>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>Industry</label>
-        <div class="multiselect-container">
-          <select 
-            multiple 
-            :value="internalFilters.industry" 
-            @change="onIndustryFilterChange('industry', Array.from($event.target.selectedOptions).map(option => option.value))"
-            class="multiselect"
-          >
-            <option v-for="industry in availableIndustries" :key="industry" :value="industry">
-              {{ industry }}
-            </option>
-          </select>
-          <div class="selected-tags" v-if="internalFilters.industry.length">
-            <span v-for="industry in internalFilters.industry" :key="industry" class="tag">
-              {{ industry }}
-              <button @click="removeFilter('industry', industry)" class="tag-remove">×</button>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>Category</label>
-        <div class="multiselect-container">
-          <select 
-            multiple 
-            :value="internalFilters.category" 
-            @change="onIndustryFilterChange('category', Array.from($event.target.selectedOptions).map(option => option.value))"
-            class="multiselect"
-          >
-            <option v-for="category in availableCategories" :key="category" :value="category">
-              {{ category }}
-            </option>
-          </select>
-          <div class="selected-tags" v-if="internalFilters.category.length">
-            <span v-for="category in internalFilters.category" :key="category" class="tag">
-              {{ category }}
-              <button @click="removeFilter('category', category)" class="tag-remove">×</button>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>Status</label>
-        <div class="multiselect-container">
-          <select 
-            multiple 
-            :value="internalFilters.status" 
-            @change="internalFilters.status = Array.from($event.target.selectedOptions).map(option => option.value); onFilterChange()"
-            class="multiselect"
-          >
-            <option v-for="status in filterOptions.statuses" :key="status" :value="status">
-              {{ status }}
-            </option>
-          </select>
-          <div class="selected-tags" v-if="internalFilters.status.length">
-            <span v-for="status in internalFilters.status" :key="status" class="tag">
-              {{ status }}
-              <button @click="removeFilter('status', status)" class="tag-remove">×</button>
-            </span>
+    <!-- Status Filter -->
+    <div class="filter-section">
+      <h3>Status Filter</h3>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Status</label>
+          <div class="multiselect-container">
+            <select 
+              multiple 
+              :value="internalFilters.status" 
+              @change="internalFilters.status = Array.from($event.target.selectedOptions).map(option => option.value); onFilterChange()"
+              class="multiselect"
+            >
+              <option v-for="status in filterOptions.statuses" :key="status" :value="status">
+                {{ status }}
+              </option>
+            </select>
+            <div class="selected-tags" v-if="internalFilters.status.length">
+              <span v-for="status in internalFilters.status" :key="status" class="tag">
+                {{ status }}
+                <button @click="removeFilter('status', status)" class="tag-remove">×</button>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -166,7 +160,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { filterOptions, locationMapping, industryToCategoryMapping } from '../data/mockData';
+import { filterOptions, locationMapping, categoryToSubCategoryMapping } from '../data/mockData';
 
 const props = defineProps<{
   selectedEntity: 'manufacturer' | 'distributor';
@@ -180,18 +174,8 @@ const emit = defineEmits<{
   'filter-change': [];
   'clear-filters': [];
   'location-filter-change': [type: 'city' | 'district' | 'state', values: string[]];
-  'industry-filter-change': [type: 'industry' | 'category', values: string[]];
+  'category-filter-change': [type: 'category' | 'subCategory', values: string[]];
 }>();
-
-const internalSelectedEntity = computed({
-  get() {
-    return props.selectedEntity;
-  },
-  set(value: 'manufacturer' | 'distributor') {
-    emit('update:selectedEntity', value);
-    emit('entity-change');
-  }
-});
 
 const internalFilters = computed({
   get() {
@@ -204,7 +188,6 @@ const internalFilters = computed({
 
 const availableStates = computed(() => {
   if (internalFilters.value.city.length > 0 || internalFilters.value.district.length > 0) {
-    // If cities or districts are selected, show only related states
     const relatedStates = new Set<string>();
     
     if (internalFilters.value.city.length > 0) {
@@ -256,33 +239,33 @@ const availableCities = computed(() => {
   return filterOptions.cities;
 });
 
-const availableIndustries = computed(() => {
-  if (internalFilters.value.category.length > 0) {
-    const relatedIndustries = new Set<string>();
-    (Array.isArray(internalFilters.value.category) ? internalFilters.value.category : []).forEach((category: string) => {
-      Object.entries(industryToCategoryMapping).forEach(([industry, categories]) => {
-        if (categories.includes(category)) {
-          relatedIndustries.add(industry);
+const availableCategories = computed(() => {
+  if (internalFilters.value.subCategory.length > 0) {
+    const relatedCategories = new Set<string>();
+    (Array.isArray(internalFilters.value.subCategory) ? internalFilters.value.subCategory : []).forEach((subCategory: string) => {
+      Object.entries(categoryToSubCategoryMapping).forEach(([category, subCategories]) => {
+        if (subCategories.includes(subCategory)) {
+          relatedCategories.add(category);
         }
       });
-    });
-    return Array.from(relatedIndustries);
-  }
-  return filterOptions.industries;
-});
-
-const availableCategories = computed(() => {
-  if (internalFilters.value.industry.length > 0) {
-    const relatedCategories = new Set<string>();
-    (Array.isArray(internalFilters.value.industry) ? internalFilters.value.industry : []).forEach((industry: string) => {
-      const categories = industryToCategoryMapping[industry];
-      if (categories) {
-        categories.forEach(category => relatedCategories.add(category));
-      }
     });
     return Array.from(relatedCategories);
   }
   return filterOptions.categories;
+});
+
+const availableSubCategories = computed(() => {
+  if (internalFilters.value.category.length > 0) {
+    const relatedSubCategories = new Set<string>();
+    (Array.isArray(internalFilters.value.category) ? internalFilters.value.category : []).forEach((category: string) => {
+      const subCategories = categoryToSubCategoryMapping[category];
+      if (subCategories) {
+        subCategories.forEach(subCategory => relatedSubCategories.add(subCategory));
+      }
+    });
+    return Array.from(relatedSubCategories);
+  }
+  return filterOptions.subCategories;
 });
 
 const onFilterChange = () => {
@@ -294,8 +277,8 @@ const onLocationFilterChange = (type: 'city' | 'district' | 'state', values: str
   emit('filter-change');
 };
 
-const onIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
-  emit('industry-filter-change', type, values);
+const onCategoryFilterChange = (type: 'category' | 'subCategory', values: string[]) => {
+  emit('category-filter-change', type, values);
   emit('filter-change');
 };
 
@@ -305,8 +288,8 @@ const removeFilter = (type: string, value: string) => {
   
   if (type === 'city' || type === 'district' || type === 'state') {
     emit('location-filter-change', type as 'city' | 'district' | 'state', newValues);
-  } else if (type === 'industry' || type === 'category') {
-    emit('industry-filter-change', type as 'industry' | 'category', newValues);
+  } else if (type === 'category' || type === 'subCategory') {
+    emit('category-filter-change', type as 'category' | 'subCategory', newValues);
   } else {
     internalFilters.value[type] = newValues;
   }
@@ -321,54 +304,46 @@ const clearAllFilters = () => {
 
 <style scoped>
 .filter-controls {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.filter-section {
   padding: 24px;
-  border: 1px solid #dee2e6;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.entity-toggle {
-  margin-bottom: 24px;
+.filter-section:last-of-type {
+  border-bottom: none;
 }
 
-.entity-toggle h3 {
-  margin: 0 0 12px 0;
-  color: #212529;
-  font-size: 16px;
+.filter-section h3 {
+  margin: 0 0 20px 0;
+  color: #1e293b;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.025em;
-}
-
-.radio-group {
-  display: flex;
-  gap: 24px;
-}
-
-.radio-group label {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
-  color: #495057;
-  font-weight: 500;
-  transition: color 0.2s ease;
 }
 
-.radio-group label:hover {
-  color: #212529;
+.filter-section h3::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 2px;
 }
 
-.radio-group input[type="radio"] {
-  accent-color: #0066cc;
-}
-
-.filters-grid {
+.filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 24px;
 }
 
 .filter-group {
@@ -379,7 +354,7 @@ const clearAllFilters = () => {
 
 .filter-group label {
   font-weight: 600;
-  color: #212529;
+  color: #374151;
   font-size: 14px;
   letter-spacing: -0.025em;
 }
@@ -389,14 +364,14 @@ const clearAllFilters = () => {
 }
 
 .multiselect {
-  padding: 10px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
   background: white;
   font-size: 14px;
   width: 100%;
-  min-height: 42px;
-  max-height: 120px;
+  min-height: 48px;
+  max-height: 140px;
   overflow-y: auto;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -404,51 +379,59 @@ const clearAllFilters = () => {
 
 .multiselect:focus {
   outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .multiselect option {
-  padding: 8px;
-  border-radius: 4px;
+  padding: 10px;
+  border-radius: 6px;
   margin: 2px 0;
+  background: white;
+  color: #374151;
 }
 
 .multiselect option:checked {
-  background: #0066cc;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
 }
 
 .selected-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .tag {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  color: #1565c0;
-  padding: 4px 8px;
-  border-radius: 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 6px;
-  border: 1px solid #90caf9;
+  gap: 8px;
+  border: 1px solid #bfdbfe;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  transform: translateY(-1px);
 }
 
 .tag-remove {
   background: none;
   border: none;
-  color: #1565c0;
+  color: #1e40af;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   padding: 0;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -457,46 +440,47 @@ const clearAllFilters = () => {
 }
 
 .tag-remove:hover {
-  background: #1565c0;
+  background: #1e40af;
   color: white;
 }
 
 .filter-actions {
+  padding: 24px;
   display: flex;
   justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .btn-clear {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.025em;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .btn-clear:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 768px) {
-  .filters-grid {
+  .filter-grid {
     grid-template-columns: 1fr;
   }
   
-  .radio-group {
-    flex-direction: column;
-    gap: 12px;
+  .filter-section {
+    padding: 20px;
   }
   
-  .filter-controls {
+  .filter-actions {
     padding: 20px;
   }
 }

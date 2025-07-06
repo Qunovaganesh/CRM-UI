@@ -590,8 +590,8 @@ export const filterOptions: FilterOptions = {
     'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar' // Gujarat
   ],
   states: ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Uttar Pradesh', 'Rajasthan', 'Gujarat'],
-  industries: ['F&B', 'Personal Care', 'Home Care', 'Health & Wellness', 'Baby Care'],
-  categories: [
+  categories: ['F&B', 'Personal Care', 'Home Care', 'Health & Wellness', 'Baby Care'],
+  subCategories: [
     // F&B subcategories
     'Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products',
     // Personal Care subcategories
@@ -713,8 +713,8 @@ export const cityToLocationMapping: Record<string, { state: string; district: st
   'Bhavnagar': { state: 'Gujarat', district: 'Bhavnagar' }
 };
 
-// Industry to category mapping for FMCG
-export const industryToCategoryMapping: Record<string, string[]> = {
+// Category to sub-category mapping for FMCG
+export const categoryToSubCategoryMapping: Record<string, string[]> = {
   'F&B': ['Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products'],
   'Personal Care': ['Skincare', 'Haircare', 'Oral Care', 'Fragrances', 'Color Cosmetics', 'Men\'s Grooming'],
   'Home Care': ['Laundry Care', 'Dishwashing', 'Surface Cleaners', 'Air Care', 'Fabric Care', 'Kitchen Care'],

@@ -1,13 +1,7 @@
 <template>
   <div class="customer-page">
-    <!-- Floating Back Button -->
-    <div class="floating-back-button">
-      <button class="btn-floating-back" @click="$router.go(-1)">
-        ← Back
-      </button>
-    </div>
-
-    <div class="page-header">
+    <!-- Floating Header -->
+    <div class="floating-header">
       <div class="relationship-header">
         <h1>Customer Management</h1>
         <div class="relationship-info">
@@ -23,6 +17,15 @@
       </div>
       <p>Manage invoices, payments, and customer validation</p>
     </div>
+
+    <!-- Floating Back Button -->
+    <div class="floating-back-button">
+      <button class="btn-floating-back" @click="$router.go(-1)">
+        ← Back
+      </button>
+    </div>
+
+    <div class="content-wrapper">
 
     <div class="customer-content">
       <div class="invoice-section">
@@ -174,6 +177,7 @@
         </div>
       </div>
     </div>
+    </div>
 
     <div class="customer-actions">
       <h2>Customer Actions</h2>
@@ -181,15 +185,28 @@
         <button class="btn-secondary" @click="submitToCompliance">
           Submit to Compliance
         </button>
-        <button class="btn-primary" @click="validateCustomer" v-if="showValidateButton">
-          Validate Customer
-        </button>
         <button class="btn-success" @click="uploadPayment">
           Upload Payment
         </button>
-        <button class="btn-success" @click="convertToRegistered" v-if="isValidated">
-          Convert to Registered Customer
-        </button>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div v-if="paymentHistory.length" class="payment-history">
+      <h2>Payment History</h2>
+      <div class="payment-list">
+        <div v-for="payment in paymentHistory" :key="payment.id" class="payment-item">
+          <div class="payment-info">
+            <h4>Payment #{{ payment.id }}</h4>
+            <p><strong>Amount:</strong> ₹{{ payment.amount.toLocaleString() }}</p>
+            <p><strong>Method:</strong> {{ payment.method }}</p>
+            <p><strong>Date:</strong> {{ formatDate(payment.date) }}</p>
+            <p><strong>Status:</strong> <span class="status-success">Completed</span></p>
+          </div>
+          <div class="payment-file">
+            <p><strong>Receipt:</strong> {{ payment.fileName }}</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -245,6 +262,7 @@ import { useRouter } from 'vue-router';
 import { useBusinessLogic } from '../composables/useBusinessLogic';
 import { mockManufacturers, mockDistributors } from '../data/mockData';
 import type { Invoice } from '../types';
+import type { Payment } from '../types';
 
 const props = defineProps<{
   id: string;
@@ -255,12 +273,11 @@ const { invoices, addInvoice, updateDistributorStatus } = useBusinessLogic();
 
 const uploadType = ref<'proforma' | 'tax'>('proforma');
 const invoiceFilter = ref('all');
-const showValidateButton = ref(false);
-const isValidated = ref(false);
 const showPaymentModal = ref(false);
 const paymentAmount = ref<number>(0);
 const paymentMethod = ref('bank_transfer');
 const selectedPaymentFile = ref<File | null>(null);
+const paymentHistory = ref<Payment[]>([]);
 
 const newInvoice = ref({
   invoiceNo: '',
@@ -280,7 +297,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor customer, find matching manufacturer
-    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
   } else {
     // This is a manufacturer customer
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -296,6 +313,8 @@ const isManufacturerCustomer = computed(() => {
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
+
+const distributorName = computed(() => distributorData.value.name);
 
 const filteredInvoices = computed(() => {
   let filtered = invoices.value;
@@ -408,11 +427,6 @@ const submitToCompliance = () => {
   alert('Submitted to compliance team for review');
 };
 
-const validateCustomer = () => {
-  isValidated.value = true;
-  alert('Customer validated successfully!');
-};
-
 const uploadPayment = () => {
   showPaymentModal.value = true;
 };
@@ -426,29 +440,25 @@ const closePaymentModal = () => {
 
 const submitPayment = () => {
   if (paymentAmount.value > 0 && selectedPaymentFile.value) {
+    const newPayment: Payment = {
+      id: `PAY${Date.now()}`,
+      amount: paymentAmount.value,
+      method: paymentMethod.value,
+      date: new Date().toISOString(),
+      fileName: selectedPaymentFile.value.name,
+      status: 'Completed'
+    };
+    
+    paymentHistory.value.unshift(newPayment);
+    
+    // Update status to Customer after successful payment
+    // This logic would be handled by the business logic layer
+    
     alert('Payment uploaded successfully!');
     closePaymentModal();
   } else {
     alert('Please fill all required fields');
   }
-};
-
-const convertToRegistered = () => {
-  if (isManufacturerCustomer.value) {
-    // Update manufacturer status
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      manufacturer.status = 'View';
-      manufacturer.daysSinceStatus = 0;
-    }
-  } else {
-    // Update distributor status
-    updateDistributorStatus(props.id, 'View');
-  }
-  alert('Customer converted to registered status! Redirecting...');
-  setTimeout(() => {
-    router.push({ name: 'ViewOnly', params: { id: props.id } });
-  }, 1000);
 };
 
 onMounted(() => {
@@ -457,6 +467,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.floating-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.content-wrapper {
+  margin-top: 140px;
+  padding: 20px;
+}
+
 .floating-back-button {
   position: fixed;
   top: 20px;
@@ -486,7 +513,6 @@ onMounted(() => {
 .customer-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .page-header {
@@ -638,6 +664,7 @@ onMounted(() => {
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 14px;
+  min-width: 150px;
 }
 
 .invoice-summary {
@@ -801,6 +828,44 @@ onMounted(() => {
   background: #4b5563;
 }
 
+.payment-history {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.payment-history h2 {
+  color: #374151;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.payment-info h4 {
+  margin: 0 0 8px 0;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 .btn-success {
   background: #10b981;
   color: white;
@@ -885,6 +950,10 @@ onMounted(() => {
 @media (max-width: 768px) {
   .customer-content {
     grid-template-columns: 1fr;
+  }
+  
+  .content-wrapper {
+    margin-top: 160px;
   }
   
   .relationship-info {

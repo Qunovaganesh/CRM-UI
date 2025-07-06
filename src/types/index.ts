@@ -4,8 +4,8 @@ export interface Manufacturer {
   city: string;
   district: string;
   state: string;
-  industry: string;
   category: string;
+  subCategory: string;
   status: 'Lead' | 'Prospect' | 'Customer' | 'View';
   registrationDate: string;
   daysSinceStatus: number;
@@ -17,8 +17,8 @@ export interface Distributor {
   city: string;
   district: string;
   state: string;
-  industry: string;
   category: string;
+  subCategory: string;
   status: 'Lead' | 'Prospect' | 'Customer' | 'View';
   registrationDate: string;
   daysSinceStatus: number;
@@ -63,12 +63,21 @@ export interface Invoice {
   durationBetween?: number;
 }
 
+export interface Payment {
+  id: string;
+  amount: number;
+  method: string;
+  date: string;
+  fileName: string;
+  status: string;
+}
+
 export interface FilterOptions {
   cities: string[];
   districts: string[];
   states: string[];
-  industries: string[];
   categories: string[];
+  subCategories: string[];
   statuses: string[];
 }
 

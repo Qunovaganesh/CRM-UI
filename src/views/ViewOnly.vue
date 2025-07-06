@@ -1,13 +1,7 @@
 <template>
   <div class="view-only-page">
-    <!-- Floating Back Button -->
-    <div class="floating-back-button">
-      <button class="btn-floating-back" @click="$router.go(-1)">
-        ← Back
-      </button>
-    </div>
-
-    <div class="page-header">
+    <!-- Floating Header -->
+    <div class="floating-header">
       <div class="relationship-header">
         <h1>Relationship Web View</h1>
         <div class="relationship-info">
@@ -23,6 +17,15 @@
       </div>
       <p>Complete view of manufacturer-distributor relationship and business history</p>
     </div>
+
+    <!-- Floating Back Button -->
+    <div class="floating-back-button">
+      <button class="btn-floating-back" @click="$router.go(-1)">
+        ← Back
+      </button>
+    </div>
+
+    <div class="content-wrapper">
 
     <!-- Relationship Web Visualization -->
     <div class="relationship-web">
@@ -46,7 +49,7 @@
           <div class="entity-node distributor-node">
             <h4>{{ distributorName }}</h4>
             <p>{{ distributorData.city }}, {{ distributorData.state }}</p>
-            <p>{{ distributorData.industry }}</p>
+            <p>{{ distributorData.category }}</p>
             <span class="entity-type">Distributor</span>
           </div>
         </div>
@@ -109,11 +112,11 @@
           </div>
           <div class="info-item">
             <label>Industry:</label>
-            <span>{{ distributorData.industry }}</span>
+            <span>{{ distributorData.category }}</span>
           </div>
           <div class="info-item">
             <label>Category:</label>
-            <span>{{ distributorData.category }}</span>
+            <span>{{ distributorData.subCategory }}</span>
           </div>
           <div class="info-item">
             <label>Partnership Date:</label>
@@ -276,6 +279,7 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -299,7 +303,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor view, find matching manufacturer
-    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
   } else {
     // This is a manufacturer view
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -319,7 +323,7 @@ const distributorData = computed(() => {
     // This is a manufacturer view, find matching distributor
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
-      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
+      return mockDistributors.find(d => d.category === manufacturer.category) || mockDistributors[0];
     }
     return mockDistributors[0];
   }
@@ -335,14 +339,14 @@ const manufacturerName = computed(() => manufacturerData.value.name);
 const relatedDistributors = computed(() => {
   return mockDistributors.filter(d => 
     d.id !== props.id && 
-    d.industry === distributorData.value.industry
+    d.category === distributorData.value.category
   ).slice(0, 4);
 });
 
 const relatedManufacturers = computed(() => {
   return mockManufacturers.filter(m => 
     m.id !== manufacturerData.value.id && 
-    m.industry === distributorData.value.industry
+    m.category === distributorData.value.category
   ).slice(0, 4);
 });
 
@@ -443,6 +447,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.floating-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.content-wrapper {
+  margin-top: 140px;
+  padding: 20px;
+}
+
 .floating-back-button {
   position: fixed;
   top: 20px;
@@ -472,7 +493,6 @@ onMounted(() => {
 .view-only-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .page-header {
@@ -1044,6 +1064,10 @@ onMounted(() => {
   
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .content-wrapper {
+    margin-top: 160px;
   }
   
   .relationship-info {

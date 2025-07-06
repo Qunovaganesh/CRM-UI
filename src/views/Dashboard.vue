@@ -1,5 +1,11 @@
 <template>
   <div class="dashboard">
+    <!-- Floating Header -->
+    <div class="floating-header">
+      <h1>Manufacturer-Distributor Management</h1>
+      <p>Manage your business relationships and workflow processes</p>
+    </div>
+
     <!-- Floating Back Button -->
     <div class="floating-back-button" v-if="selectedEntityItem">
       <button class="btn-floating-back" @click="clearSelection">
@@ -7,140 +13,176 @@
       </button>
     </div>
 
-    <div class="page-header">
-      <h1>Manufacturer-Distributor Management</h1>
-      <p>Manage your business relationships and workflow processes</p>
-    </div>
-
-    <FilterControls 
-      :selectedEntity="selectedEntity"
-      :filters="filters"
-      @update:selectedEntity="onEntityChange"
-      @update:filters="Object.assign(filters, $event)"
-      @entity-change="onEntityChange"
-      @filter-change="onFilterChange"
-      @clear-filters="clearAllFilters"
-      @location-filter-change="onLocationFilterChange"
-      @industry-filter-change="onIndustryFilterChange"
-    />
-
-    <!-- Entity Selection Dropdown -->
-    <div class="entity-selection" v-if="!selectedEntityItem">
-      <h3>Select {{ selectedEntity === 'manufacturer' ? 'Manufacturer' : 'Distributor' }}</h3>
-      <div class="entity-dropdown">
-        <select v-model="selectedEntityId" @change="onEntitySelect" class="entity-select">
-          <option value="">Choose {{ selectedEntity === 'manufacturer' ? 'a Manufacturer' : 'a Distributor' }}</option>
-          <option 
-            v-for="entity in currentEntityList" 
-            :key="entity.id"
-            :value="entity.id"
-          >
-            {{ entity.name }} - {{ entity.city }}, {{ entity.state }}
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Selected Entity Info and Associated List -->
-    <div v-if="selectedEntityItem" class="selected-entity-section">
-      <div class="selected-entity-info">
-        <div class="entity-card selected">
-          <div class="entity-header">
-            <h4>{{ selectedEntityItem.name }}</h4>
-            <button class="btn-change" @click="clearSelection">Change Selection</button>
-          </div>
-          <p>{{ selectedEntityItem.city }}, {{ selectedEntityItem.state }}</p>
-          <p>{{ selectedEntityItem.industry }} - {{ selectedEntityItem.category }}</p>
-          <span v-if="'status' in selectedEntityItem" :class="getStatusClass(selectedEntityItem.status)">
-            {{ selectedEntityItem.status }}
-          </span>
+    <div class="content-wrapper">
+      <div class="entity-toggle">
+        <h3>Select Entity Type</h3>
+        <div class="radio-group">
+          <label>
+            <input 
+              type="radio" 
+              :value="'manufacturer'" 
+              v-model="selectedEntity"
+              @change="onEntityChange"
+            >
+            Manufacturer
+          </label>
+          <label>
+            <input 
+              type="radio" 
+              :value="'distributor'" 
+              v-model="selectedEntity"
+              @change="onEntityChange"
+            >
+            Distributor
+          </label>
         </div>
       </div>
 
-      <!-- Filters for Associated Entities -->
-      <div class="associated-filters">
-        <h3>Filter {{ selectedEntity === 'manufacturer' ? 'Distributors' : 'Manufacturers' }}</h3>
-        <div class="filters-grid">
-          <div class="filter-group">
-            <label>State</label>
-            <select v-model="associatedFilters.state" @change="onAssociatedFilterChange">
-              <option value="">All States</option>
-              <option v-for="state in filterOptions.states" :key="state" :value="state">
-                {{ state }}
-              </option>
-            </select>
-          </div>
+      <FilterControls 
+        :selectedEntity="selectedEntity"
+        :filters="filters"
+        @update:selectedEntity="onEntityChange"
+        @update:filters="Object.assign(filters, $event)"
+        @entity-change="onEntityChange"
+        @filter-change="onFilterChange"
+        @clear-filters="clearAllFilters"
+        @location-filter-change="onLocationFilterChange"
+        @category-filter-change="onCategoryFilterChange"
+      />
 
-          <div class="filter-group">
-            <label>District</label>
-            <select v-model="associatedFilters.district" @change="onAssociatedFilterChange">
-              <option value="">All Districts</option>
-              <option v-for="district in filterOptions.districts" :key="district" :value="district">
-                {{ district }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>City</label>
-            <select v-model="associatedFilters.city" @change="onAssociatedFilterChange">
-              <option value="">All Cities</option>
-              <option v-for="city in filterOptions.cities" :key="city" :value="city">
-                {{ city }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>Industry</label>
-            <select v-model="associatedFilters.industry" @change="onAssociatedFilterChange">
-              <option value="">All Industries</option>
-              <option v-for="industry in filterOptions.industries" :key="industry" :value="industry">
-                {{ industry }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>Category</label>
-            <select v-model="associatedFilters.category" @change="onAssociatedFilterChange">
-              <option value="">All Categories</option>
-              <option v-for="category in filterOptions.categories" :key="category" :value="category">
-                {{ category }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>Status</label>
-            <select v-model="associatedFilters.status" @change="onAssociatedFilterChange">
-              <option value="">All Status</option>
-              <option v-for="status in filterOptions.statuses" :key="status" :value="status">
-                {{ status }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-actions">
-            <button type="button" class="btn-secondary" @click="clearAssociatedFilters">
-              Clear Filters
-            </button>
-          </div>
+      <!-- Entity Selection Dropdown -->
+      <div class="entity-selection" v-if="!selectedEntityItem">
+        <h3>Select {{ selectedEntity === 'manufacturer' ? 'Manufacturer' : 'Distributor' }}</h3>
+        <div class="entity-dropdown">
+          <select v-model="selectedEntityId" @change="onEntitySelect" class="entity-select">
+            <option value="">Choose {{ selectedEntity === 'manufacturer' ? 'a Manufacturer' : 'a Distributor' }}</option>
+            <option 
+              v-for="entity in currentEntityList" 
+              :key="entity.id"
+              :value="entity.id"
+            >
+              {{ entity.name }} - {{ entity.city }}, {{ entity.state }}
+            </option>
+          </select>
         </div>
       </div>
 
-      <DataTable
-        :title="tableTitle"
-        :columns="tableColumns"
-        :data="filteredPairedList"
-        @action-click="handleActionClick"
-      >
-        <template #actions>
-          <div class="table-summary">
-            <span>{{ filteredPairedList.length }} {{ selectedEntity === 'manufacturer' ? 'Distributors' : 'Manufacturers' }} found</span>
+      <!-- Selected Entity Info and Associated List -->
+      <div v-if="selectedEntityItem" class="selected-entity-section">
+        <div class="selected-entity-info">
+          <div class="entity-card selected">
+            <div class="entity-header">
+              <h4>{{ selectedEntityItem.name }}</h4>
+              <button class="btn-change" @click="clearSelection">Change Selection</button>
+            </div>
+            <p>{{ selectedEntityItem.city }}, {{ selectedEntityItem.state }}</p>
+            <p>{{ selectedEntityItem.category }} - {{ selectedEntityItem.subCategory }}</p>
+            <span v-if="'status' in selectedEntityItem" :class="getStatusClass(selectedEntityItem.status)">
+              {{ selectedEntityItem.status }}
+            </span>
           </div>
-        </template>
-      </DataTable>
+        </div>
+
+        <!-- Filters for Associated Entities -->
+        <div class="associated-filters">
+          <h3>Filter {{ selectedEntity === 'manufacturer' ? 'Distributors' : 'Manufacturers' }}</h3>
+          <div class="filters-container">
+            <div class="filter-section">
+              <h4>Geographic Filters</h4>
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label>State</label>
+                  <select v-model="associatedFilters.state" @change="onAssociatedFilterChange">
+                    <option value="">All States</option>
+                    <option v-for="state in filterOptions.states" :key="state" :value="state">
+                      {{ state }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label>District</label>
+                  <select v-model="associatedFilters.district" @change="onAssociatedFilterChange">
+                    <option value="">All Districts</option>
+                    <option v-for="district in filterOptions.districts" :key="district" :value="district">
+                      {{ district }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label>City</label>
+                  <select v-model="associatedFilters.city" @change="onAssociatedFilterChange">
+                    <option value="">All Cities</option>
+                    <option v-for="city in filterOptions.cities" :key="city" :value="city">
+                      {{ city }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h4>Category Filters</h4>
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label>Category</label>
+                  <select v-model="associatedFilters.category" @change="onAssociatedFilterChange">
+                    <option value="">All Categories</option>
+                    <option v-for="category in filterOptions.categories" :key="category" :value="category">
+                      {{ category }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label>Sub Category</label>
+                  <select v-model="associatedFilters.subCategory" @change="onAssociatedFilterChange">
+                    <option value="">All Sub Categories</option>
+                    <option v-for="subCategory in filterOptions.subCategories" :key="subCategory" :value="subCategory">
+                      {{ subCategory }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h4>Status Filter</h4>
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label>Status</label>
+                  <select v-model="associatedFilters.status" @change="onAssociatedFilterChange">
+                    <option value="">All Status</option>
+                    <option v-for="status in filterOptions.statuses" :key="status" :value="status">
+                      {{ status }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-actions">
+              <button type="button" class="btn-secondary" @click="clearAssociatedFilters">
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <DataTable
+          :title="tableTitle"
+          :columns="tableColumns"
+          :data="filteredPairedList"
+          @action-click="handleActionClick"
+        >
+          <template #actions>
+            <div class="table-summary">
+              <span>{{ filteredPairedList.length }} {{ selectedEntity === 'manufacturer' ? 'Distributors' : 'Manufacturers' }} found</span>
+            </div>
+          </template>
+        </DataTable>
+      </div>
     </div>
   </div>
 </template>
@@ -167,7 +209,7 @@ const {
   clearFilters,
   clearAssociatedFilters,
   updateLocationFilters,
-  updateIndustryFilters,
+  updateCategoryFilters,
   setSelectedEntity,
   setSelectedEntityId,
   setSelectedManufacturer,
@@ -214,11 +256,11 @@ const filteredPairedList = computed(() => {
   if (associatedFilters.state.length) {
     filtered = filtered.filter(item => associatedFilters.state.includes(item.state));
   }
-  if (associatedFilters.industry.length) {
-    filtered = filtered.filter(item => associatedFilters.industry.includes(item.industry));
-  }
   if (associatedFilters.category.length) {
     filtered = filtered.filter(item => associatedFilters.category.includes(item.category));
+  }
+  if (associatedFilters.subCategory.length) {
+    filtered = filtered.filter(item => associatedFilters.subCategory.includes(item.subCategory));
   }
   if (associatedFilters.status.length && filtered.length > 0 && 'status' in filtered[0]) {
     filtered = filtered.filter(item => 'status' in item && associatedFilters.status.includes(item.status));
@@ -244,8 +286,8 @@ const tableColumns = computed(() => {
     { key: 'city', label: 'City' },
     { key: 'district', label: 'District' },
     { key: 'state', label: 'State' },
-    { key: 'industry', label: 'Industry' },
-    { key: 'category', label: 'Category' }
+    { key: 'category', label: 'Category' },
+    { key: 'subCategory', label: 'Sub Category' }
   ];
 
   // Both manufacturers and distributors now have status
@@ -341,8 +383,8 @@ const onLocationFilterChange = (type: 'city' | 'district' | 'state', values: str
   updateLocationFilters(type, values, false);
 };
 
-const onIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
-  updateIndustryFilters(type, values, false);
+const onCategoryFilterChange = (type: 'category' | 'subCategory', values: string[]) => {
+  updateCategoryFilters(type, values, false);
 };
 
 const onAssociatedFilterChange = () => {
@@ -387,6 +429,26 @@ const getStatusClass = (status: string) => {
 </script>
 
 <style scoped>
+.floating-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.floating-header h1 {
+  margin: 0 0 4px 0;
+  color: #1e293b;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
 .floating-back-button {
   position: fixed;
   top: 20px;
@@ -417,6 +479,10 @@ const getStatusClass = (status: string) => {
 .dashboard {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.content-wrapper {
+  margin-top: 100px;
   padding: 20px;
 }
 
@@ -436,6 +502,35 @@ const getStatusClass = (status: string) => {
   color: #6b7280;
   font-size: 16px;
   margin: 0;
+}
+
+.entity-toggle {
+  margin-bottom: 30px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.entity-toggle h3 {
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #495057;
+  font-weight: 500;
 }
 
 .entity-selection {
@@ -574,6 +669,8 @@ const getStatusClass = (status: string) => {
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .associated-filters h3 {
@@ -582,6 +679,28 @@ const getStatusClass = (status: string) => {
   font-weight: 600;
   margin: 0 0 16px 0;
   letter-spacing: -0.025em;
+}
+
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-section h4 {
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-section {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .filters-grid {
@@ -661,6 +780,10 @@ const getStatusClass = (status: string) => {
   
   .entity-card {
     max-width: 100%;
+  }
+  
+  .content-wrapper {
+    margin-top: 120px;
   }
   
   .filters-grid {

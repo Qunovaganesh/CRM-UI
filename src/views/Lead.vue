@@ -1,13 +1,7 @@
 <template>
   <div class="lead-page">
-    <!-- Floating Back Button -->
-    <div class="floating-back-button">
-      <button class="btn-floating-back" @click="$router.go(-1)">
-        ← Back
-      </button>
-    </div>
-
-    <div class="page-header">
+    <!-- Floating Header -->
+    <div class="floating-header">
       <div class="relationship-header">
         <h1>Lead Management</h1>
         <div class="relationship-info">
@@ -22,6 +16,16 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <!-- Floating Back Button -->
+    <div class="floating-back-button">
+      <button class="btn-floating-back" @click="$router.go(-1)">
+        ← Back
+      </button>
+    </div>
+
+    <div class="content-wrapper">
 
     <div class="lead-content">
       <div class="interactions-section">
@@ -179,7 +183,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor lead, find matching manufacturer
-    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
   } else {
     // This is a manufacturer lead, find matching distributor
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -200,7 +204,7 @@ const distributorData = computed(() => {
     // This is a manufacturer lead, find matching distributor
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
-      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
+      return mockDistributors.find(d => d.category === manufacturer.category) || mockDistributors[0];
     }
     return mockDistributors[0];
   }
@@ -281,6 +285,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.floating-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.content-wrapper {
+  margin-top: 120px;
+  padding: 20px;
+}
+
 .floating-back-button {
   position: fixed;
   top: 20px;
@@ -310,7 +331,6 @@ onMounted(() => {
 .lead-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .page-header {
@@ -619,6 +639,10 @@ onMounted(() => {
 @media (max-width: 768px) {
   .lead-content {
     grid-template-columns: 1fr;
+  }
+  
+  .content-wrapper {
+    margin-top: 140px;
   }
   
   .relationship-info {
