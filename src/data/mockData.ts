@@ -266,6 +266,118 @@ export const mockDistributors: Distributor[] = [
     status: 'View',
     registrationDate: '2023-03-20',
     daysSinceStatus: 85
+  },
+  // Additional Electronics distributors for Tech Solutions Pvt Ltd
+  {
+    id: 'D017',
+    name: 'Electronics Distribution Hub',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    industry: 'Electronics',
+    category: 'Manufacturing',
+    status: 'Lead',
+    registrationDate: '2023-07-20',
+    daysSinceStatus: 5
+  },
+  {
+    id: 'D018',
+    name: 'Tech Retail Network',
+    city: 'Pune',
+    district: 'Pune',
+    state: 'Maharashtra',
+    industry: 'Electronics',
+    category: 'Manufacturing',
+    status: 'Prospect',
+    registrationDate: '2023-06-30',
+    daysSinceStatus: 25
+  },
+  {
+    id: 'D019',
+    name: 'Digital Solutions Distributors',
+    city: 'Bangalore',
+    district: 'Bangalore Urban',
+    state: 'Karnataka',
+    industry: 'Electronics',
+    category: 'Manufacturing',
+    status: 'Customer',
+    registrationDate: '2023-05-15',
+    daysSinceStatus: 50
+  },
+  // Additional Renewable Energy distributors for Green Energy Corp
+  {
+    id: 'D020',
+    name: 'Solar Panel Distributors',
+    city: 'Chennai',
+    district: 'Chennai',
+    state: 'Tamil Nadu',
+    industry: 'Renewable Energy',
+    category: 'Solar Panels',
+    status: 'Lead',
+    registrationDate: '2023-07-10',
+    daysSinceStatus: 15
+  },
+  {
+    id: 'D021',
+    name: 'Renewable Energy Solutions',
+    city: 'Hyderabad',
+    district: 'Hyderabad',
+    state: 'Telangana',
+    industry: 'Renewable Energy',
+    category: 'Solar Panels',
+    status: 'Prospect',
+    registrationDate: '2023-06-20',
+    daysSinceStatus: 35
+  },
+  // Additional Pharmaceutical distributors for Pharma Solutions Ltd
+  {
+    id: 'D022',
+    name: 'Medical Supply Chain',
+    city: 'Delhi',
+    district: 'New Delhi',
+    state: 'Delhi',
+    industry: 'Pharmaceuticals',
+    category: 'Manufacturing',
+    status: 'Customer',
+    registrationDate: '2023-04-25',
+    daysSinceStatus: 70
+  },
+  {
+    id: 'D023',
+    name: 'Healthcare Distribution Network',
+    city: 'Kolkata',
+    district: 'Kolkata',
+    state: 'West Bengal',
+    industry: 'Pharmaceuticals',
+    category: 'Manufacturing',
+    status: 'View',
+    registrationDate: '2023-03-30',
+    daysSinceStatus: 95
+  },
+  // Additional Textile distributors for Textile Mills Co
+  {
+    id: 'D024',
+    name: 'Fabric Distribution Center',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    industry: 'Textiles',
+    category: 'Manufacturing',
+    status: 'Lead',
+    registrationDate: '2023-07-25',
+    daysSinceStatus: 8
+  },
+  {
+    id: 'D025',
+    name: 'Textile Wholesale Network',
+    city: 'Chennai',
+    district: 'Chennai',
+    state: 'Tamil Nadu',
+    industry: 'Textiles',
+    category: 'Manufacturing',
+    status: 'Prospect',
+    registrationDate: '2023-06-05',
+    daysSinceStatus: 40
   }
 ];
 

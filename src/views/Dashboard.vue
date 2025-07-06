@@ -346,7 +346,9 @@ const handleActionClick = (row: any) => {
       router.push({ name: routeName, params: { id: row.id } });
     }
   } else {
-    // Clicked on a manufacturer from distributor view, default to view action
+    // Clicked on a manufacturer from distributor view
+    // For manufacturers, we'll treat them as having a "View" status by default
+    // but we can also create prospect/customer relationships
     router.push({ name: 'ViewOnly', params: { id: row.id } });
   }
 };

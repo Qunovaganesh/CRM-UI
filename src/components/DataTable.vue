@@ -73,19 +73,27 @@ defineEmits<{
 }>();
 
 const getActionButton = (row: any) => {
-  if (row.status === 'Lead') return 'Manage Lead';
-  if (row.status === 'Prospect') return 'Manage Prospect';
-  if (row.status === 'Customer') return 'Manage Customer';
-  if (row.status === 'View') return 'View Details';
+  // If the row has a status property (distributor), use status-based actions
+  if ('status' in row) {
+    if (row.status === 'Lead') return 'Manage Lead';
+    if (row.status === 'Prospect') return 'Manage Prospect';
+    if (row.status === 'Customer') return 'Manage Customer';
+    if (row.status === 'View') return 'View Details';
+  }
+  // For manufacturers (no status property), default to view details
   return 'View Details';
 };
 
 const getActionButtonClass = (row: any) => {
   const baseClass = 'btn-action';
-  if (row.status === 'Lead') return `${baseClass} btn-lead`;
-  if (row.status === 'Prospect') return `${baseClass} btn-prospect`;
-  if (row.status === 'Customer') return `${baseClass} btn-customer`;
-  if (row.status === 'View') return `${baseClass} btn-view`;
+  // If the row has a status property (distributor), use status-based styling
+  if ('status' in row) {
+    if (row.status === 'Lead') return `${baseClass} btn-lead`;
+    if (row.status === 'Prospect') return `${baseClass} btn-prospect`;
+    if (row.status === 'Customer') return `${baseClass} btn-customer`;
+    if (row.status === 'View') return `${baseClass} btn-view`;
+  }
+  // For manufacturers (no status property), use view styling
   return `${baseClass} btn-view`;
 };
 
