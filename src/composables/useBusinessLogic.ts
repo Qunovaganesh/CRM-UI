@@ -1,6 +1,6 @@
 import { ref, computed, reactive } from 'vue';
 import type { Manufacturer, Distributor, Interaction, Agreement, Invoice } from '../types';
-import { mockManufacturers, mockDistributors, mockInteractions, mockAgreement, mockInvoices, locationMapping, cityToLocationMapping, industryToCategoryMapping } from '../data/mockData';
+import { mockManufacturers, mockDistributors, mockInteractions, mockAgreement, mockInvoices, locationMapping, cityToLocationMapping, industryToCategoryMapping, categoryToSubCategoryMapping } from '../data/mockData';
 
 // Persistent state using localStorage
 const getStoredState = (key: string, defaultValue: any) => {
