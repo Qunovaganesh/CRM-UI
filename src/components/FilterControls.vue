@@ -366,15 +366,17 @@ const clearAllFilters = () => {
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 24px;
+  align-items: start;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  height: 100%;
 }
 
 .filter-group label {
@@ -382,11 +384,17 @@ const clearAllFilters = () => {
   color: #1f2937;
   font-size: 14px;
   letter-spacing: -0.025em;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .multiselect-container {
   position: relative;
-  min-height: 120px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .multiselect {
@@ -396,11 +404,13 @@ const clearAllFilters = () => {
   background: white;
   font-size: 14px;
   width: 100%;
-  min-height: 42px;
-  max-height: 120px;
+  height: 80px;
+  min-height: 80px;
+  max-height: 80px;
   overflow-y: auto;
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 .multiselect:focus {
@@ -426,8 +436,10 @@ const clearAllFilters = () => {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
-  min-height: 32px;
+  min-height: 40px;
   padding: 4px 0;
+  flex: 1;
+  align-content: flex-start;
 }
 
 .tag {
@@ -442,6 +454,7 @@ const clearAllFilters = () => {
   gap: 6px;
   border: 1px solid #d1d5db;
   white-space: nowrap;
+  height: fit-content;
 }
 
 .tag-remove {
@@ -469,6 +482,7 @@ const clearAllFilters = () => {
 .filter-actions {
   display: flex;
   justify-content: center;
+  margin-top: 8px;
 }
 
 .btn-clear {
@@ -506,11 +520,13 @@ const clearAllFilters = () => {
   }
   
   .multiselect-container {
-    min-height: 100px;
+    min-height: 120px;
   }
   
   .multiselect {
-    max-height: 100px;
+    height: 60px;
+    min-height: 60px;
+    max-height: 60px;
   }
 }
 </style>
