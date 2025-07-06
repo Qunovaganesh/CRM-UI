@@ -1,6 +1,6 @@
 import { ref, computed, reactive } from 'vue';
 import type { Manufacturer, Distributor, Interaction, Agreement, Invoice } from '../types';
-import { mockManufacturers, mockDistributors, mockInteractions, mockAgreement, mockInvoices, locationMapping, cityToLocationMapping, industryToCategoryMapping, categoryToSubCategoryMapping } from '../data/mockData';
+import { mockManufacturers, mockDistributors, mockInteractions, mockAgreement, mockInvoices, locationMapping, cityToLocationMapping, industryToCategoryMapping } from '../data/mockData';
 
 // Persistent state using localStorage
 const getStoredState = (key: string, defaultValue: any) => {
@@ -20,30 +20,6 @@ const setStoredState = (key: string, value: any) => {
   }
 };
 
-// Default filter state to ensure all properties are arrays
-const defaultFilterState = {
-  city: [] as string[],
-  district: [] as string[],
-  state: [] as string[],
-  category: [] as string[],
-  subCategory: [] as string[],
-  status: [] as string[]
-};
-
-// Helper function to merge stored filters with default state
-const getStoredFilters = (key: string) => {
-  const stored = getStoredState(key, defaultFilterState);
-  const merged = { ...defaultFilterState };
-  
-  // Ensure each property is an array
-  Object.keys(defaultFilterState).forEach(prop => {
-    const key = prop as keyof typeof defaultFilterState;
-    merged[key] = Array.isArray(stored[key]) ? stored[key] : [];
-  });
-  
-  return merged;
-};
-
 export const useBusinessLogic = () => {
   const selectedEntity = ref<'manufacturer' | 'distributor'>(
     getStoredState('selectedEntity', 'manufacturer')
@@ -58,9 +34,27 @@ export const useBusinessLogic = () => {
     getStoredState('selectedEntityId', '')
   );
   
-  const filters = reactive(getStoredFilters('filters'));
+  const filters = reactive(
+    getStoredState('filters', {
+      city: [] as string[],
+      district: [] as string[],
+      state: [] as string[],
+      industry: [] as string[],
+      category: [] as string[],
+      status: [] as string[]
+    })
+  );
 
-  const associatedFilters = reactive(getStoredFilters('associatedFilters'));
+  const associatedFilters = reactive(
+    getStoredState('associatedFilters', {
+      city: [] as string[],
+      district: [] as string[],
+      state: [] as string[],
+      industry: [] as string[],
+      category: [] as string[],
+      status: [] as string[]
+    })
+  );
 
   const manufacturers = ref<Manufacturer[]>(mockManufacturers);
   const distributors = ref<Distributor[]>(mockDistributors);
@@ -83,8 +77,8 @@ export const useBusinessLogic = () => {
       return (!filters.city.length || filters.city.includes(manufacturer.city)) &&
              (!filters.district.length || filters.district.includes(manufacturer.district)) &&
              (!filters.state.length || filters.state.includes(manufacturer.state)) &&
+             (!filters.industry.length || filters.industry.includes(manufacturer.industry)) &&
              (!filters.category.length || filters.category.includes(manufacturer.category)) &&
-             (!filters.subCategory.length || filters.subCategory.includes(manufacturer.subCategory)) &&
              (!filters.status.length || filters.status.includes(manufacturer.status));
     });
   });
@@ -94,8 +88,8 @@ export const useBusinessLogic = () => {
       return (!filters.city.length || filters.city.includes(distributor.city)) &&
              (!filters.district.length || filters.district.includes(distributor.district)) &&
              (!filters.state.length || filters.state.includes(distributor.state)) &&
+             (!filters.industry.length || filters.industry.includes(distributor.industry)) &&
              (!filters.category.length || filters.category.includes(distributor.category)) &&
-             (!filters.subCategory.length || filters.subCategory.includes(distributor.subCategory)) &&
              (!filters.status.length || filters.status.includes(distributor.status));
     });
   });
@@ -103,14 +97,14 @@ export const useBusinessLogic = () => {
   const pairedList = computed(() => {
     if (selectedEntity.value === 'manufacturer' && selectedManufacturer.value) {
       return distributors.value.filter(d => 
-        d.category === selectedManufacturer.value?.category &&
-        d.subCategory === selectedManufacturer.value?.subCategory
+        d.industry === selectedManufacturer.value?.industry &&
+        d.category === selectedManufacturer.value?.category
       );
     }
     if (selectedEntity.value === 'distributor' && selectedDistributor.value) {
       return manufacturers.value.filter(m => 
-        m.category === selectedDistributor.value?.category &&
-        m.subCategory === selectedDistributor.value?.subCategory
+        m.industry === selectedDistributor.value?.industry &&
+        m.category === selectedDistributor.value?.category
       );
     }
     return [];
@@ -234,39 +228,39 @@ export const useBusinessLogic = () => {
     persistState();
   };
 
-  const updateCategoryFilters = (type: 'category' | 'subCategory', values: string[], isAssociated = false) => {
+  const updateIndustryFilters = (type: 'industry' | 'category', values: string[], isAssociated = false) => {
     const targetFilters = isAssociated ? associatedFilters : filters;
     
-    if (type === 'category') {
-      targetFilters.category = values;
-      // Auto-update sub-categories based on selected categories
-      const relatedSubCategories = new Set<string>();
+    if (type === 'industry') {
+      targetFilters.industry = values;
+      // Auto-update categories based on selected industries
+      const relatedCategories = new Set<string>();
       
-      values.forEach(category => {
-        const subCategories = categoryToSubCategoryMapping[category];
-        if (subCategories) {
-          subCategories.forEach(subCategory => relatedSubCategories.add(subCategory));
+      values.forEach(industry => {
+        const categories = industryToCategoryMapping[industry];
+        if (categories) {
+          categories.forEach(category => relatedCategories.add(category));
         }
       });
       
       if (values.length > 0) {
-        targetFilters.subCategory = Array.from(relatedSubCategories);
+        targetFilters.category = Array.from(relatedCategories);
       }
-    } else if (type === 'subCategory') {
-      targetFilters.subCategory = values;
-      // Auto-update categories based on selected sub-categories
-      const relatedCategories = new Set<string>();
+    } else if (type === 'category') {
+      targetFilters.category = values;
+      // Auto-update industries based on selected categories
+      const relatedIndustries = new Set<string>();
       
-      values.forEach(subCategory => {
-        Object.entries(categoryToSubCategoryMapping).forEach(([category, subCategories]) => {
-          if (subCategories.includes(subCategory)) {
-            relatedCategories.add(category);
+      values.forEach(category => {
+        Object.entries(industryToCategoryMapping).forEach(([industry, categories]) => {
+          if (categories.includes(category)) {
+            relatedIndustries.add(industry);
           }
         });
       });
       
       if (values.length > 0) {
-        targetFilters.category = Array.from(relatedCategories);
+        targetFilters.industry = Array.from(relatedIndustries);
       }
     }
     
@@ -316,13 +310,13 @@ export const useBusinessLogic = () => {
     clearFilters,
     clearAssociatedFilters,
     updateLocationFilters,
-    updateCategoryFilters,
+    updateIndustryFilters,
     setSelectedEntity,
     setSelectedEntityId,
     setSelectedManufacturer,
     setSelectedDistributor,
     persistState,
     locationMapping,
-    categoryToSubCategoryMapping
+    industryToCategoryMapping
   };
 };

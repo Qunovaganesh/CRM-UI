@@ -183,7 +183,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor lead, find matching manufacturer
-    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
   } else {
     // This is a manufacturer lead, find matching distributor
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -204,7 +204,7 @@ const distributorData = computed(() => {
     // This is a manufacturer lead, find matching distributor
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
-      return mockDistributors.find(d => d.category === manufacturer.category) || mockDistributors[0];
+      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
     }
     return mockDistributors[0];
   }

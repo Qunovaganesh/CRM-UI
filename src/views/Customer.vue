@@ -185,8 +185,14 @@
         <button class="btn-secondary" @click="submitToCompliance">
           Submit to Compliance
         </button>
+        <button class="btn-primary" @click="validateCustomer" v-if="showValidateButton">
+          Validate Customer
+        </button>
         <button class="btn-success" @click="uploadPayment">
           Upload Payment
+        </button>
+        <button class="btn-success" @click="convertToRegistered" v-if="isValidated">
+          Convert to Registered Customer
         </button>
       </div>
     </div>
@@ -273,6 +279,8 @@ const { invoices, addInvoice, updateDistributorStatus } = useBusinessLogic();
 
 const uploadType = ref<'proforma' | 'tax'>('proforma');
 const invoiceFilter = ref('all');
+const showValidateButton = ref(false);
+const isValidated = ref(false);
 const showPaymentModal = ref(false);
 const paymentAmount = ref<number>(0);
 const paymentMethod = ref('bank_transfer');
@@ -427,6 +435,11 @@ const submitToCompliance = () => {
   alert('Submitted to compliance team for review');
 };
 
+const validateCustomer = () => {
+  isValidated.value = true;
+  alert('Customer validated successfully!');
+};
+
 const uploadPayment = () => {
   showPaymentModal.value = true;
 };
@@ -459,6 +472,24 @@ const submitPayment = () => {
   } else {
     alert('Please fill all required fields');
   }
+};
+
+const convertToRegistered = () => {
+  if (isManufacturerCustomer.value) {
+    // Update manufacturer status
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      manufacturer.status = 'View';
+      manufacturer.daysSinceStatus = 0;
+    }
+  } else {
+    // Update distributor status
+    updateDistributorStatus(props.id, 'View');
+  }
+  alert('Customer converted to registered status! Redirecting...');
+  setTimeout(() => {
+    router.push({ name: 'ViewOnly', params: { id: props.id } });
+  }, 1000);
 };
 
 onMounted(() => {

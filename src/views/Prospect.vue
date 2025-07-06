@@ -243,7 +243,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor prospect, find matching manufacturer
-    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
   } else {
     // This is a manufacturer prospect
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -381,16 +381,16 @@ const convertToCustomer = () => {
     // Update manufacturer status
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
-      manufacturer.status = 'Prospect'; // Keep as Prospect until payment is uploaded
+      manufacturer.status = 'Customer';
       manufacturer.daysSinceStatus = 0;
     }
   } else {
     // Update distributor status
-    updateDistributorStatus(props.id, 'Prospect'); // Keep as Prospect until payment is uploaded
+    updateDistributorStatus(props.id, 'Customer');
   }
-  alert('Agreement signed! Status remains Prospect until payment is uploaded.');
+  alert('Status updated to Customer! Redirecting...');
   setTimeout(() => {
-    router.push({ name: 'Prospect', params: { id: props.id } });
+    router.push({ name: 'Customer', params: { id: props.id } });
   }, 1000);
 };
 

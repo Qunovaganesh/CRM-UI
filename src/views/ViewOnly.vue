@@ -112,11 +112,11 @@
           </div>
           <div class="info-item">
             <label>Industry:</label>
-            <span>{{ distributorData.category }}</span>
+            <span>{{ distributorData.industry }}</span>
           </div>
           <div class="info-item">
             <label>Category:</label>
-            <span>{{ distributorData.subCategory }}</span>
+            <span>{{ distributorData.category }}</span>
           </div>
           <div class="info-item">
             <label>Partnership Date:</label>
@@ -303,7 +303,7 @@ const manufacturerData = computed(() => {
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
     // This is a distributor view, find matching manufacturer
-    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
   } else {
     // This is a manufacturer view
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
@@ -323,7 +323,7 @@ const distributorData = computed(() => {
     // This is a manufacturer view, find matching distributor
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
-      return mockDistributors.find(d => d.category === manufacturer.category) || mockDistributors[0];
+      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
     }
     return mockDistributors[0];
   }
@@ -339,14 +339,14 @@ const manufacturerName = computed(() => manufacturerData.value.name);
 const relatedDistributors = computed(() => {
   return mockDistributors.filter(d => 
     d.id !== props.id && 
-    d.category === distributorData.value.category
+    d.industry === distributorData.value.industry
   ).slice(0, 4);
 });
 
 const relatedManufacturers = computed(() => {
   return mockManufacturers.filter(m => 
     m.id !== manufacturerData.value.id && 
-    m.category === distributorData.value.category
+    m.industry === distributorData.value.industry
   ).slice(0, 4);
 });
 
