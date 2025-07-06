@@ -5,9 +5,13 @@
       <div class="relationship-header">
         <h1>Customer Management</h1>
         <div class="relationship-info">
-          <span class="manufacturer">{{ manufacturerName }}</span>
+          <span :class="isManufacturerCustomer ? 'manufacturer selected-entity' : 'manufacturer'">
+            {{ manufacturerName }}
+          </span>
           <span class="connector">↔</span>
-          <span class="distributor">{{ distributorName }}</span>
+          <span :class="!isManufacturerCustomer ? 'distributor selected-entity' : 'distributor'">
+            {{ distributorName }}
+          </span>
           <span class="status-badge status-customer">Customer</span>
         </div>
       </div>
@@ -266,11 +270,41 @@ const distributorData = computed(() => {
 });
 
 const manufacturerData = computed(() => {
-  return mockManufacturers.find(m => m.industry === distributorData.value.industry) || mockManufacturers[0];
+  // Check if we're dealing with a distributor or manufacturer customer
+  const distributor = mockDistributors.find(d => d.id === props.id);
+  if (distributor) {
+    // This is a distributor customer, find matching manufacturer
+    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+  } else {
+    // This is a manufacturer customer
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      return manufacturer;
+    }
+    return mockManufacturers[0];
+  }
+});
+
+const distributorData = computed(() => {
+  // Check if we're dealing with a distributor or manufacturer customer
+  const distributor = mockDistributors.find(d => d.id === props.id);
+  if (distributor) {
+    return distributor;
+  } else {
+    // This is a manufacturer customer, find matching distributor
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
+    }
+    return mockDistributors[0];
+  }
+});
+
+const isManufacturerCustomer = computed(() => {
+  return mockManufacturers.some(m => m.id === props.id);
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
-const distributorName = computed(() => distributorData.value.name);
 
 const filteredInvoices = computed(() => {
   let filtered = invoices.value;
@@ -409,11 +443,22 @@ const submitPayment = () => {
 };
 
 const convertToRegistered = () => {
-  updateDistributorStatus(props.id, 'View');
+  if (isManufacturerCustomer.value) {
+    // Update manufacturer status
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      manufacturer.status = 'View';
+      manufacturer.daysSinceStatus = 0;
+    }
+  } else {
+    // Update distributor status
+    updateDistributorStatus(props.id, 'View');
+  }
   alert('Customer converted to registered status! Redirecting...');
   setTimeout(() => {
     router.push({ name: 'ViewOnly', params: { id: props.id } });
   }, 1000);
+};
 };
 
 onMounted(() => {
@@ -500,6 +545,11 @@ onMounted(() => {
 .status-customer {
   background: #d1fae5;
   color: #065f46;
+}
+
+.selected-entity {
+  border: 2px solid #0066cc !important;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
 }
 
 .page-header p {

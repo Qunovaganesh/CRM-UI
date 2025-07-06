@@ -9,7 +9,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'Maharashtra',
     industry: 'Electronics',
     category: 'Manufacturing',
-    registrationDate: '2023-01-15'
+    status: 'Customer',
+    registrationDate: '2023-01-15',
+    daysSinceStatus: 180
   },
   {
     id: 'M002',
@@ -19,7 +21,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'Delhi',
     industry: 'Automotive',
     category: 'Heavy Machinery',
-    registrationDate: '2023-02-20'
+    status: 'Prospect',
+    registrationDate: '2023-02-20',
+    daysSinceStatus: 150
   },
   {
     id: 'M003',
@@ -29,7 +33,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'Karnataka',
     industry: 'Renewable Energy',
     category: 'Solar Panels',
-    registrationDate: '2023-03-10'
+    status: 'Lead',
+    registrationDate: '2023-03-10',
+    daysSinceStatus: 135
   },
   {
     id: 'M004',
@@ -39,7 +45,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'Tamil Nadu',
     industry: 'Pharmaceuticals',
     category: 'Manufacturing',
-    registrationDate: '2023-04-05'
+    status: 'Customer',
+    registrationDate: '2023-04-05',
+    daysSinceStatus: 110
   },
   {
     id: 'M005',
@@ -49,7 +57,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'West Bengal',
     industry: 'Textiles',
     category: 'Manufacturing',
-    registrationDate: '2023-05-12'
+    status: 'View',
+    registrationDate: '2023-05-12',
+    daysSinceStatus: 75
   },
   {
     id: 'M006',
@@ -59,7 +69,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'Maharashtra',
     industry: 'Automotive',
     category: 'Heavy Machinery',
-    registrationDate: '2023-06-18'
+    status: 'Lead',
+    registrationDate: '2023-06-18',
+    daysSinceStatus: 40
   },
   {
     id: 'M007',
@@ -69,7 +81,9 @@ export const mockManufacturers: Manufacturer[] = [
     state: 'Telangana',
     industry: 'Electronics',
     category: 'Manufacturing',
-    registrationDate: '2023-07-22'
+    status: 'Prospect',
+    registrationDate: '2023-07-22',
+    daysSinceStatus: 15
   }
 ];
 

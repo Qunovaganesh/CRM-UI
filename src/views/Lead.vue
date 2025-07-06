@@ -5,13 +5,16 @@
       <div class="relationship-header">
         <h1>Lead Management</h1>
         <div class="relationship-info">
-          <span class="manufacturer">{{ manufacturerName }}</span>
+          <span :class="isManufacturerLead ? 'manufacturer selected-entity' : 'manufacturer'">
+            {{ manufacturerName }}
+          </span>
           <span class="connector">↔</span>
-          <span class="distributor">{{ distributorName }}</span>
+          <span :class="!isManufacturerLead ? 'distributor selected-entity' : 'distributor'">
+            {{ distributorName }}
+          </span>
           <span class="status-badge status-lead">Lead</span>
         </div>
       </div>
-      <p>Manage interactions and notes for lead development</p>
     </div>
 
     <div class="lead-content">
@@ -169,12 +172,42 @@ const distributorData = computed(() => {
 });
 
 const manufacturerData = computed(() => {
-  // Find a manufacturer that matches the distributor's industry
-  return mockManufacturers.find(m => m.industry === distributorData.value.industry) || mockManufacturers[0];
+  // Check if we're dealing with a distributor or manufacturer lead
+  const distributor = mockDistributors.find(d => d.id === props.id);
+  if (distributor) {
+    // This is a distributor lead, find matching manufacturer
+    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+  } else {
+    // This is a manufacturer lead, find matching distributor
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      const matchingDistributor = mockDistributors.find(d => d.industry === manufacturer.industry);
+      return manufacturer;
+    }
+    return mockManufacturers[0];
+  }
+});
+
+const distributorData = computed(() => {
+  // Check if we're dealing with a distributor or manufacturer lead
+  const distributor = mockDistributors.find(d => d.id === props.id);
+  if (distributor) {
+    return distributor;
+  } else {
+    // This is a manufacturer lead, find matching distributor
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
+    }
+    return mockDistributors[0];
+  }
+});
+
+const isManufacturerLead = computed(() => {
+  return mockManufacturers.some(m => m.id === props.id);
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
-const distributorName = computed(() => distributorData.value.name);
 
 const today = computed(() => {
   return new Date().toISOString().split('T')[0];
@@ -321,6 +354,11 @@ onMounted(() => {
 .status-lead {
   background: #fef3c7;
   color: #92400e;
+}
+
+.selected-entity {
+  border: 2px solid #0066cc !important;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
 }
 
 .page-header p {

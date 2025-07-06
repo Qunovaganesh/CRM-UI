@@ -283,6 +283,8 @@ const tableColumns = computed(() => {
     // When distributor is selected, show manufacturers (no status for manufacturers)
     return [
       ...baseColumns,
+      { key: 'status', label: 'Status' },
+      { key: 'daysSinceStatus', label: 'Days Since Status' },
       { key: 'registrationDate', label: 'Registration Date' },
       { key: 'action', label: 'Action' }
     ];
@@ -346,10 +348,11 @@ const handleActionClick = (row: any) => {
       router.push({ name: routeName, params: { id: row.id } });
     }
   } else {
-    // Clicked on a manufacturer from distributor view
-    // For manufacturers, we'll treat them as having a "View" status by default
-    // but we can also create prospect/customer relationships
-    router.push({ name: 'ViewOnly', params: { id: row.id } });
+    // Clicked on a manufacturer from distributor view, route based on manufacturer's status
+    const routeName = getRouteNameFromStatus(row.status);
+    if (routeName) {
+      router.push({ name: routeName, params: { id: row.id } });
+    }
   }
 };
 
