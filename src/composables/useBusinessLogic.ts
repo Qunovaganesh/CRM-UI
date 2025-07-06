@@ -20,6 +20,30 @@ const setStoredState = (key: string, value: any) => {
   }
 };
 
+// Default filter state to ensure all properties are arrays
+const defaultFilterState = {
+  city: [] as string[],
+  district: [] as string[],
+  state: [] as string[],
+  category: [] as string[],
+  subCategory: [] as string[],
+  status: [] as string[]
+};
+
+// Helper function to merge stored filters with default state
+const getStoredFilters = (key: string) => {
+  const stored = getStoredState(key, defaultFilterState);
+  const merged = { ...defaultFilterState };
+  
+  // Ensure each property is an array
+  Object.keys(defaultFilterState).forEach(prop => {
+    const key = prop as keyof typeof defaultFilterState;
+    merged[key] = Array.isArray(stored[key]) ? stored[key] : [];
+  });
+  
+  return merged;
+};
+
 export const useBusinessLogic = () => {
   const selectedEntity = ref<'manufacturer' | 'distributor'>(
     getStoredState('selectedEntity', 'manufacturer')
@@ -34,27 +58,9 @@ export const useBusinessLogic = () => {
     getStoredState('selectedEntityId', '')
   );
   
-  const filters = reactive(
-    getStoredState('filters', {
-      city: [] as string[],
-      district: [] as string[],
-      state: [] as string[],
-      category: [] as string[],
-      subCategory: [] as string[],
-      status: [] as string[]
-    })
-  );
+  const filters = reactive(getStoredFilters('filters'));
 
-  const associatedFilters = reactive(
-    getStoredState('associatedFilters', {
-      city: [] as string[],
-      district: [] as string[],
-      state: [] as string[],
-      category: [] as string[],
-      subCategory: [] as string[],
-      status: [] as string[]
-    })
-  );
+  const associatedFilters = reactive(getStoredFilters('associatedFilters'));
 
   const manufacturers = ref<Manufacturer[]>(mockManufacturers);
   const distributors = ref<Distributor[]>(mockDistributors);
