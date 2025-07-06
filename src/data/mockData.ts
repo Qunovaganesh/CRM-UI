@@ -84,6 +84,55 @@ export const mockManufacturers: Manufacturer[] = [
     status: 'Prospect',
     registrationDate: '2023-07-22',
     daysSinceStatus: 15
+  },
+  // Additional manufacturers for better distributor associations
+  {
+    id: 'M008',
+    name: 'Advanced Electronics Corp',
+    city: 'Chennai',
+    district: 'Chennai',
+    state: 'Tamil Nadu',
+    industry: 'Electronics',
+    category: 'Manufacturing',
+    status: 'Customer',
+    registrationDate: '2023-03-25',
+    daysSinceStatus: 80
+  },
+  {
+    id: 'M009',
+    name: 'Solar Tech Industries',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    industry: 'Renewable Energy',
+    category: 'Solar Panels',
+    status: 'Prospect',
+    registrationDate: '2023-05-30',
+    daysSinceStatus: 40
+  },
+  {
+    id: 'M010',
+    name: 'Medical Device Manufacturing',
+    city: 'Bangalore',
+    district: 'Bangalore Urban',
+    state: 'Karnataka',
+    industry: 'Pharmaceuticals',
+    category: 'Manufacturing',
+    status: 'Lead',
+    registrationDate: '2023-07-01',
+    daysSinceStatus: 20
+  },
+  {
+    id: 'M011',
+    name: 'Premium Textiles Ltd',
+    city: 'Delhi',
+    district: 'New Delhi',
+    state: 'Delhi',
+    industry: 'Textiles',
+    category: 'Manufacturing',
+    status: 'View',
+    registrationDate: '2023-04-15',
+    daysSinceStatus: 100
   }
 ];
 

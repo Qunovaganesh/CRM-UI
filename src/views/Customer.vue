@@ -531,6 +531,11 @@ onMounted(() => {
   color: #065f46;
 }
 
+.selected-entity {
+  border: 2px solid #0066cc !important;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
 .page-header p {
   color: #6b7280;
   margin: 0;
