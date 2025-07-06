@@ -373,10 +373,6 @@ export const mockManufacturers: Manufacturer[] = [
   }
 ];
 
-  
-  // Additional manufacturers for better coverage
-];
-
 // Expanded distributors with FMCG focus
 export const mockDistributors: Distributor[] = [
   // F&B Distributors
