@@ -62,8 +62,8 @@ export const useBusinessLogic = () => {
     city: [] as string[],
     district: [] as string[],
     state: [] as string[],
-    industry: [] as string[],
     category: [] as string[],
+    subCategory: [] as string[],
     status: [] as string[]
   };
   
@@ -96,8 +96,8 @@ export const useBusinessLogic = () => {
       return (!filters.city.length || filters.city.includes(manufacturer.city)) &&
              (!filters.district.length || filters.district.includes(manufacturer.district)) &&
              (!filters.state.length || filters.state.includes(manufacturer.state)) &&
-             (!filters.industry.length || filters.industry.includes(manufacturer.industry)) &&
              (!filters.category.length || filters.category.includes(manufacturer.category)) &&
+             (!filters.subCategory.length || filters.subCategory.includes(manufacturer.subCategory)) &&
              (!filters.status.length || filters.status.includes(manufacturer.status));
     });
   });
@@ -107,8 +107,8 @@ export const useBusinessLogic = () => {
       return (!filters.city.length || filters.city.includes(distributor.city)) &&
              (!filters.district.length || filters.district.includes(distributor.district)) &&
              (!filters.state.length || filters.state.includes(distributor.state)) &&
-             (!filters.industry.length || filters.industry.includes(distributor.industry)) &&
              (!filters.category.length || filters.category.includes(distributor.category)) &&
+             (!filters.subCategory.length || filters.subCategory.includes(distributor.subCategory)) &&
              (!filters.status.length || filters.status.includes(distributor.status));
     });
   });
@@ -116,14 +116,14 @@ export const useBusinessLogic = () => {
   const pairedList = computed(() => {
     if (selectedEntity.value === 'manufacturer' && selectedManufacturer.value) {
       return distributors.value.filter(d => 
-        d.industry === selectedManufacturer.value?.industry &&
-        d.category === selectedManufacturer.value?.category
+        d.category === selectedManufacturer.value?.category &&
+        d.subCategory === selectedManufacturer.value?.subCategory
       );
     }
     if (selectedEntity.value === 'distributor' && selectedDistributor.value) {
       return manufacturers.value.filter(m => 
-        m.industry === selectedDistributor.value?.industry &&
-        m.category === selectedDistributor.value?.category
+        m.category === selectedDistributor.value?.category &&
+        m.subCategory === selectedDistributor.value?.subCategory
       );
     }
     return [];
@@ -247,39 +247,39 @@ export const useBusinessLogic = () => {
     persistState();
   };
 
-  const updateIndustryFilters = (type: 'industry' | 'category', values: string[], isAssociated = false) => {
+  const updateCategoryFilters = (type: 'category' | 'subCategory', values: string[], isAssociated = false) => {
     const targetFilters = isAssociated ? associatedFilters : filters;
     
-    if (type === 'industry') {
-      targetFilters.industry = values;
-      // Auto-update categories based on selected industries
-      const relatedCategories = new Set<string>();
+    if (type === 'category') {
+      targetFilters.category = values;
+      // Auto-update sub-categories based on selected categories
+      const relatedSubCategories = new Set<string>();
       
-      values.forEach(industry => {
-        const categories = industryToCategoryMapping[industry];
-        if (categories) {
-          categories.forEach(category => relatedCategories.add(category));
+      values.forEach(category => {
+        const subCategories = categoryToSubCategoryMapping[category];
+        if (subCategories) {
+          subCategories.forEach(subCategory => relatedSubCategories.add(subCategory));
         }
       });
       
       if (values.length > 0) {
-        targetFilters.category = Array.from(relatedCategories);
+        targetFilters.subCategory = Array.from(relatedSubCategories);
       }
-    } else if (type === 'category') {
-      targetFilters.category = values;
-      // Auto-update industries based on selected categories
-      const relatedIndustries = new Set<string>();
+    } else if (type === 'subCategory') {
+      targetFilters.subCategory = values;
+      // Auto-update categories based on selected sub-categories
+      const relatedCategories = new Set<string>();
       
-      values.forEach(category => {
-        Object.entries(industryToCategoryMapping).forEach(([industry, categories]) => {
-          if (categories.includes(category)) {
-            relatedIndustries.add(industry);
+      values.forEach(subCategory => {
+        Object.entries(categoryToSubCategoryMapping).forEach(([category, subCategories]) => {
+          if (subCategories.includes(subCategory)) {
+            relatedCategories.add(category);
           }
         });
       });
       
       if (values.length > 0) {
-        targetFilters.industry = Array.from(relatedIndustries);
+        targetFilters.category = Array.from(relatedCategories);
       }
     }
     
@@ -329,13 +329,13 @@ export const useBusinessLogic = () => {
     clearFilters,
     clearAssociatedFilters,
     updateLocationFilters,
-    updateIndustryFilters,
+    updateCategoryFilters,
     setSelectedEntity,
     setSelectedEntityId,
     setSelectedManufacturer,
     setSelectedDistributor,
     persistState,
     locationMapping,
-    industryToCategoryMapping
+    categoryToSubCategoryMapping
   };
 };
