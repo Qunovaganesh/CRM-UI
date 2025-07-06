@@ -211,20 +211,7 @@ const manufacturerData = computed(() => {
   }
 });
 
-const distributorData = computed(() => {
-  // Check if we're dealing with a distributor or manufacturer prospect
-  const distributor = mockDistributors.find(d => d.id === props.id);
-  if (distributor) {
-    return distributor;
-  } else {
-    // This is a manufacturer prospect, find matching distributor
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      return mockDistributors.find(d => d.industry === manufacturer.industry) || mockDistributors[0];
-    }
-    return mockDistributors[0];
-  }
-});
+const distributorName = computed(() => distributorData.value.name);
 
 const isManufacturerProspect = computed(() => {
   return mockManufacturers.some(m => m.id === props.id);
@@ -339,7 +326,6 @@ const convertToCustomer = () => {
     router.push({ name: 'Customer', params: { id: props.id } });
   }, 1000);
 };
-};
 
 onMounted(() => {
   console.log('Loading prospect data for ID:', props.id);
@@ -425,11 +411,6 @@ onMounted(() => {
 .status-prospect {
   background: #dbeafe;
   color: #1e40af;
-}
-
-.selected-entity {
-  border: 2px solid #0066cc !important;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
 }
 
 .page-header p {
