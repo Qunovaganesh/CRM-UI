@@ -28,8 +28,8 @@
         <div class="multiselect-container">
           <select 
             multiple 
-            v-model="internalFilters.state" 
-            @change="onLocationFilterChange('state', $event.target.value)"
+            :value="internalFilters.state" 
+            @change="onLocationFilterChange('state', Array.from($event.target.selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="state in availableStates" :key="state" :value="state">
@@ -50,8 +50,8 @@
         <div class="multiselect-container">
           <select 
             multiple 
-            v-model="internalFilters.district" 
-            @change="onLocationFilterChange('district', $event.target.value)"
+            :value="internalFilters.district" 
+            @change="onLocationFilterChange('district', Array.from($event.target.selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="district in availableDistricts" :key="district" :value="district">
@@ -72,8 +72,8 @@
         <div class="multiselect-container">
           <select 
             multiple 
-            v-model="internalFilters.city" 
-            @change="onLocationFilterChange('city', $event.target.value)"
+            :value="internalFilters.city" 
+            @change="onLocationFilterChange('city', Array.from($event.target.selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="city in availableCities" :key="city" :value="city">
@@ -94,8 +94,8 @@
         <div class="multiselect-container">
           <select 
             multiple 
-            v-model="internalFilters.industry" 
-            @change="onIndustryFilterChange('industry', $event.target.value)"
+            :value="internalFilters.industry" 
+            @change="onIndustryFilterChange('industry', Array.from($event.target.selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="industry in availableIndustries" :key="industry" :value="industry">
@@ -116,8 +116,8 @@
         <div class="multiselect-container">
           <select 
             multiple 
-            v-model="internalFilters.category" 
-            @change="onIndustryFilterChange('category', $event.target.value)"
+            :value="internalFilters.category" 
+            @change="onIndustryFilterChange('category', Array.from($event.target.selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="category in availableCategories" :key="category" :value="category">
@@ -138,8 +138,8 @@
         <div class="multiselect-container">
           <select 
             multiple 
-            v-model="internalFilters.status" 
-            @change="onFilterChange"
+            :value="internalFilters.status" 
+            @change="internalFilters.status = Array.from($event.target.selectedOptions).map(option => option.value); onFilterChange()"
             class="multiselect"
           >
             <option v-for="status in filterOptions.statuses" :key="status" :value="status">
@@ -231,7 +231,7 @@ const availableStates = computed(() => {
 const availableDistricts = computed(() => {
   if (internalFilters.value.state.length > 0) {
     const relatedDistricts = new Set<string>();
-    internalFilters.value.state.forEach((state: string) => {
+    (Array.isArray(internalFilters.value.state) ? internalFilters.value.state : []).forEach((state: string) => {
       const mapping = locationMapping[state];
       if (mapping) {
         mapping.districts.forEach(district => relatedDistricts.add(district));
@@ -245,7 +245,7 @@ const availableDistricts = computed(() => {
 const availableCities = computed(() => {
   if (internalFilters.value.state.length > 0) {
     const relatedCities = new Set<string>();
-    internalFilters.value.state.forEach((state: string) => {
+    (Array.isArray(internalFilters.value.state) ? internalFilters.value.state : []).forEach((state: string) => {
       const mapping = locationMapping[state];
       if (mapping) {
         mapping.cities.forEach(city => relatedCities.add(city));
@@ -259,7 +259,7 @@ const availableCities = computed(() => {
 const availableIndustries = computed(() => {
   if (internalFilters.value.category.length > 0) {
     const relatedIndustries = new Set<string>();
-    internalFilters.value.category.forEach((category: string) => {
+    (Array.isArray(internalFilters.value.category) ? internalFilters.value.category : []).forEach((category: string) => {
       Object.entries(industryToCategoryMapping).forEach(([industry, categories]) => {
         if (categories.includes(category)) {
           relatedIndustries.add(industry);
@@ -274,7 +274,7 @@ const availableIndustries = computed(() => {
 const availableCategories = computed(() => {
   if (internalFilters.value.industry.length > 0) {
     const relatedCategories = new Set<string>();
-    internalFilters.value.industry.forEach((industry: string) => {
+    (Array.isArray(internalFilters.value.industry) ? internalFilters.value.industry : []).forEach((industry: string) => {
       const categories = industryToCategoryMapping[industry];
       if (categories) {
         categories.forEach(category => relatedCategories.add(category));
