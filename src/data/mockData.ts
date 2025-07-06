@@ -503,12 +503,159 @@ export const mockInvoices: Invoice[] = [
 ];
 
 export const filterOptions: FilterOptions = {
-  cities: ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Pune', 'Hyderabad'],
-  districts: ['Mumbai', 'New Delhi', 'Bangalore Urban', 'Chennai', 'Kolkata', 'Pune', 'Hyderabad'],
-  states: ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana'],
-  industries: ['Electronics', 'Automotive', 'Renewable Energy', 'Pharmaceuticals', 'Textiles'],
-  categories: ['Manufacturing', 'Heavy Machinery', 'Solar Panels', 'Retail', 'Distribution', 'Installation'],
+  cities: [
+    'Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad', // Maharashtra
+    'Delhi', 'New Delhi', 'Gurgaon', 'Noida', 'Faridabad', // Delhi NCR
+    'Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum', // Karnataka
+    'Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', // Tamil Nadu
+    'Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', // West Bengal
+    'Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Khammam', // Telangana
+    'Kanpur', 'Lucknow', 'Agra', 'Varanasi', 'Meerut', 'Allahabad', // Uttar Pradesh
+    'Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur', // Rajasthan
+    'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar' // Gujarat
+  ],
+  districts: [
+    'Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad', // Maharashtra
+    'New Delhi', 'North Delhi', 'South Delhi', 'East Delhi', 'West Delhi', // Delhi
+    'Bangalore Urban', 'Mysore', 'Hubli-Dharwad', 'Dakshina Kannada', 'Belgaum', // Karnataka
+    'Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', // Tamil Nadu
+    'Kolkata', 'Howrah', 'Burdwan', 'Asansol', 'Darjeeling', // West Bengal
+    'Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Khammam', // Telangana
+    'Kanpur Nagar', 'Lucknow', 'Agra', 'Varanasi', 'Meerut', 'Allahabad', // Uttar Pradesh
+    'Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur', // Rajasthan
+    'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar' // Gujarat
+  ],
+  states: ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Uttar Pradesh', 'Rajasthan', 'Gujarat'],
+  industries: ['F&B', 'Personal Care', 'Home Care', 'Health & Wellness', 'Baby Care'],
+  categories: [
+    // F&B subcategories
+    'Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products',
+    // Personal Care subcategories
+    'Skincare', 'Haircare', 'Oral Care', 'Fragrances', 'Color Cosmetics', 'Men\'s Grooming',
+    // Home Care subcategories
+    'Laundry Care', 'Dishwashing', 'Surface Cleaners', 'Air Care', 'Fabric Care', 'Kitchen Care',
+    // Health & Wellness subcategories
+    'Vitamins & Supplements', 'Health Drinks', 'Protein Products', 'Ayurvedic Products', 'First Aid',
+    // Baby Care subcategories
+    'Baby Food', 'Diapers', 'Baby Skincare', 'Baby Bath', 'Feeding Accessories'
+  ],
   statuses: ['Lead', 'Prospect', 'Customer', 'View']
+};
+
+// Location mapping for dependent multiselect
+export const locationMapping = {
+  'Maharashtra': {
+    districts: ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad'],
+    cities: ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad']
+  },
+  'Delhi': {
+    districts: ['New Delhi', 'North Delhi', 'South Delhi', 'East Delhi', 'West Delhi'],
+    cities: ['Delhi', 'New Delhi', 'Gurgaon', 'Noida', 'Faridabad']
+  },
+  'Karnataka': {
+    districts: ['Bangalore Urban', 'Mysore', 'Hubli-Dharwad', 'Dakshina Kannada', 'Belgaum'],
+    cities: ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum']
+  },
+  'Tamil Nadu': {
+    districts: ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli'],
+    cities: ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli']
+  },
+  'West Bengal': {
+    districts: ['Kolkata', 'Howrah', 'Burdwan', 'Asansol', 'Darjeeling'],
+    cities: ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri']
+  },
+  'Telangana': {
+    districts: ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Khammam'],
+    cities: ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Khammam']
+  },
+  'Uttar Pradesh': {
+    districts: ['Kanpur Nagar', 'Lucknow', 'Agra', 'Varanasi', 'Meerut', 'Allahabad'],
+    cities: ['Kanpur', 'Lucknow', 'Agra', 'Varanasi', 'Meerut', 'Allahabad']
+  },
+  'Rajasthan': {
+    districts: ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur'],
+    cities: ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur']
+  },
+  'Gujarat': {
+    districts: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar'],
+    cities: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar']
+  }
+};
+
+// City to state/district mapping
+export const cityToLocationMapping: Record<string, { state: string; district: string }> = {
+  // Maharashtra
+  'Mumbai': { state: 'Maharashtra', district: 'Mumbai' },
+  'Pune': { state: 'Maharashtra', district: 'Pune' },
+  'Nagpur': { state: 'Maharashtra', district: 'Nagpur' },
+  'Nashik': { state: 'Maharashtra', district: 'Nashik' },
+  'Aurangabad': { state: 'Maharashtra', district: 'Aurangabad' },
+  
+  // Delhi NCR
+  'Delhi': { state: 'Delhi', district: 'New Delhi' },
+  'New Delhi': { state: 'Delhi', district: 'New Delhi' },
+  'Gurgaon': { state: 'Delhi', district: 'South Delhi' },
+  'Noida': { state: 'Delhi', district: 'East Delhi' },
+  'Faridabad': { state: 'Delhi', district: 'South Delhi' },
+  
+  // Karnataka
+  'Bangalore': { state: 'Karnataka', district: 'Bangalore Urban' },
+  'Mysore': { state: 'Karnataka', district: 'Mysore' },
+  'Hubli': { state: 'Karnataka', district: 'Hubli-Dharwad' },
+  'Mangalore': { state: 'Karnataka', district: 'Dakshina Kannada' },
+  'Belgaum': { state: 'Karnataka', district: 'Belgaum' },
+  
+  // Tamil Nadu
+  'Chennai': { state: 'Tamil Nadu', district: 'Chennai' },
+  'Coimbatore': { state: 'Tamil Nadu', district: 'Coimbatore' },
+  'Madurai': { state: 'Tamil Nadu', district: 'Madurai' },
+  'Salem': { state: 'Tamil Nadu', district: 'Salem' },
+  'Tiruchirappalli': { state: 'Tamil Nadu', district: 'Tiruchirappalli' },
+  
+  // West Bengal
+  'Kolkata': { state: 'West Bengal', district: 'Kolkata' },
+  'Howrah': { state: 'West Bengal', district: 'Howrah' },
+  'Durgapur': { state: 'West Bengal', district: 'Burdwan' },
+  'Asansol': { state: 'West Bengal', district: 'Asansol' },
+  'Siliguri': { state: 'West Bengal', district: 'Darjeeling' },
+  
+  // Telangana
+  'Hyderabad': { state: 'Telangana', district: 'Hyderabad' },
+  'Warangal': { state: 'Telangana', district: 'Warangal' },
+  'Nizamabad': { state: 'Telangana', district: 'Nizamabad' },
+  'Karimnagar': { state: 'Telangana', district: 'Karimnagar' },
+  'Khammam': { state: 'Telangana', district: 'Khammam' },
+  
+  // Uttar Pradesh
+  'Kanpur': { state: 'Uttar Pradesh', district: 'Kanpur Nagar' },
+  'Lucknow': { state: 'Uttar Pradesh', district: 'Lucknow' },
+  'Agra': { state: 'Uttar Pradesh', district: 'Agra' },
+  'Varanasi': { state: 'Uttar Pradesh', district: 'Varanasi' },
+  'Meerut': { state: 'Uttar Pradesh', district: 'Meerut' },
+  'Allahabad': { state: 'Uttar Pradesh', district: 'Allahabad' },
+  
+  // Rajasthan
+  'Jaipur': { state: 'Rajasthan', district: 'Jaipur' },
+  'Jodhpur': { state: 'Rajasthan', district: 'Jodhpur' },
+  'Kota': { state: 'Rajasthan', district: 'Kota' },
+  'Bikaner': { state: 'Rajasthan', district: 'Bikaner' },
+  'Udaipur': { state: 'Rajasthan', district: 'Udaipur' },
+  
+  // Gujarat
+  'Ahmedabad': { state: 'Gujarat', district: 'Ahmedabad' },
+  'Surat': { state: 'Gujarat', district: 'Surat' },
+  'Vadodara': { state: 'Gujarat', district: 'Vadodara' },
+  'Rajkot': { state: 'Gujarat', district: 'Rajkot' },
+  'Bhavnagar': { state: 'Gujarat', district: 'Bhavnagar' }
+};
+
+// Industry to category mapping for FMCG
+export const industryToCategoryMapping: Record<string, string[]> = {
+  'F&B': ['Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products'],
+  'Personal Care': ['Skincare', 'Haircare', 'Oral Care', 'Fragrances', 'Color Cosmetics', 'Men\'s Grooming'],
+  'Home Care': ['Laundry Care', 'Dishwashing', 'Surface Cleaners', 'Air Care', 'Fabric Care', 'Kitchen Care'],
+  'Health & Wellness': ['Vitamins & Supplements', 'Health Drinks', 'Protein Products', 'Ayurvedic Products', 'First Aid'],
+  'Baby Care': ['Baby Food', 'Diapers', 'Baby Skincare', 'Baby Bath', 'Feeding Accessories']
 };
 
 export const termsOptions = {

@@ -1,5 +1,12 @@
 <template>
   <div class="dashboard">
+    <!-- Floating Back Button -->
+    <div class="floating-back-button" v-if="selectedEntityItem">
+      <button class="btn-floating-back" @click="clearSelection">
+        ← Back to Selection
+      </button>
+    </div>
+
     <div class="page-header">
       <h1>Manufacturer-Distributor Management</h1>
       <p>Manage your business relationships and workflow processes</p>
@@ -13,6 +20,8 @@
       @entity-change="onEntityChange"
       @filter-change="onFilterChange"
       @clear-filters="clearAllFilters"
+      @location-filter-change="onLocationFilterChange"
+      @industry-filter-change="onIndustryFilterChange"
     />
 
     <!-- Entity Selection Dropdown -->
@@ -148,23 +157,18 @@ import type { Manufacturer, Distributor } from '../types';
 const router = useRouter();
 const {
   selectedEntity,
+  selectedEntityId,
   filters,
+  associatedFilters,
   filteredManufacturers,
   filteredDistributors,
-  clearFilters
+  clearFilters,
+  clearAssociatedFilters,
+  updateLocationFilters,
+  updateIndustryFilters
 } = useBusinessLogic();
 
-const selectedEntityId = ref<string>('');
 const selectedEntityItem = ref<Manufacturer | Distributor | null>(null);
-
-const associatedFilters = reactive({
-  city: '',
-  district: '',
-  state: '',
-  status: '',
-  industry: '',
-  category: ''
-});
 
 const currentEntityList = computed(() => {
   return selectedEntity.value === 'manufacturer' ? filteredManufacturers.value : filteredDistributors.value;
@@ -228,23 +232,23 @@ const filteredPairedList = computed(() => {
   let filtered = pairedList.value;
 
   // Apply associated filters
-  if (associatedFilters.city) {
-    filtered = filtered.filter(item => item.city === associatedFilters.city);
+  if (associatedFilters.city.length) {
+    filtered = filtered.filter(item => associatedFilters.city.includes(item.city));
   }
-  if (associatedFilters.district) {
-    filtered = filtered.filter(item => item.district === associatedFilters.district);
+  if (associatedFilters.district.length) {
+    filtered = filtered.filter(item => associatedFilters.district.includes(item.district));
   }
-  if (associatedFilters.state) {
-    filtered = filtered.filter(item => item.state === associatedFilters.state);
+  if (associatedFilters.state.length) {
+    filtered = filtered.filter(item => associatedFilters.state.includes(item.state));
   }
-  if (associatedFilters.industry) {
-    filtered = filtered.filter(item => item.industry === associatedFilters.industry);
+  if (associatedFilters.industry.length) {
+    filtered = filtered.filter(item => associatedFilters.industry.includes(item.industry));
   }
-  if (associatedFilters.category) {
-    filtered = filtered.filter(item => item.category === associatedFilters.category);
+  if (associatedFilters.category.length) {
+    filtered = filtered.filter(item => associatedFilters.category.includes(item.category));
   }
-  if (associatedFilters.status && filtered.length > 0 && 'status' in filtered[0]) {
-    filtered = filtered.filter(item => 'status' in item && item.status === associatedFilters.status);
+  if (associatedFilters.status.length && filtered.length > 0 && 'status' in filtered[0]) {
+    filtered = filtered.filter(item => 'status' in item && associatedFilters.status.includes(item.status));
   }
 
   return filtered;
@@ -326,18 +330,29 @@ const onAssociatedFilterChange = () => {
   // Filter change logic handled by computed property
 };
 
+const onLocationFilterChange = (type: 'city' | 'district' | 'state', values: string[]) => {
+  updateLocationFilters(type, values, false);
+};
+
+const onIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
+  updateIndustryFilters(type, values, false);
+};
+
+const onAssociatedLocationFilterChange = (type: 'city' | 'district' | 'state', values: string[]) => {
+  updateLocationFilters(type, values, true);
+};
+
+const onAssociatedIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
+  updateIndustryFilters(type, values, true);
+};
+
 const clearAllFilters = () => {
   clearFilters();
   clearAssociatedFilters();
 };
 
 const clearAssociatedFilters = () => {
-  associatedFilters.city = '';
-  associatedFilters.district = '';
-  associatedFilters.state = '';
-  associatedFilters.industry = '';
-  associatedFilters.category = '';
-  associatedFilters.status = '';
+  clearAssociatedFilters();
 };
 
 const handleActionClick = (row: any) => {
@@ -382,6 +397,32 @@ const getStatusClass = (status: string) => {
 </script>
 
 <style scoped>
+.floating-back-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.btn-floating-back {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-floating-back:hover {
+  background: #0052a3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
+}
+
 .dashboard {
   max-width: 1200px;
   margin: 0 auto;

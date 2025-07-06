@@ -25,62 +25,134 @@
     <div class="filters-grid">
       <div class="filter-group">
         <label>State</label>
-        <select v-model="internalFilters.state" @change="onFilterChange">
-          <option value="">All States</option>
-          <option v-for="state in filterOptions.states" :key="state" :value="state">
-            {{ state }}
-          </option>
-        </select>
+        <div class="multiselect-container">
+          <select 
+            multiple 
+            v-model="internalFilters.state" 
+            @change="onLocationFilterChange('state', $event.target.value)"
+            class="multiselect"
+          >
+            <option v-for="state in availableStates" :key="state" :value="state">
+              {{ state }}
+            </option>
+          </select>
+          <div class="selected-tags" v-if="internalFilters.state.length">
+            <span v-for="state in internalFilters.state" :key="state" class="tag">
+              {{ state }}
+              <button @click="removeFilter('state', state)" class="tag-remove">×</button>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="filter-group">
         <label>District</label>
-        <select v-model="internalFilters.district" @change="onFilterChange">
-          <option value="">All Districts</option>
-          <option v-for="district in filterOptions.districts" :key="district" :value="district">
-            {{ district }}
-          </option>
-        </select>
+        <div class="multiselect-container">
+          <select 
+            multiple 
+            v-model="internalFilters.district" 
+            @change="onLocationFilterChange('district', $event.target.value)"
+            class="multiselect"
+          >
+            <option v-for="district in availableDistricts" :key="district" :value="district">
+              {{ district }}
+            </option>
+          </select>
+          <div class="selected-tags" v-if="internalFilters.district.length">
+            <span v-for="district in internalFilters.district" :key="district" class="tag">
+              {{ district }}
+              <button @click="removeFilter('district', district)" class="tag-remove">×</button>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="filter-group">
         <label>City</label>
-        <select v-model="internalFilters.city" @change="onFilterChange">
-          <option value="">All Cities</option>
-          <option v-for="city in filterOptions.cities" :key="city" :value="city">
-            {{ city }}
-          </option>
-        </select>
+        <div class="multiselect-container">
+          <select 
+            multiple 
+            v-model="internalFilters.city" 
+            @change="onLocationFilterChange('city', $event.target.value)"
+            class="multiselect"
+          >
+            <option v-for="city in availableCities" :key="city" :value="city">
+              {{ city }}
+            </option>
+          </select>
+          <div class="selected-tags" v-if="internalFilters.city.length">
+            <span v-for="city in internalFilters.city" :key="city" class="tag">
+              {{ city }}
+              <button @click="removeFilter('city', city)" class="tag-remove">×</button>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="filter-group">
         <label>Industry</label>
-        <select v-model="internalFilters.industry" @change="onFilterChange">
-          <option value="">All Industries</option>
-          <option v-for="industry in filterOptions.industries" :key="industry" :value="industry">
-            {{ industry }}
-          </option>
-        </select>
+        <div class="multiselect-container">
+          <select 
+            multiple 
+            v-model="internalFilters.industry" 
+            @change="onIndustryFilterChange('industry', $event.target.value)"
+            class="multiselect"
+          >
+            <option v-for="industry in availableIndustries" :key="industry" :value="industry">
+              {{ industry }}
+            </option>
+          </select>
+          <div class="selected-tags" v-if="internalFilters.industry.length">
+            <span v-for="industry in internalFilters.industry" :key="industry" class="tag">
+              {{ industry }}
+              <button @click="removeFilter('industry', industry)" class="tag-remove">×</button>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="filter-group">
         <label>Category</label>
-        <select v-model="internalFilters.category" @change="onFilterChange">
-          <option value="">All Categories</option>
-          <option v-for="category in filterOptions.categories" :key="category" :value="category">
-            {{ category }}
-          </option>
-        </select>
+        <div class="multiselect-container">
+          <select 
+            multiple 
+            v-model="internalFilters.category" 
+            @change="onIndustryFilterChange('category', $event.target.value)"
+            class="multiselect"
+          >
+            <option v-for="category in availableCategories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+          <div class="selected-tags" v-if="internalFilters.category.length">
+            <span v-for="category in internalFilters.category" :key="category" class="tag">
+              {{ category }}
+              <button @click="removeFilter('category', category)" class="tag-remove">×</button>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="filter-group" v-if="selectedEntity === 'distributor'">
         <label>Status</label>
-        <select v-model="internalFilters.status" @change="onFilterChange">
-          <option value="">All Status</option>
-          <option v-for="status in filterOptions.statuses" :key="status" :value="status">
-            {{ status }}
-          </option>
-        </select>
+        <div class="multiselect-container">
+          <select 
+            multiple 
+            v-model="internalFilters.status" 
+            @change="onFilterChange"
+            class="multiselect"
+          >
+            <option v-for="status in filterOptions.statuses" :key="status" :value="status">
+              {{ status }}
+            </option>
+          </select>
+          <div class="selected-tags" v-if="internalFilters.status.length">
+            <span v-for="status in internalFilters.status" :key="status" class="tag">
+              {{ status }}
+              <button @click="removeFilter('status', status)" class="tag-remove">×</button>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -94,7 +166,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { filterOptions } from '../data/mockData';
+import { filterOptions, locationMapping, industryToCategoryMapping } from '../data/mockData';
 
 const props = defineProps<{
   selectedEntity: 'manufacturer' | 'distributor';
@@ -107,6 +179,8 @@ const emit = defineEmits<{
   'entity-change': [];
   'filter-change': [];
   'clear-filters': [];
+  'location-filter-change': [type: 'city' | 'district' | 'state', values: string[]];
+  'industry-filter-change': [type: 'industry' | 'category', values: string[]];
 }>();
 
 const internalSelectedEntity = computed({
@@ -128,7 +202,115 @@ const internalFilters = computed({
   }
 });
 
+const availableStates = computed(() => {
+  if (internalFilters.value.city.length > 0 || internalFilters.value.district.length > 0) {
+    // If cities or districts are selected, show only related states
+    const relatedStates = new Set<string>();
+    
+    if (internalFilters.value.city.length > 0) {
+      Object.entries(locationMapping).forEach(([state, mapping]) => {
+        if (mapping.cities.some(city => internalFilters.value.city.includes(city))) {
+          relatedStates.add(state);
+        }
+      });
+    }
+    
+    if (internalFilters.value.district.length > 0) {
+      Object.entries(locationMapping).forEach(([state, mapping]) => {
+        if (mapping.districts.some(district => internalFilters.value.district.includes(district))) {
+          relatedStates.add(state);
+        }
+      });
+    }
+    
+    return Array.from(relatedStates);
+  }
+  return filterOptions.states;
+});
+
+const availableDistricts = computed(() => {
+  if (internalFilters.value.state.length > 0) {
+    const relatedDistricts = new Set<string>();
+    internalFilters.value.state.forEach((state: string) => {
+      const mapping = locationMapping[state];
+      if (mapping) {
+        mapping.districts.forEach(district => relatedDistricts.add(district));
+      }
+    });
+    return Array.from(relatedDistricts);
+  }
+  return filterOptions.districts;
+});
+
+const availableCities = computed(() => {
+  if (internalFilters.value.state.length > 0) {
+    const relatedCities = new Set<string>();
+    internalFilters.value.state.forEach((state: string) => {
+      const mapping = locationMapping[state];
+      if (mapping) {
+        mapping.cities.forEach(city => relatedCities.add(city));
+      }
+    });
+    return Array.from(relatedCities);
+  }
+  return filterOptions.cities;
+});
+
+const availableIndustries = computed(() => {
+  if (internalFilters.value.category.length > 0) {
+    const relatedIndustries = new Set<string>();
+    internalFilters.value.category.forEach((category: string) => {
+      Object.entries(industryToCategoryMapping).forEach(([industry, categories]) => {
+        if (categories.includes(category)) {
+          relatedIndustries.add(industry);
+        }
+      });
+    });
+    return Array.from(relatedIndustries);
+  }
+  return filterOptions.industries;
+});
+
+const availableCategories = computed(() => {
+  if (internalFilters.value.industry.length > 0) {
+    const relatedCategories = new Set<string>();
+    internalFilters.value.industry.forEach((industry: string) => {
+      const categories = industryToCategoryMapping[industry];
+      if (categories) {
+        categories.forEach(category => relatedCategories.add(category));
+      }
+    });
+    return Array.from(relatedCategories);
+  }
+  return filterOptions.categories;
+});
+
 const onFilterChange = () => {
+  emit('filter-change');
+};
+
+const onLocationFilterChange = (type: 'city' | 'district' | 'state', values: string[]) => {
+  emit('location-filter-change', type, values);
+  emit('filter-change');
+};
+
+const onIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
+  emit('industry-filter-change', type, values);
+  emit('filter-change');
+};
+
+const removeFilter = (type: string, value: string) => {
+  const currentValues = internalFilters.value[type] as string[];
+  const newValues = currentValues.filter(v => v !== value);
+  
+  if (type === 'city' || type === 'district' || type === 'state') {
+    emit('location-filter-change', type as 'city' | 'district' | 'state', newValues);
+  } else if (type === 'industry' || type === 'category') {
+    emit('industry-filter-change', type as 'industry' | 'category', newValues);
+  } else {
+    internalFilters.value[type] = newValues;
+  }
+  
   emit('filter-change');
 };
 
@@ -190,18 +372,65 @@ const clearAllFilters = () => {
   font-size: 14px;
 }
 
-.filter-group select {
+.multiselect-container {
+  position: relative;
+}
+
+.multiselect {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   background: white;
   font-size: 14px;
+  width: 100%;
+  min-height: 40px;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
-.filter-group select:focus {
+.multiselect:focus {
   outline: none;
   border-color: #0066cc;
   box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.tag {
+  background: #e5e7eb;
+  color: #374151;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.tag-remove:hover {
+  background: #d1d5db;
+  color: #374151;
 }
 
 .filter-actions {

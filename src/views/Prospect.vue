@@ -1,7 +1,13 @@
 <template>
   <div class="prospect-page">
+    <!-- Floating Back Button -->
+    <div class="floating-back-button">
+      <button class="btn-floating-back" @click="$router.go(-1)">
+        ← Back
+      </button>
+    </div>
+
     <div class="page-header">
-      <button class="btn-back" @click="$router.go(-1)">← Back</button>
       <div class="relationship-header">
         <h1>Prospect Management</h1>
         <div class="relationship-info">
@@ -136,7 +142,7 @@
             @click="convertToCustomer"
             v-if="agreement.status === 'Signed'"
           >
-            Convert to Customer
+            {{ isManufacturerProspect ? 'Convert to Customer' : 'Convert to Customer' }}
           </button>
         </div>
       </div>
@@ -390,6 +396,32 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.floating-back-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.btn-floating-back {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-floating-back:hover {
+  background: #0052a3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
+}
+
 .prospect-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -398,19 +430,6 @@ onMounted(() => {
 
 .page-header {
   margin-bottom: 30px;
-}
-
-.btn-back {
-  background: none;
-  border: none;
-  color: #0066cc;
-  font-size: 16px;
-  cursor: pointer;
-  margin-bottom: 15px;
-}
-
-.btn-back:hover {
-  text-decoration: underline;
 }
 
 .relationship-header {
