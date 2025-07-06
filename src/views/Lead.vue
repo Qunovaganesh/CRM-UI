@@ -16,7 +16,6 @@
         </div>
       </div>
     </div>
-    </div>
 
     <!-- Floating Back Button -->
     <div class="floating-back-button">
