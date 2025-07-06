@@ -21,36 +21,68 @@
     <div class="prospect-content">
       <div class="terms-section">
         <h2>Terms & Conditions</h2>
-        <div class="terms-form">
-          <div v-for="term in agreement.terms" :key="term.id" class="term-item">
-            <div class="term-group">
-              <label>{{ term.clause }}</label>
-              <input 
-                type="text" 
-                v-model="term.response" 
-                :disabled="!editMode"
-                placeholder="Enter response..."
-              >
+        <div class="terms-container">
+          <div class="terms-form">
+            <div v-for="term in agreement.terms" :key="term.id" class="term-item">
+              <div class="term-group">
+                <label>Clause</label>
+                <select 
+                  v-model="term.clause" 
+                  :disabled="!editMode"
+                  @change="onClauseChange(term)"
+                >
+                  <option value="">Select Clause</option>
+                  <option v-for="clause in termsOptions.clauses" :key="clause" :value="clause">
+                    {{ clause }}
+                  </option>
+                </select>
+              </div>
+              <div class="term-group">
+                <label>Response</label>
+                <select 
+                  v-model="term.response" 
+                  :disabled="!editMode || !term.clause"
+                >
+                  <option value="">Select Response</option>
+                  <option 
+                    v-for="response in getResponseOptions(term.clause)" 
+                    :key="response" 
+                    :value="response"
+                  >
+                    {{ response }}
+                  </option>
+                </select>
+              </div>
+              <div class="term-actions" v-if="editMode">
+                <button 
+                  type="button" 
+                  class="btn-remove" 
+                  @click="removeTerm(term.id)"
+                  :disabled="agreement.terms.length <= 1"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           </div>
-          
-          <div class="form-actions">
-            <button 
-              type="button" 
-              class="btn-primary" 
-              @click="editMode = !editMode"
-            >
-              {{ editMode ? 'Save Changes' : 'Edit Terms' }}
-            </button>
-            <button 
-              type="button" 
-              class="btn-secondary" 
-              @click="addTerm"
-              v-if="editMode"
-            >
-              Add Term
-            </button>
-          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn-primary" 
+            @click="toggleEditMode"
+          >
+            {{ editMode ? 'Save Changes' : 'Edit Terms' }}
+          </button>
+          <button 
+            type="button" 
+            class="btn-secondary" 
+            @click="addTerm"
+            v-if="editMode"
+          >
+            Add Term
+          </button>
         </div>
       </div>
 
@@ -176,6 +208,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBusinessLogic } from '../composables/useBusinessLogic';
 import { mockManufacturers, mockDistributors } from '../data/mockData';
+import { termsOptions } from '../data/mockData';
 import type { TermsCondition } from '../types';
 
 const props = defineProps<{
@@ -243,10 +276,34 @@ const getStatusClass = (status: string) => {
 const addTerm = () => {
   const newTerm: TermsCondition = {
     id: `T${Date.now()}`,
-    clause: 'New Term',
+    clause: '',
     response: ''
   };
   agreement.value.terms.push(newTerm);
+};
+
+const removeTerm = (termId: string) => {
+  const index = agreement.value.terms.findIndex(term => term.id === termId);
+  if (index > -1 && agreement.value.terms.length > 1) {
+    agreement.value.terms.splice(index, 1);
+  }
+};
+
+const onClauseChange = (term: TermsCondition) => {
+  // Reset response when clause changes
+  term.response = '';
+};
+
+const getResponseOptions = (clause: string) => {
+  return termsOptions.responses[clause] || [];
+};
+
+const toggleEditMode = () => {
+  if (editMode.value) {
+    // Save changes
+    updateAgreement(agreement.value);
+  }
+  editMode.value = !editMode.value;
 };
 
 const generateAgreement = () => {
@@ -445,17 +502,31 @@ onMounted(() => {
   margin: 0 0 20px 0;
 }
 
-.terms-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.term-item {
+.terms-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   padding: 15px;
   background: #f9fafb;
+}
+
+.terms-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.term-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 15px;
+  align-items: end;
+  background: white;
+  border-radius: 6px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
 }
 
 .term-group {
@@ -470,22 +541,48 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.term-group input {
+.term-group select {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 14px;
 }
 
-.term-group input:disabled {
+.term-group select:disabled {
   background: #f3f4f6;
   color: #6b7280;
+  cursor: not-allowed;
 }
 
-.term-group input:focus {
+.term-group select:focus {
   outline: none;
   border-color: #0066cc;
   box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+.term-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-remove {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-remove:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-remove:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
 
 .form-actions {
@@ -698,6 +795,15 @@ onMounted(() => {
 @media (max-width: 768px) {
   .prospect-content {
     grid-template-columns: 1fr;
+  }
+  
+  .term-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .terms-container {
+    max-height: 300px;
   }
   
   .relationship-info {

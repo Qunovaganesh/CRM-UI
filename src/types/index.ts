@@ -71,3 +71,8 @@ export interface FilterOptions {
   categories: string[];
   statuses: string[];
 }
+
+export interface TermsOptions {
+  clauses: string[];
+  responses: Record<string, string[]>;
+}

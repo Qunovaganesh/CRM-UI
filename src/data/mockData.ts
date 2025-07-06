@@ -510,3 +510,188 @@ export const filterOptions: FilterOptions = {
   categories: ['Manufacturing', 'Heavy Machinery', 'Solar Panels', 'Retail', 'Distribution', 'Installation'],
   statuses: ['Lead', 'Prospect', 'Customer', 'View']
 };
+
+export const termsOptions = {
+  clauses: [
+    'Payment Terms',
+    'Delivery Terms',
+    'Commission Rate',
+    'Territory Rights',
+    'Minimum Order Quantity',
+    'Credit Terms',
+    'Return Policy',
+    'Marketing Support',
+    'Training Requirements',
+    'Performance Targets',
+    'Exclusivity Agreement',
+    'Contract Duration',
+    'Termination Clause',
+    'Dispute Resolution',
+    'Force Majeure',
+    'Intellectual Property Rights',
+    'Quality Standards',
+    'Warranty Terms',
+    'Insurance Requirements',
+    'Compliance Standards'
+  ],
+  responses: {
+    'Payment Terms': [
+      'Net 30 days',
+      'Net 45 days',
+      'Net 60 days',
+      'Advance Payment',
+      '50% Advance, 50% on Delivery',
+      'Letter of Credit',
+      'Cash on Delivery'
+    ],
+    'Delivery Terms': [
+      'FOB Origin',
+      'FOB Destination',
+      'CIF (Cost, Insurance, Freight)',
+      'DDP (Delivered Duty Paid)',
+      'EXW (Ex Works)',
+      'FCA (Free Carrier)',
+      'CPT (Carriage Paid To)'
+    ],
+    'Commission Rate': [
+      '10%',
+      '12%',
+      '15%',
+      '18%',
+      '20%',
+      '25%',
+      'Tiered: 15-20%',
+      'Volume Based'
+    ],
+    'Territory Rights': [
+      'Exclusive - State Level',
+      'Exclusive - District Level',
+      'Exclusive - City Level',
+      'Non-Exclusive',
+      'Regional Exclusive',
+      'National Non-Exclusive'
+    ],
+    'Minimum Order Quantity': [
+      '100 units per month',
+      '500 units per month',
+      '1000 units per month',
+      '₹1,00,000 per month',
+      '₹5,00,000 per month',
+      '₹10,00,000 per month',
+      'No minimum requirement'
+    ],
+    'Credit Terms': [
+      'No Credit Facility',
+      '₹1,00,000 Credit Limit',
+      '₹5,00,000 Credit Limit',
+      '₹10,00,000 Credit Limit',
+      'Based on Bank Guarantee',
+      'Security Deposit Required'
+    ],
+    'Return Policy': [
+      'No Returns',
+      '7 Days Return',
+      '15 Days Return',
+      '30 Days Return',
+      'Defective Items Only',
+      'Mutual Agreement'
+    ],
+    'Marketing Support': [
+      'No Support',
+      'Marketing Materials Provided',
+      '50% Co-op Advertising',
+      'Full Marketing Support',
+      'Digital Marketing Support',
+      'Trade Show Support'
+    ],
+    'Training Requirements': [
+      'No Training Required',
+      'Initial Training Provided',
+      'Quarterly Training',
+      'Annual Training',
+      'Online Training Modules',
+      'Certification Required'
+    ],
+    'Performance Targets': [
+      'No Targets',
+      'Monthly Sales Target',
+      'Quarterly Growth Target',
+      'Annual Revenue Target',
+      'Market Share Target',
+      'Customer Acquisition Target'
+    ],
+    'Exclusivity Agreement': [
+      'Non-Exclusive',
+      'Exclusive for Territory',
+      'Exclusive for Product Line',
+      'Conditional Exclusivity',
+      'Performance Based Exclusivity'
+    ],
+    'Contract Duration': [
+      '1 Year',
+      '2 Years',
+      '3 Years',
+      '5 Years',
+      'Renewable Annually',
+      'Indefinite with Notice Period'
+    ],
+    'Termination Clause': [
+      '30 Days Notice',
+      '60 Days Notice',
+      '90 Days Notice',
+      'Immediate for Breach',
+      'Mutual Agreement',
+      'Performance Based'
+    ],
+    'Dispute Resolution': [
+      'Mutual Discussion',
+      'Mediation',
+      'Arbitration',
+      'Court Jurisdiction - Mumbai',
+      'Court Jurisdiction - Delhi',
+      'Industry Association'
+    ],
+    'Force Majeure': [
+      'Standard Force Majeure',
+      'Extended Force Majeure',
+      'No Force Majeure Clause',
+      'Limited Force Majeure',
+      'Pandemic Specific Clause'
+    ],
+    'Intellectual Property Rights': [
+      'Manufacturer Retains All Rights',
+      'Limited Usage Rights',
+      'Shared IP Rights',
+      'No IP Transfer',
+      'Trademark Usage Permitted'
+    ],
+    'Quality Standards': [
+      'ISO 9001 Compliance',
+      'Industry Standard',
+      'Manufacturer Standards',
+      'Custom Quality Metrics',
+      'Third Party Certification'
+    ],
+    'Warranty Terms': [
+      'Manufacturer Warranty',
+      'Extended Warranty',
+      'No Warranty',
+      'Limited Warranty',
+      'Distributor Warranty'
+    ],
+    'Insurance Requirements': [
+      'No Insurance Required',
+      'Product Liability Insurance',
+      'General Liability Insurance',
+      'Comprehensive Coverage',
+      'Minimum Coverage Amount'
+    ],
+    'Compliance Standards': [
+      'Local Regulations',
+      'National Standards',
+      'International Standards',
+      'Industry Specific',
+      'Environmental Compliance'
+    ]
+  }
+};
