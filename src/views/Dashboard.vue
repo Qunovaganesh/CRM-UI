@@ -15,7 +15,7 @@
     <FilterControls 
       :selectedEntity="selectedEntity"
       :filters="filters"
-      @update:selectedEntity="selectedEntity = $event"
+      @update:selectedEntity="onEntityChange"
       @update:filters="Object.assign(filters, $event)"
       @entity-change="onEntityChange"
       @filter-change="onFilterChange"
@@ -91,16 +91,6 @@
             </select>
           </div>
 
-          <div class="filter-group" v-if="selectedEntity === 'manufacturer'">
-            <label>Status</label>
-            <select v-model="associatedFilters.status" @change="onAssociatedFilterChange">
-              <option value="">All Status</option>
-              <option v-for="status in filterOptions.statuses" :key="status" :value="status">
-                {{ status }}
-              </option>
-            </select>
-          </div>
-
           <div class="filter-group">
             <label>Industry</label>
             <select v-model="associatedFilters.industry" @change="onAssociatedFilterChange">
@@ -117,6 +107,16 @@
               <option value="">All Categories</option>
               <option v-for="category in filterOptions.categories" :key="category" :value="category">
                 {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Status</label>
+            <select v-model="associatedFilters.status" @change="onAssociatedFilterChange">
+              <option value="">All Status</option>
+              <option v-for="status in filterOptions.statuses" :key="status" :value="status">
+                {{ status }}
               </option>
             </select>
           </div>
@@ -146,7 +146,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBusinessLogic } from '../composables/useBusinessLogic';
 import FilterControls from '../components/FilterControls.vue';
@@ -158,6 +158,8 @@ const router = useRouter();
 const {
   selectedEntity,
   selectedEntityId,
+  selectedManufacturer,
+  selectedDistributor,
   filters,
   associatedFilters,
   filteredManufacturers,
@@ -165,7 +167,12 @@ const {
   clearFilters,
   clearAssociatedFilters,
   updateLocationFilters,
-  updateIndustryFilters
+  updateIndustryFilters,
+  setSelectedEntity,
+  setSelectedEntityId,
+  setSelectedManufacturer,
+  setSelectedDistributor,
+  persistState
 } = useBusinessLogic();
 
 const selectedEntityItem = ref<Manufacturer | Distributor | null>(null);
@@ -178,51 +185,17 @@ const pairedList = computed(() => {
   if (!selectedEntityItem.value) return [];
   
   if (selectedEntity.value === 'manufacturer') {
-    // Show distributors that match the manufacturer's industry
-    // For better matching, we'll match by industry and allow broader category matching
+    // Show distributors that match the manufacturer's industry and category
     return filteredDistributors.value.filter(distributor => {
       const industryMatch = distributor.industry === selectedEntityItem.value?.industry;
-      
-      // For automotive manufacturers with Heavy Machinery, match with:
-      // - Heavy Machinery distributors (exact match)
-      // - Distribution category (general automotive distribution)
-      if (selectedEntityItem.value?.industry === 'Automotive') {
-        const categoryMatch = 
-          distributor.category === selectedEntityItem.value?.category || // Exact match
-          distributor.category === 'Distribution' || // General distribution
-          distributor.category.includes('Heavy'); // Contains "Heavy"
-        return industryMatch && categoryMatch;
-      }
-      
-      // For other industries, use more flexible matching
-      const categoryMatch = 
-        distributor.category === selectedEntityItem.value?.category ||
-        distributor.category.includes(selectedEntityItem.value?.category.split(' ')[0] || '') ||
-        selectedEntityItem.value?.category.includes(distributor.category.split(' ')[0] || '');
-      
+      const categoryMatch = distributor.category === selectedEntityItem.value?.category;
       return industryMatch && categoryMatch;
     });
   } else {
-    // Show manufacturers that match the distributor's industry
+    // Show manufacturers that match the distributor's industry and category
     return filteredManufacturers.value.filter(manufacturer => {
       const industryMatch = manufacturer.industry === selectedEntityItem.value?.industry;
-      
-      // For automotive distributors, match with automotive manufacturers
-      if (selectedEntityItem.value?.industry === 'Automotive') {
-        // For Heavy Machinery distributors, match with Heavy Machinery manufacturers
-        if ('category' in selectedEntityItem.value && selectedEntityItem.value.category === 'Heavy Machinery') {
-          return industryMatch && manufacturer.category === 'Heavy Machinery';
-        }
-        // For Distribution category distributors, match with any automotive manufacturer
-        return industryMatch;
-      }
-      
-      // For other industries, use flexible matching
-      const categoryMatch = 
-        manufacturer.category === selectedEntityItem.value?.category ||
-        manufacturer.category.includes(selectedEntityItem.value?.category.split(' ')[0] || '') ||
-        selectedEntityItem.value?.category.includes(manufacturer.category.split(' ')[0] || '');
-      
+      const categoryMatch = manufacturer.category === selectedEntityItem.value?.category;
       return industryMatch && categoryMatch;
     });
   }
@@ -275,43 +248,80 @@ const tableColumns = computed(() => {
     { key: 'category', label: 'Category' }
   ];
 
-  if (selectedEntity.value === 'manufacturer') {
-    // When manufacturer is selected, show distributors with their status
-    return [
-      ...baseColumns,
-      { key: 'status', label: 'Status' },
-      { key: 'daysSinceStatus', label: 'Days Since Status' },
-      { key: 'action', label: 'Action' }
-    ];
-  } else {
-    // When distributor is selected, show manufacturers (no status for manufacturers)
-    return [
-      ...baseColumns,
-      { key: 'status', label: 'Status' },
-      { key: 'daysSinceStatus', label: 'Days Since Status' },
-      { key: 'registrationDate', label: 'Registration Date' },
-      { key: 'action', label: 'Action' }
-    ];
+  // Both manufacturers and distributors now have status
+  return [
+    ...baseColumns,
+    { key: 'status', label: 'Status' },
+    { key: 'daysSinceStatus', label: 'Days Since Status' },
+    { key: 'registrationDate', label: 'Registration Date' },
+    { key: 'action', label: 'Action' }
+  ];
+});
+
+// Load selected entity from storage on mount
+onMounted(() => {
+  if (selectedEntityId.value) {
+    const entity = currentEntityList.value.find(e => e.id === selectedEntityId.value);
+    if (entity) {
+      selectedEntityItem.value = entity;
+      if (selectedEntity.value === 'manufacturer') {
+        setSelectedManufacturer(entity as Manufacturer);
+      } else {
+        setSelectedDistributor(entity as Distributor);
+      }
+    }
   }
 });
+
+// Watch for changes in currentEntityList to update selectedEntityItem
+watch(currentEntityList, (newList) => {
+  if (selectedEntityId.value) {
+    const entity = newList.find(e => e.id === selectedEntityId.value);
+    if (entity) {
+      selectedEntityItem.value = entity;
+    } else {
+      // Entity no longer in filtered list, clear selection
+      clearSelection();
+    }
+  }
+}, { immediate: true });
 
 const onEntitySelect = () => {
   if (selectedEntityId.value) {
     const entity = currentEntityList.value.find(e => e.id === selectedEntityId.value);
     selectedEntityItem.value = entity || null;
+    
+    if (entity) {
+      if (selectedEntity.value === 'manufacturer') {
+        setSelectedManufacturer(entity as Manufacturer);
+      } else {
+        setSelectedDistributor(entity as Distributor);
+      }
+    }
+    
     clearAssociatedFilters();
+    setSelectedEntityId(selectedEntityId.value);
   } else {
     selectedEntityItem.value = null;
+    setSelectedManufacturer(null);
+    setSelectedDistributor(null);
+    setSelectedEntityId('');
   }
 };
 
 const clearSelection = () => {
   selectedEntityId.value = '';
   selectedEntityItem.value = null;
+  setSelectedManufacturer(null);
+  setSelectedDistributor(null);
+  setSelectedEntityId('');
   clearAssociatedFilters();
 };
 
-const onEntityChange = () => {
+const onEntityChange = (newEntity?: 'manufacturer' | 'distributor') => {
+  if (newEntity) {
+    setSelectedEntity(newEntity);
+  }
   clearSelection();
   clearAllFilters();
 };
@@ -324,10 +334,7 @@ const onFilterChange = () => {
       clearSelection();
     }
   }
-};
-
-const onAssociatedFilterChange = () => {
-  // Filter change logic handled by computed property
+  persistState();
 };
 
 const onLocationFilterChange = (type: 'city' | 'district' | 'state', values: string[]) => {
@@ -338,12 +345,8 @@ const onIndustryFilterChange = (type: 'industry' | 'category', values: string[])
   updateIndustryFilters(type, values, false);
 };
 
-const onAssociatedLocationFilterChange = (type: 'city' | 'district' | 'state', values: string[]) => {
-  updateLocationFilters(type, values, true);
-};
-
-const onAssociatedIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
-  updateIndustryFilters(type, values, true);
+const onAssociatedFilterChange = () => {
+  persistState();
 };
 
 const clearAllFilters = () => {
@@ -352,18 +355,9 @@ const clearAllFilters = () => {
 };
 
 const handleActionClick = (row: any) => {
-  if (selectedEntity.value === 'manufacturer') {
-    // Clicked on a distributor, route based on distributor's status
-    const routeName = getRouteNameFromStatus(row.status);
-    if (routeName) {
-      router.push({ name: routeName, params: { id: row.id } });
-    }
-  } else {
-    // Clicked on a manufacturer from distributor view, route based on manufacturer's status
-    const routeName = getRouteNameFromStatus(row.status);
-    if (routeName) {
-      router.push({ name: routeName, params: { id: row.id } });
-    }
+  const routeName = getRouteNameFromStatus(row.status);
+  if (routeName) {
+    router.push({ name: routeName, params: { id: row.id } });
   }
 };
 
@@ -401,20 +395,21 @@ const getStatusClass = (status: string) => {
 }
 
 .btn-floating-back {
-  background: #0066cc;
+  background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
   color: white;
   border: none;
   padding: 12px 20px;
   border-radius: 25px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
   transition: all 0.3s ease;
+  letter-spacing: 0.025em;
 }
 
 .btn-floating-back:hover {
-  background: #0052a3;
+  background: linear-gradient(135deg, #0052a3 0%, #003366 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
 }
@@ -434,6 +429,7 @@ const getStatusClass = (status: string) => {
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 8px 0;
+  letter-spacing: -0.025em;
 }
 
 .page-header p {
@@ -445,16 +441,18 @@ const getStatusClass = (status: string) => {
 .entity-selection {
   margin-bottom: 30px;
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .entity-selection h3 {
   color: #374151;
   font-size: 20px;
   font-weight: 600;
-  margin: 0 0 15px 0;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.025em;
 }
 
 .entity-dropdown {
@@ -465,10 +463,12 @@ const getStatusClass = (status: string) => {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 16px;
   background: white;
   color: #374151;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .entity-select:focus {
@@ -485,16 +485,17 @@ const getStatusClass = (status: string) => {
 
 .selected-entity-info {
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .entity-card {
-  background: #f0f9ff;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 2px solid #0066cc;
-  border-radius: 8px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 24px;
   max-width: 500px;
 }
 
@@ -502,7 +503,7 @@ const getStatusClass = (status: string) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .entity-card h4 {
@@ -510,6 +511,7 @@ const getStatusClass = (status: string) => {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
+  letter-spacing: -0.025em;
 }
 
 .btn-change {
@@ -517,31 +519,33 @@ const getStatusClass = (status: string) => {
   color: white;
   border: none;
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .btn-change:hover {
   background: #4b5563;
+  transform: translateY(-1px);
 }
 
 .entity-card p {
   color: #6b7280;
   font-size: 14px;
-  margin: 0 0 5px 0;
+  margin: 0 0 6px 0;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 16px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .status-lead {
@@ -566,43 +570,47 @@ const getStatusClass = (status: string) => {
 
 .associated-filters {
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .associated-filters h3 {
   color: #374151;
   font-size: 18px;
   font-weight: 600;
-  margin: 0 0 15px 0;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.025em;
 }
 
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 16px;
   align-items: end;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .filter-group label {
   font-weight: 600;
   color: #374151;
   font-size: 14px;
+  letter-spacing: -0.025em;
 }
 
 .filter-group select {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
   background: white;
   font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .filter-group select:focus {
@@ -618,18 +626,20 @@ const getStatusClass = (status: string) => {
 
 .btn-secondary {
   padding: 8px 16px;
-  background: #6b7280;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
   height: fit-content;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #4b5563;
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  transform: translateY(-1px);
 }
 
 .table-summary {

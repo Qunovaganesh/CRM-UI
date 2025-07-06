@@ -2,35 +2,75 @@ import { ref, computed, reactive } from 'vue';
 import type { Manufacturer, Distributor, Interaction, Agreement, Invoice } from '../types';
 import { mockManufacturers, mockDistributors, mockInteractions, mockAgreement, mockInvoices, locationMapping, cityToLocationMapping, industryToCategoryMapping } from '../data/mockData';
 
-export const useBusinessLogic = () => {
-  const selectedEntity = ref<'manufacturer' | 'distributor'>('manufacturer');
-  const selectedManufacturer = ref<Manufacturer | null>(null);
-  const selectedDistributor = ref<Distributor | null>(null);
-  const selectedEntityId = ref<string>('');
-  
-  const filters = reactive({
-    city: [] as string[],
-    district: [] as string[],
-    state: [] as string[],
-    industry: [] as string[],
-    category: [] as string[],
-    status: [] as string[]
-  });
+// Persistent state using localStorage
+const getStoredState = (key: string, defaultValue: any) => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
 
-  const associatedFilters = reactive({
-    city: [] as string[],
-    district: [] as string[],
-    state: [] as string[],
-    industry: [] as string[],
-    category: [] as string[],
-    status: [] as string[]
-  });
+const setStoredState = (key: string, value: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
+export const useBusinessLogic = () => {
+  const selectedEntity = ref<'manufacturer' | 'distributor'>(
+    getStoredState('selectedEntity', 'manufacturer')
+  );
+  const selectedManufacturer = ref<Manufacturer | null>(
+    getStoredState('selectedManufacturer', null)
+  );
+  const selectedDistributor = ref<Distributor | null>(
+    getStoredState('selectedDistributor', null)
+  );
+  const selectedEntityId = ref<string>(
+    getStoredState('selectedEntityId', '')
+  );
+  
+  const filters = reactive(
+    getStoredState('filters', {
+      city: [] as string[],
+      district: [] as string[],
+      state: [] as string[],
+      industry: [] as string[],
+      category: [] as string[],
+      status: [] as string[]
+    })
+  );
+
+  const associatedFilters = reactive(
+    getStoredState('associatedFilters', {
+      city: [] as string[],
+      district: [] as string[],
+      state: [] as string[],
+      industry: [] as string[],
+      category: [] as string[],
+      status: [] as string[]
+    })
+  );
 
   const manufacturers = ref<Manufacturer[]>(mockManufacturers);
   const distributors = ref<Distributor[]>(mockDistributors);
   const interactions = ref<Interaction[]>(mockInteractions);
   const agreement = ref<Agreement>(mockAgreement);
   const invoices = ref<Invoice[]>(mockInvoices);
+
+  // Watch for changes and persist to localStorage
+  const persistState = () => {
+    setStoredState('selectedEntity', selectedEntity.value);
+    setStoredState('selectedManufacturer', selectedManufacturer.value);
+    setStoredState('selectedDistributor', selectedDistributor.value);
+    setStoredState('selectedEntityId', selectedEntityId.value);
+    setStoredState('filters', filters);
+    setStoredState('associatedFilters', associatedFilters);
+  };
 
   const filteredManufacturers = computed(() => {
     return manufacturers.value.filter(manufacturer => {
@@ -98,16 +138,26 @@ export const useBusinessLogic = () => {
     }
   };
 
+  const updateManufacturerStatus = (manufacturerId: string, newStatus: Manufacturer['status']) => {
+    const manufacturer = manufacturers.value.find(m => m.id === manufacturerId);
+    if (manufacturer) {
+      manufacturer.status = newStatus;
+      manufacturer.daysSinceStatus = 0;
+    }
+  };
+
   const clearFilters = () => {
     Object.keys(filters).forEach(key => {
       filters[key as keyof typeof filters] = [];
     });
+    persistState();
   };
 
   const clearAssociatedFilters = () => {
     Object.keys(associatedFilters).forEach(key => {
       associatedFilters[key as keyof typeof associatedFilters] = [];
     });
+    persistState();
   };
 
   const updateLocationFilters = (type: 'city' | 'district' | 'state', values: string[], isAssociated = false) => {
@@ -174,6 +224,8 @@ export const useBusinessLogic = () => {
         targetFilters.city = Array.from(relatedCities);
       }
     }
+    
+    persistState();
   };
 
   const updateIndustryFilters = (type: 'industry' | 'category', values: string[], isAssociated = false) => {
@@ -211,6 +263,28 @@ export const useBusinessLogic = () => {
         targetFilters.industry = Array.from(relatedIndustries);
       }
     }
+    
+    persistState();
+  };
+
+  const setSelectedEntity = (entity: 'manufacturer' | 'distributor') => {
+    selectedEntity.value = entity;
+    persistState();
+  };
+
+  const setSelectedEntityId = (id: string) => {
+    selectedEntityId.value = id;
+    persistState();
+  };
+
+  const setSelectedManufacturer = (manufacturer: Manufacturer | null) => {
+    selectedManufacturer.value = manufacturer;
+    persistState();
+  };
+
+  const setSelectedDistributor = (distributor: Distributor | null) => {
+    selectedDistributor.value = distributor;
+    persistState();
   };
 
   return {
@@ -232,10 +306,16 @@ export const useBusinessLogic = () => {
     updateAgreement,
     addInvoice,
     updateDistributorStatus,
+    updateManufacturerStatus,
     clearFilters,
     clearAssociatedFilters,
     updateLocationFilters,
     updateIndustryFilters,
+    setSelectedEntity,
+    setSelectedEntityId,
+    setSelectedManufacturer,
+    setSelectedDistributor,
+    persistState,
     locationMapping,
     industryToCategoryMapping
   };

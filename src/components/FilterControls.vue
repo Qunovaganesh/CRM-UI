@@ -133,7 +133,7 @@
         </div>
       </div>
 
-      <div class="filter-group" v-if="selectedEntity === 'distributor'">
+      <div class="filter-group">
         <label>Status</label>
         <div class="multiselect-container">
           <select 
@@ -157,8 +157,8 @@
     </div>
 
     <div class="filter-actions">
-      <button type="button" class="btn-secondary" @click="clearAllFilters">
-        Clear Filters
+      <button type="button" class="btn-clear" @click="clearAllFilters">
+        Clear All Filters
       </button>
     </div>
   </div>
@@ -321,27 +321,29 @@ const clearAllFilters = () => {
 
 <style scoped>
 .filter-controls {
-  background: #f8f9fa;
-  padding: 20px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 24px;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .entity-toggle {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .entity-toggle h3 {
-  margin: 0 0 10px 0;
-  color: #374151;
+  margin: 0 0 12px 0;
+  color: #212529;
   font-size: 16px;
   font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .radio-group {
   display: flex;
-  gap: 20px;
+  gap: 24px;
 }
 
 .radio-group label {
@@ -349,27 +351,37 @@ const clearAllFilters = () => {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: #374151;
+  color: #495057;
   font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.radio-group label:hover {
+  color: #212529;
+}
+
+.radio-group input[type="radio"] {
+  accent-color: #0066cc;
 }
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
 .filter-group label {
   font-weight: 600;
-  color: #374151;
+  color: #212529;
   font-size: 14px;
+  letter-spacing: -0.025em;
 }
 
 .multiselect-container {
@@ -377,45 +389,60 @@ const clearAllFilters = () => {
 }
 
 .multiselect {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
   background: white;
   font-size: 14px;
   width: 100%;
-  min-height: 40px;
+  min-height: 42px;
   max-height: 120px;
   overflow-y: auto;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .multiselect:focus {
   outline: none;
   border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.multiselect option {
+  padding: 8px;
+  border-radius: 4px;
+  margin: 2px 0;
+}
+
+.multiselect option:checked {
+  background: #0066cc;
+  color: white;
 }
 
 .selected-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   margin-top: 8px;
 }
 
 .tag {
-  background: #e5e7eb;
-  color: #374151;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1565c0;
   padding: 4px 8px;
-  border-radius: 12px;
+  border-radius: 16px;
   font-size: 12px;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  border: 1px solid #90caf9;
 }
 
 .tag-remove {
   background: none;
   border: none;
-  color: #6b7280;
+  color: #1565c0;
   cursor: pointer;
   font-size: 14px;
   font-weight: bold;
@@ -426,31 +453,37 @@ const clearAllFilters = () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .tag-remove:hover {
-  background: #d1d5db;
-  color: #374151;
+  background: #1565c0;
+  color: white;
 }
 
 .filter-actions {
   display: flex;
-  gap: 10px;
+  justify-content: center;
 }
 
-.btn-secondary {
-  padding: 8px 16px;
-  background: #6b7280;
+.btn-clear {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-secondary:hover {
-  background: #4b5563;
+.btn-clear:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 768px) {
@@ -460,7 +493,11 @@ const clearAllFilters = () => {
   
   .radio-group {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+  }
+  
+  .filter-controls {
+    padding: 20px;
   }
 }
 </style>
