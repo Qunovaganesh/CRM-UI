@@ -92,6 +92,26 @@
             </select>
           </div>
 
+          <div class="filter-group">
+            <label>Industry</label>
+            <select v-model="associatedFilters.industry" @change="onAssociatedFilterChange">
+              <option value="">All Industries</option>
+              <option v-for="industry in filterOptions.industries" :key="industry" :value="industry">
+                {{ industry }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Category</label>
+            <select v-model="associatedFilters.category" @change="onAssociatedFilterChange">
+              <option value="">All Categories</option>
+              <option v-for="category in filterOptions.categories" :key="category" :value="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
           <div class="filter-actions">
             <button type="button" class="btn-secondary" @click="clearAssociatedFilters">
               Clear Filters
@@ -141,7 +161,9 @@ const associatedFilters = reactive({
   city: '',
   district: '',
   state: '',
-  status: ''
+  status: '',
+  industry: '',
+  category: ''
 });
 
 const currentEntityList = computed(() => {
@@ -183,6 +205,11 @@ const pairedList = computed(() => {
       
       // For automotive distributors, match with automotive manufacturers
       if (selectedEntityItem.value?.industry === 'Automotive') {
+        // For Heavy Machinery distributors, match with Heavy Machinery manufacturers
+        if ('category' in selectedEntityItem.value && selectedEntityItem.value.category === 'Heavy Machinery') {
+          return industryMatch && manufacturer.category === 'Heavy Machinery';
+        }
+        // For Distribution category distributors, match with any automotive manufacturer
         return industryMatch;
       }
       
@@ -209,6 +236,12 @@ const filteredPairedList = computed(() => {
   }
   if (associatedFilters.state) {
     filtered = filtered.filter(item => item.state === associatedFilters.state);
+  }
+  if (associatedFilters.industry) {
+    filtered = filtered.filter(item => item.industry === associatedFilters.industry);
+  }
+  if (associatedFilters.category) {
+    filtered = filtered.filter(item => item.category === associatedFilters.category);
   }
   if (associatedFilters.status && filtered.length > 0 && 'status' in filtered[0]) {
     filtered = filtered.filter(item => 'status' in item && item.status === associatedFilters.status);
@@ -250,6 +283,7 @@ const tableColumns = computed(() => {
     // When distributor is selected, show manufacturers (no status for manufacturers)
     return [
       ...baseColumns,
+      { key: 'registrationDate', label: 'Registration Date' },
       { key: 'action', label: 'Action' }
     ];
   }
@@ -299,6 +333,8 @@ const clearAssociatedFilters = () => {
   associatedFilters.city = '';
   associatedFilters.district = '';
   associatedFilters.state = '';
+  associatedFilters.industry = '';
+  associatedFilters.category = '';
   associatedFilters.status = '';
 };
 
@@ -310,7 +346,7 @@ const handleActionClick = (row: any) => {
       router.push({ name: routeName, params: { id: row.id } });
     }
   } else {
-    // Clicked on a manufacturer, default to view action
+    // Clicked on a manufacturer from distributor view, default to view action
     router.push({ name: 'ViewOnly', params: { id: row.id } });
   }
 };

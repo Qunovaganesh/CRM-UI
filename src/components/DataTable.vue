@@ -36,6 +36,9 @@
                   {{ row[column.key] }}
                 </span>
               </template>
+              <template v-else-if="column.key === 'registrationDate'">
+                {{ formatDate(row[column.key]) }}
+              </template>
               <template v-else>
                 {{ row[column.key] }}
               </template>
@@ -74,7 +77,7 @@ const getActionButton = (row: any) => {
   if (row.status === 'Prospect') return 'Manage Prospect';
   if (row.status === 'Customer') return 'Manage Customer';
   if (row.status === 'View') return 'View Details';
-  return 'Select';
+  return 'View Details';
 };
 
 const getActionButtonClass = (row: any) => {
@@ -83,7 +86,7 @@ const getActionButtonClass = (row: any) => {
   if (row.status === 'Prospect') return `${baseClass} btn-prospect`;
   if (row.status === 'Customer') return `${baseClass} btn-customer`;
   if (row.status === 'View') return `${baseClass} btn-view`;
-  return `${baseClass} btn-primary`;
+  return `${baseClass} btn-view`;
 };
 
 const getStatusClass = (status: string) => {
@@ -93,6 +96,14 @@ const getStatusClass = (status: string) => {
   if (status === 'Customer') return `${baseClass} status-customer`;
   if (status === 'View') return `${baseClass} status-view`;
   return baseClass;
+};
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 };
 </script>
 
