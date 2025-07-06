@@ -501,4 +501,3 @@ const clearAllFilters = () => {
   }
 }
 </style>
-</template>
