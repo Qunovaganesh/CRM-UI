@@ -351,10 +351,6 @@ const clearAllFilters = () => {
   clearAssociatedFilters();
 };
 
-const clearAssociatedFilters = () => {
-  clearAssociatedFilters();
-};
-
 const handleActionClick = (row: any) => {
   if (selectedEntity.value === 'manufacturer') {
     // Clicked on a distributor, route based on distributor's status
