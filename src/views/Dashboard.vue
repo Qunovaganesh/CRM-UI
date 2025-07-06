@@ -60,7 +60,7 @@
       <!-- Filters for Associated Entities -->
       <div class="associated-filters">
         <h3>Filter {{ selectedEntity === 'manufacturer' ? 'Distributors' : 'Manufacturers' }}</h3>
-        <div class="filters-grid">
+        <div class="filters-grid associated-grid">
           <div class="filter-group">
             <label>State</label>
             <div class="multiselect-container">
@@ -68,7 +68,7 @@
                 multiple 
                 :value="associatedFilters.state" 
                 @change="onAssociatedLocationFilterChange('state', Array.from($event.target.selectedOptions).map(option => option.value))"
-                class="multiselect"
+                class="multiselect associated-multiselect"
               >
                 <option v-for="state in filterOptions.states" :key="state" :value="state">
                   {{ state }}
@@ -90,7 +90,7 @@
                 multiple 
                 :value="associatedFilters.district" 
                 @change="onAssociatedLocationFilterChange('district', Array.from($event.target.selectedOptions).map(option => option.value))"
-                class="multiselect"
+                class="multiselect associated-multiselect"
               >
                 <option v-for="district in filterOptions.districts" :key="district" :value="district">
                   {{ district }}
@@ -112,7 +112,7 @@
                 multiple 
                 :value="associatedFilters.city" 
                 @change="onAssociatedLocationFilterChange('city', Array.from($event.target.selectedOptions).map(option => option.value))"
-                class="multiselect"
+                class="multiselect associated-multiselect"
               >
                 <option v-for="city in filterOptions.cities" :key="city" :value="city">
                   {{ city }}
@@ -134,7 +134,7 @@
                 multiple 
                 :value="associatedFilters.category" 
                 @change="onAssociatedCategoryFilterChange('category', Array.from($event.target.selectedOptions).map(option => option.value))"
-                class="multiselect"
+                class="multiselect associated-multiselect"
               >
                 <option v-for="category in filterOptions.categories" :key="category" :value="category">
                   {{ category }}
@@ -156,7 +156,7 @@
                 multiple 
                 :value="associatedFilters.subCategory" 
                 @change="onAssociatedCategoryFilterChange('subCategory', Array.from($event.target.selectedOptions).map(option => option.value))"
-                class="multiselect"
+                class="multiselect associated-multiselect"
               >
                 <option v-for="subCategory in filterOptions.subCategories" :key="subCategory" :value="subCategory">
                   {{ subCategory }}
@@ -178,7 +178,7 @@
                 multiple 
                 :value="associatedFilters.status" 
                 @change="associatedFilters.status = Array.from($event.target.selectedOptions).map(option => option.value); onAssociatedFilterChange()"
-                class="multiselect"
+                class="multiselect associated-multiselect"
               >
                 <option v-for="status in filterOptions.statuses" :key="status" :value="status">
                   {{ status }}
@@ -195,7 +195,7 @@
 
           <div class="filter-actions">
             <button type="button" class="btn-secondary" @click="clearAssociatedFilters">
-              Clear Filters
+              Clear All Filters
             </button>
           </div>
         </div>
@@ -257,18 +257,18 @@ const pairedList = computed(() => {
   if (!selectedEntityItem.value) return [];
   
   if (selectedEntity.value === 'manufacturer') {
-    // Show distributors that match the manufacturer's industry and category
+    // Show distributors that match the manufacturer's category and subCategory
     return filteredDistributors.value.filter(distributor => {
-      const industryMatch = distributor.industry === selectedEntityItem.value?.industry;
       const categoryMatch = distributor.category === selectedEntityItem.value?.category;
-      return industryMatch && categoryMatch;
+      const subCategoryMatch = distributor.subCategory === selectedEntityItem.value?.subCategory;
+      return categoryMatch && subCategoryMatch;
     });
   } else {
-    // Show manufacturers that match the distributor's industry and category
+    // Show manufacturers that match the distributor's category and subCategory
     return filteredManufacturers.value.filter(manufacturer => {
-      const industryMatch = manufacturer.industry === selectedEntityItem.value?.industry;
       const categoryMatch = manufacturer.category === selectedEntityItem.value?.category;
-      return industryMatch && categoryMatch;
+      const subCategoryMatch = manufacturer.subCategory === selectedEntityItem.value?.subCategory;
+      return categoryMatch && subCategoryMatch;
     });
   }
 });
@@ -678,7 +678,7 @@ const getStatusClass = (status: string) => {
   letter-spacing: -0.025em;
 }
 
-.filters-grid {
+.associated-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
@@ -689,6 +689,7 @@ const getStatusClass = (status: string) => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  height: 100%;
 }
 
 .filter-group label {
@@ -696,6 +697,9 @@ const getStatusClass = (status: string) => {
   color: #374151;
   font-size: 14px;
   letter-spacing: -0.025em;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .filter-group select {
@@ -715,7 +719,10 @@ const getStatusClass = (status: string) => {
 
 .multiselect-container {
   position: relative;
-  min-height: 120px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .multiselect {
@@ -725,11 +732,13 @@ const getStatusClass = (status: string) => {
   background: white;
   font-size: 14px;
   width: 100%;
-  min-height: 42px;
-  max-height: 120px;
+  height: 80px;
+  min-height: 80px;
+  max-height: 80px;
   overflow-y: auto;
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 .multiselect:focus {
@@ -755,8 +764,10 @@ const getStatusClass = (status: string) => {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
-  min-height: 32px;
+  min-height: 40px;
   padding: 4px 0;
+  flex: 1;
+  align-content: flex-start;
 }
 
 .tag {
@@ -771,6 +782,7 @@ const getStatusClass = (status: string) => {
   gap: 6px;
   border: 1px solid #d1d5db;
   white-space: nowrap;
+  height: fit-content;
 }
 
 .tag-remove {
@@ -844,11 +856,13 @@ const getStatusClass = (status: string) => {
   }
   
   .multiselect-container {
-    min-height: 100px;
+    min-height: 120px;
   }
   
   .multiselect {
-    max-height: 100px;
+    height: 60px;
+    min-height: 60px;
+    max-height: 60px;
   }
 }
 </style>

@@ -182,6 +182,10 @@ export const useBusinessLogic = () => {
   const updateLocationFilters = (type: 'city' | 'district' | 'state', values: string[], isAssociated = false) => {
     const targetFilters = isAssociated ? associatedFilters : filters;
     
+    // Don't auto-update other location filters to prevent deselection issues
+    targetFilters[type] = values;
+    
+    /* Commented out auto-update logic that was causing deselection issues
     if (type === 'city') {
       targetFilters.city = values;
       // Auto-update state and district based on selected cities
@@ -243,6 +247,7 @@ export const useBusinessLogic = () => {
         targetFilters.city = Array.from(relatedCities);
       }
     }
+    */
     
     persistState();
   };
@@ -250,6 +255,10 @@ export const useBusinessLogic = () => {
   const updateCategoryFilters = (type: 'category' | 'subCategory', values: string[], isAssociated = false) => {
     const targetFilters = isAssociated ? associatedFilters : filters;
     
+    // Don't auto-update other category filters to prevent deselection issues
+    targetFilters[type] = values;
+    
+    /* Commented out auto-update logic that was causing deselection issues
     if (type === 'category') {
       targetFilters.category = values;
       // Auto-update sub-categories based on selected categories
@@ -282,6 +291,7 @@ export const useBusinessLogic = () => {
         targetFilters.category = Array.from(relatedCategories);
       }
     }
+    */
     
     persistState();
   };
