@@ -256,7 +256,7 @@ export const useBusinessLogic = () => {
       const relatedSubCategories = new Set<string>();
       
       values.forEach(category => {
-        const subCategories = categoryToSubCategoryMapping[category];
+        const subCategories = industryToCategoryMapping[category];
         if (subCategories) {
           subCategories.forEach(subCategory => relatedSubCategories.add(subCategory));
         }
@@ -271,7 +271,7 @@ export const useBusinessLogic = () => {
       const relatedCategories = new Set<string>();
       
       values.forEach(subCategory => {
-        Object.entries(categoryToSubCategoryMapping).forEach(([category, subCategories]) => {
+        Object.entries(industryToCategoryMapping).forEach(([category, subCategories]) => {
           if (subCategories.includes(subCategory)) {
             relatedCategories.add(category);
           }
@@ -336,6 +336,6 @@ export const useBusinessLogic = () => {
     setSelectedDistributor,
     persistState,
     locationMapping,
-    categoryToSubCategoryMapping
+    industryToCategoryMapping
   };
 };
