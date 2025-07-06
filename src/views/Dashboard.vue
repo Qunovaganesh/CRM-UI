@@ -86,87 +86,161 @@
         <!-- Filters for Associated Entities -->
         <div class="associated-filters">
           <h3>Filter {{ selectedEntity === 'manufacturer' ? 'Distributors' : 'Manufacturers' }}</h3>
-          <div class="filters-container">
-            <div class="filter-section">
-              <h4>Geographic Filters</h4>
-              <div class="filters-grid">
-                <div class="filter-group">
-                  <label>State</label>
-                  <select v-model="associatedFilters.state" @change="onAssociatedFilterChange">
-                    <option value="">All States</option>
+          
+          <!-- Geographic Filters -->
+          <div class="filter-section">
+            <h4>Geographic Filters</h4>
+            <div class="filter-grid">
+              <div class="filter-group">
+                <label>State</label>
+                <div class="multiselect-container">
+                  <select 
+                    multiple 
+                    v-model="associatedFilters.state" 
+                    @change="onAssociatedFilterChange"
+                    class="multiselect"
+                  >
                     <option v-for="state in filterOptions.states" :key="state" :value="state">
                       {{ state }}
                     </option>
                   </select>
+                  <div class="selected-tags" v-if="associatedFilters.state.length">
+                    <span v-for="state in associatedFilters.state" :key="state" class="tag">
+                      {{ state }}
+                      <button @click="removeAssociatedFilter('state', state)" class="tag-remove">×</button>
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                <div class="filter-group">
-                  <label>District</label>
-                  <select v-model="associatedFilters.district" @change="onAssociatedFilterChange">
-                    <option value="">All Districts</option>
+              <div class="filter-group">
+                <label>District</label>
+                <div class="multiselect-container">
+                  <select 
+                    multiple 
+                    v-model="associatedFilters.district" 
+                    @change="onAssociatedFilterChange"
+                    class="multiselect"
+                  >
                     <option v-for="district in filterOptions.districts" :key="district" :value="district">
                       {{ district }}
                     </option>
                   </select>
+                  <div class="selected-tags" v-if="associatedFilters.district.length">
+                    <span v-for="district in associatedFilters.district" :key="district" class="tag">
+                      {{ district }}
+                      <button @click="removeAssociatedFilter('district', district)" class="tag-remove">×</button>
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                <div class="filter-group">
-                  <label>City</label>
-                  <select v-model="associatedFilters.city" @change="onAssociatedFilterChange">
-                    <option value="">All Cities</option>
+              <div class="filter-group">
+                <label>City</label>
+                <div class="multiselect-container">
+                  <select 
+                    multiple 
+                    v-model="associatedFilters.city" 
+                    @change="onAssociatedFilterChange"
+                    class="multiselect"
+                  >
                     <option v-for="city in filterOptions.cities" :key="city" :value="city">
                       {{ city }}
                     </option>
                   </select>
+                  <div class="selected-tags" v-if="associatedFilters.city.length">
+                    <span v-for="city in associatedFilters.city" :key="city" class="tag">
+                      {{ city }}
+                      <button @click="removeAssociatedFilter('city', city)" class="tag-remove">×</button>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="filter-section">
-              <h4>Category Filters</h4>
-              <div class="filters-grid">
-                <div class="filter-group">
-                  <label>Category</label>
-                  <select v-model="associatedFilters.category" @change="onAssociatedFilterChange">
-                    <option value="">All Categories</option>
+          <!-- Category Filters -->
+          <div class="filter-section">
+            <h4>Category Filters</h4>
+            <div class="filter-grid">
+              <div class="filter-group">
+                <label>Category</label>
+                <div class="multiselect-container">
+                  <select 
+                    multiple 
+                    v-model="associatedFilters.category" 
+                    @change="onAssociatedFilterChange"
+                    class="multiselect"
+                  >
                     <option v-for="category in filterOptions.categories" :key="category" :value="category">
                       {{ category }}
                     </option>
                   </select>
+                  <div class="selected-tags" v-if="associatedFilters.category.length">
+                    <span v-for="category in associatedFilters.category" :key="category" class="tag">
+                      {{ category }}
+                      <button @click="removeAssociatedFilter('category', category)" class="tag-remove">×</button>
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                <div class="filter-group">
-                  <label>Sub Category</label>
-                  <select v-model="associatedFilters.subCategory" @change="onAssociatedFilterChange">
-                    <option value="">All Sub Categories</option>
+              <div class="filter-group">
+                <label>Sub Category</label>
+                <div class="multiselect-container">
+                  <select 
+                    multiple 
+                    v-model="associatedFilters.subCategory" 
+                    @change="onAssociatedFilterChange"
+                    class="multiselect"
+                  >
                     <option v-for="subCategory in filterOptions.subCategories" :key="subCategory" :value="subCategory">
                       {{ subCategory }}
                     </option>
                   </select>
+                  <div class="selected-tags" v-if="associatedFilters.subCategory.length">
+                    <span v-for="subCategory in associatedFilters.subCategory" :key="subCategory" class="tag">
+                      {{ subCategory }}
+                      <button @click="removeAssociatedFilter('subCategory', subCategory)" class="tag-remove">×</button>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="filter-section">
-              <h4>Status Filter</h4>
-              <div class="filters-grid">
-                <div class="filter-group">
-                  <label>Status</label>
-                  <select v-model="associatedFilters.status" @change="onAssociatedFilterChange">
-                    <option value="">All Status</option>
+          <!-- Status Filter -->
+          <div class="filter-section">
+            <h4>Status Filter</h4>
+            <div class="filter-grid">
+              <div class="filter-group">
+                <label>Status</label>
+                <div class="multiselect-container">
+                  <select 
+                    multiple 
+                    v-model="associatedFilters.status" 
+                    @change="onAssociatedFilterChange"
+                    class="multiselect"
+                  >
                     <option v-for="status in filterOptions.statuses" :key="status" :value="status">
                       {{ status }}
                     </option>
                   </select>
+                  <div class="selected-tags" v-if="associatedFilters.status.length">
+                    <span v-for="status in associatedFilters.status" :key="status" class="tag">
+                      {{ status }}
+                      <button @click="removeAssociatedFilter('status', status)" class="tag-remove">×</button>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="filter-actions">
-              <button type="button" class="btn-secondary" @click="clearAssociatedFilters">
-                Clear Filters
-              </button>
-            </div>
+          <div class="filter-actions">
+            <button type="button" class="btn-clear" @click="clearAssociatedFilters">
+              Clear All Filters
+            </button>
           </div>
         </div>
 
@@ -391,6 +465,13 @@ const onAssociatedFilterChange = () => {
   persistState();
 };
 
+const removeAssociatedFilter = (type: string, value: string) => {
+  const currentValues = associatedFilters[type as keyof typeof associatedFilters] as string[];
+  const newValues = currentValues.filter(v => v !== value);
+  associatedFilters[type as keyof typeof associatedFilters] = newValues;
+  persistState();
+};
+
 const clearAllFilters = () => {
   clearFilters();
   clearAssociatedFilters();
@@ -434,11 +515,14 @@ const getStatusClass = (status: string) => {
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 20px;
   z-index: 100;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .floating-header h1 {
@@ -664,50 +748,66 @@ const getStatusClass = (status: string) => {
 }
 
 .associated-filters {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   max-height: 400px;
   overflow-y: auto;
 }
 
 .associated-filters h3 {
-  color: #374151;
+  color: #1e293b;
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 16px 0;
   letter-spacing: -0.025em;
-}
-
-.filters-container {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  gap: 8px;
 }
 
-.filter-section h4 {
-  color: #4b5563;
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.associated-filters h3::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 2px;
 }
 
 .filter-section {
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.filters-grid {
+.filter-section:last-of-type {
+  border-bottom: none;
+}
+
+.filter-section h4 {
+  margin: 0 0 20px 0;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-section h4::before {
+  content: '';
+  width: 3px;
+  height: 16px;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  border-radius: 2px;
+}
+
+.filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  align-items: end;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 .filter-group {
@@ -723,42 +823,116 @@ const getStatusClass = (status: string) => {
   letter-spacing: -0.025em;
 }
 
-.filter-group select {
-  padding: 8px 12px;
+.multiselect-container {
+  position: relative;
+}
+
+.multiselect {
+  padding: 12px 16px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 12px;
   background: white;
   font-size: 14px;
+  width: 100%;
+  min-height: 48px;
+  max-height: 140px;
+  overflow-y: auto;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.multiselect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.multiselect option {
+  padding: 10px;
+  border-radius: 6px;
+  margin: 2px 0;
+  background: white;
+  color: #374151;
+}
+
+.multiselect option:checked {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tag {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #bfdbfe;
   transition: all 0.2s ease;
 }
 
-.filter-group select:focus {
-  outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+.tag:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  transform: translateY(-1px);
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #1e40af;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.tag-remove:hover {
+  background: #1e40af;
+  color: white;
 }
 
 .filter-actions {
+  padding: 24px;
   display: flex;
-  align-items: end;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-.btn-secondary {
-  padding: 8px 16px;
+.btn-clear {
+  padding: 12px 32px;
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  height: fit-content;
+  font-weight: 600;
+  letter-spacing: 0.025em;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.btn-secondary:hover {
+.btn-clear:hover {
   background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15);
 }
 
 .table-summary {
@@ -786,7 +960,7 @@ const getStatusClass = (status: string) => {
     margin-top: 120px;
   }
   
-  .filters-grid {
+  .filter-grid {
     grid-template-columns: 1fr;
   }
 }

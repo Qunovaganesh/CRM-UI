@@ -9,8 +9,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'F&B',
     category: 'Bakery Products',
+    subCategory: 'Biscuits & Cookies',
     status: 'Customer',
     registrationDate: '2023-01-15',
     daysSinceStatus: 180
@@ -21,8 +21,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'F&B',
     category: 'Snacks & Confectionery',
+    subCategory: 'Biscuits & Cookies',
     status: 'Prospect',
     registrationDate: '2023-02-20',
     daysSinceStatus: 150
@@ -33,8 +33,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Ahmedabad',
     district: 'Ahmedabad',
     state: 'Gujarat',
-    industry: 'F&B',
     category: 'Dairy Products',
+    subCategory: 'Milk & Cream',
     status: 'Customer',
     registrationDate: '2023-03-10',
     daysSinceStatus: 135
@@ -45,8 +45,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Bangalore',
     district: 'Bangalore Urban',
     state: 'Karnataka',
-    industry: 'F&B',
     category: 'Beverages',
+    subCategory: 'Soft Drinks',
     status: 'Lead',
     registrationDate: '2023-04-05',
     daysSinceStatus: 110
@@ -57,8 +57,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Delhi',
     district: 'New Delhi',
     state: 'Delhi',
-    industry: 'F&B',
     category: 'Packaged Foods',
+    subCategory: 'Ready-to-Eat',
     status: 'Customer',
     registrationDate: '2023-05-12',
     daysSinceStatus: 75
@@ -71,8 +71,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Skincare',
+    subCategory: 'Face Care',
     status: 'Customer',
     registrationDate: '2023-06-18',
     daysSinceStatus: 40
@@ -83,8 +83,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Haircare',
+    subCategory: 'Shampoo & Conditioner',
     status: 'Prospect',
     registrationDate: '2023-07-22',
     daysSinceStatus: 15
@@ -95,8 +95,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Oral Care',
+    subCategory: 'Toothpaste',
     status: 'Customer',
     registrationDate: '2023-03-25',
     daysSinceStatus: 80
@@ -107,8 +107,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Haircare',
+    subCategory: 'Hair Oil',
     status: 'Lead',
     registrationDate: '2023-05-30',
     daysSinceStatus: 40
@@ -121,8 +121,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Gurgaon',
     district: 'South Delhi',
     state: 'Delhi',
-    industry: 'Home Care',
     category: 'Surface Cleaners',
+    subCategory: 'Floor Cleaners',
     status: 'Customer',
     registrationDate: '2023-07-01',
     daysSinceStatus: 20
@@ -133,8 +133,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Home Care',
     category: 'Laundry Care',
+    subCategory: 'Detergent Powder',
     status: 'Prospect',
     registrationDate: '2023-04-15',
     daysSinceStatus: 100
@@ -147,8 +147,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Delhi',
     district: 'New Delhi',
     state: 'Delhi',
-    industry: 'Health & Wellness',
     category: 'Ayurvedic Products',
+    subCategory: 'Health Supplements',
     status: 'Customer',
     registrationDate: '2023-02-28',
     daysSinceStatus: 120
@@ -159,8 +159,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Health & Wellness',
     category: 'Health Drinks',
+    subCategory: 'Protein Drinks',
     status: 'Lead',
     registrationDate: '2023-06-10',
     daysSinceStatus: 50
@@ -173,8 +173,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Baby Care',
     category: 'Baby Skincare',
+    subCategory: 'Baby Lotion',
     status: 'Customer',
     registrationDate: '2023-01-20',
     daysSinceStatus: 200
@@ -185,8 +185,8 @@ export const mockManufacturers: Manufacturer[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Baby Care',
     category: 'Diapers',
+    subCategory: 'Disposable Diapers',
     status: 'Prospect',
     registrationDate: '2023-05-05',
     daysSinceStatus: 60
@@ -202,8 +202,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'F&B',
     category: 'Bakery Products',
+    subCategory: 'Biscuits & Cookies',
     status: 'Lead',
     registrationDate: '2023-04-01',
     daysSinceStatus: 25
@@ -214,8 +214,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Delhi',
     district: 'New Delhi',
     state: 'Delhi',
-    industry: 'F&B',
     category: 'Snacks & Confectionery',
+    subCategory: 'Biscuits & Cookies',
     status: 'Prospect',
     registrationDate: '2023-03-15',
     daysSinceStatus: 45
@@ -226,8 +226,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'F&B',
     category: 'Dairy Products',
+    subCategory: 'Milk & Cream',
     status: 'Customer',
     registrationDate: '2023-02-10',
     daysSinceStatus: 75
@@ -238,8 +238,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Kolkata',
     district: 'Kolkata',
     state: 'West Bengal',
-    industry: 'F&B',
     category: 'Beverages',
+    subCategory: 'Soft Drinks',
     status: 'Lead',
     registrationDate: '2023-05-20',
     daysSinceStatus: 15
@@ -250,8 +250,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Chennai',
     district: 'Chennai',
     state: 'Tamil Nadu',
-    industry: 'F&B',
     category: 'Packaged Foods',
+    subCategory: 'Ready-to-Eat',
     status: 'Customer',
     registrationDate: '2023-06-10',
     daysSinceStatus: 30
@@ -262,8 +262,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Pune',
     district: 'Pune',
     state: 'Maharashtra',
-    industry: 'F&B',
     category: 'Frozen Foods',
+    subCategory: 'Frozen Vegetables',
     status: 'Prospect',
     registrationDate: '2023-01-25',
     daysSinceStatus: 90
@@ -276,8 +276,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Bangalore',
     district: 'Bangalore Urban',
     state: 'Karnataka',
-    industry: 'Personal Care',
     category: 'Skincare',
+    subCategory: 'Face Care',
     status: 'Customer',
     registrationDate: '2022-12-15',
     daysSinceStatus: 120
@@ -288,8 +288,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Color Cosmetics',
+    subCategory: 'Lipstick',
     status: 'Lead',
     registrationDate: '2023-07-05',
     daysSinceStatus: 10
@@ -300,8 +300,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Hyderabad',
     district: 'Hyderabad',
     state: 'Telangana',
-    industry: 'Personal Care',
     category: 'Oral Care',
+    subCategory: 'Toothpaste',
     status: 'Prospect',
     registrationDate: '2023-06-25',
     daysSinceStatus: 20
@@ -312,8 +312,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Fragrances',
+    subCategory: 'Perfumes',
     status: 'Customer',
     registrationDate: '2023-04-12',
     daysSinceStatus: 60
@@ -326,8 +326,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Home Care',
     category: 'Surface Cleaners',
+    subCategory: 'Floor Cleaners',
     status: 'Lead',
     registrationDate: '2023-07-15',
     daysSinceStatus: 8
@@ -338,8 +338,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Pune',
     district: 'Pune',
     state: 'Maharashtra',
-    industry: 'Home Care',
     category: 'Laundry Care',
+    subCategory: 'Detergent Powder',
     status: 'Prospect',
     registrationDate: '2023-05-30',
     daysSinceStatus: 35
@@ -350,8 +350,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Home Care',
     category: 'Dishwashing',
+    subCategory: 'Dishwashing Liquid',
     status: 'Customer',
     registrationDate: '2023-03-20',
     daysSinceStatus: 85
@@ -364,8 +364,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Health & Wellness',
     category: 'Vitamins & Supplements',
+    subCategory: 'Multivitamins',
     status: 'Lead',
     registrationDate: '2023-07-01',
     daysSinceStatus: 12
@@ -376,8 +376,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Hyderabad',
     district: 'Hyderabad',
     state: 'Telangana',
-    industry: 'Health & Wellness',
     category: 'Health Drinks',
+    subCategory: 'Protein Drinks',
     status: 'Prospect',
     registrationDate: '2023-06-15',
     daysSinceStatus: 28
@@ -388,8 +388,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Delhi',
     district: 'New Delhi',
     state: 'Delhi',
-    industry: 'Health & Wellness',
     category: 'Ayurvedic Products',
+    subCategory: 'Health Supplements',
     status: 'Customer',
     registrationDate: '2023-05-10',
     daysSinceStatus: 55
@@ -402,8 +402,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Pune',
     district: 'Pune',
     state: 'Maharashtra',
-    industry: 'Baby Care',
     category: 'Baby Food',
+    subCategory: 'Baby Cereal',
     status: 'Customer',
     registrationDate: '2023-03-20',
     daysSinceStatus: 85
@@ -414,8 +414,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Baby Care',
     category: 'Diapers',
+    subCategory: 'Disposable Diapers',
     status: 'Lead',
     registrationDate: '2023-07-20',
     daysSinceStatus: 5
@@ -426,8 +426,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Bangalore',
     district: 'Bangalore Urban',
     state: 'Karnataka',
-    industry: 'Baby Care',
     category: 'Baby Skincare',
+    subCategory: 'Baby Lotion',
     status: 'Prospect',
     registrationDate: '2023-06-30',
     daysSinceStatus: 25
@@ -440,8 +440,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'F&B',
     category: 'Bakery Products',
+    subCategory: 'Biscuits & Cookies',
     status: 'Customer',
     registrationDate: '2023-05-15',
     daysSinceStatus: 50
@@ -452,8 +452,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Bangalore',
     district: 'Bangalore Urban',
     state: 'Karnataka',
-    industry: 'Personal Care',
     category: 'Skincare',
+    subCategory: 'Face Care',
     status: 'View',
     registrationDate: '2023-02-28',
     daysSinceStatus: 95
@@ -464,8 +464,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Mumbai',
     district: 'Mumbai',
     state: 'Maharashtra',
-    industry: 'Personal Care',
     category: 'Haircare',
+    subCategory: 'Shampoo & Conditioner',
     status: 'Lead',
     registrationDate: '2023-07-10',
     daysSinceStatus: 15
@@ -476,8 +476,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Chennai',
     district: 'Chennai',
     state: 'Tamil Nadu',
-    industry: 'Home Care',
     category: 'Air Care',
+    subCategory: 'Air Fresheners',
     status: 'Prospect',
     registrationDate: '2023-06-20',
     daysSinceStatus: 35
@@ -488,8 +488,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Bangalore',
     district: 'Bangalore Urban',
     state: 'Karnataka',
-    industry: 'F&B',
     category: 'Snacks & Confectionery',
+    subCategory: 'Biscuits & Cookies',
     status: 'Customer',
     registrationDate: '2023-04-25',
     daysSinceStatus: 70
@@ -500,8 +500,8 @@ export const mockDistributors: Distributor[] = [
     city: 'Pune',
     district: 'Pune',
     state: 'Maharashtra',
-    industry: 'Baby Care',
     category: 'Feeding Accessories',
+    subCategory: 'Baby Bottles',
     status: 'View',
     registrationDate: '2023-03-30',
     daysSinceStatus: 95
@@ -592,16 +592,16 @@ export const filterOptions: FilterOptions = {
   states: ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Uttar Pradesh', 'Rajasthan', 'Gujarat'],
   categories: ['F&B', 'Personal Care', 'Home Care', 'Health & Wellness', 'Baby Care'],
   subCategories: [
-    // F&B subcategories
-    'Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products',
-    // Personal Care subcategories
-    'Skincare', 'Haircare', 'Oral Care', 'Fragrances', 'Color Cosmetics', 'Men\'s Grooming',
-    // Home Care subcategories
-    'Laundry Care', 'Dishwashing', 'Surface Cleaners', 'Air Care', 'Fabric Care', 'Kitchen Care',
-    // Health & Wellness subcategories
-    'Vitamins & Supplements', 'Health Drinks', 'Protein Products', 'Ayurvedic Products', 'First Aid',
-    // Baby Care subcategories
-    'Baby Food', 'Diapers', 'Baby Skincare', 'Baby Bath', 'Feeding Accessories'
+    // F&B sub-categories
+    'Soft Drinks', 'Biscuits & Cookies', 'Milk & Cream', 'Ready-to-Eat', 'Frozen Vegetables', 'Bread & Cakes',
+    // Personal Care sub-categories
+    'Face Care', 'Shampoo & Conditioner', 'Toothpaste', 'Perfumes', 'Lipstick', 'Hair Oil',
+    // Home Care sub-categories
+    'Detergent Powder', 'Dishwashing Liquid', 'Floor Cleaners', 'Air Fresheners', 'Fabric Softener', 'Kitchen Cleaners',
+    // Health & Wellness sub-categories
+    'Multivitamins', 'Protein Drinks', 'Health Supplements', 'First Aid Kits',
+    // Baby Care sub-categories
+    'Baby Cereal', 'Disposable Diapers', 'Baby Lotion', 'Baby Shampoo', 'Baby Bottles'
   ],
   statuses: ['Lead', 'Prospect', 'Customer', 'View']
 };
@@ -715,11 +715,28 @@ export const cityToLocationMapping: Record<string, { state: string; district: st
 
 // Category to sub-category mapping for FMCG
 export const categoryToSubCategoryMapping: Record<string, string[]> = {
-  'F&B': ['Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products'],
-  'Personal Care': ['Skincare', 'Haircare', 'Oral Care', 'Fragrances', 'Color Cosmetics', 'Men\'s Grooming'],
-  'Home Care': ['Laundry Care', 'Dishwashing', 'Surface Cleaners', 'Air Care', 'Fabric Care', 'Kitchen Care'],
-  'Health & Wellness': ['Vitamins & Supplements', 'Health Drinks', 'Protein Products', 'Ayurvedic Products', 'First Aid'],
-  'Baby Care': ['Baby Food', 'Diapers', 'Baby Skincare', 'Baby Bath', 'Feeding Accessories']
+  'Beverages': ['Soft Drinks', 'Juices', 'Energy Drinks'],
+  'Snacks & Confectionery': ['Biscuits & Cookies', 'Chocolates', 'Chips'],
+  'Dairy Products': ['Milk & Cream', 'Cheese', 'Yogurt'],
+  'Packaged Foods': ['Ready-to-Eat', 'Instant Noodles', 'Canned Foods'],
+  'Frozen Foods': ['Frozen Vegetables', 'Ice Cream', 'Frozen Snacks'],
+  'Bakery Products': ['Bread & Cakes', 'Pastries', 'Cookies'],
+  'Skincare': ['Face Care', 'Body Care', 'Sun Care'],
+  'Haircare': ['Shampoo & Conditioner', 'Hair Oil', 'Hair Styling'],
+  'Oral Care': ['Toothpaste', 'Mouthwash', 'Toothbrush'],
+  'Fragrances': ['Perfumes', 'Deodorants', 'Body Spray'],
+  'Color Cosmetics': ['Lipstick', 'Foundation', 'Eye Makeup'],
+  'Laundry Care': ['Detergent Powder', 'Fabric Softener', 'Stain Removers'],
+  'Dishwashing': ['Dishwashing Liquid', 'Dishwasher Tablets', 'Scrubbers'],
+  'Surface Cleaners': ['Floor Cleaners', 'Glass Cleaners', 'Bathroom Cleaners'],
+  'Air Care': ['Air Fresheners', 'Room Sprays', 'Candles'],
+  'Vitamins & Supplements': ['Multivitamins', 'Calcium', 'Iron'],
+  'Health Drinks': ['Protein Drinks', 'Energy Drinks', 'Health Tonics'],
+  'Ayurvedic Products': ['Health Supplements', 'Herbal Teas', 'Natural Remedies'],
+  'Baby Food': ['Baby Cereal', 'Baby Puree', 'Baby Snacks'],
+  'Diapers': ['Disposable Diapers', 'Cloth Diapers', 'Training Pants'],
+  'Baby Skincare': ['Baby Lotion', 'Baby Oil', 'Baby Powder'],
+  'Feeding Accessories': ['Baby Bottles', 'Sippy Cups', 'Bibs']
 };
 
 export const termsOptions = {
