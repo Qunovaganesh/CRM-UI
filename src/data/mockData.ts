@@ -590,7 +590,18 @@ export const filterOptions: FilterOptions = {
     'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar' // Gujarat
   ],
   states: ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Uttar Pradesh', 'Rajasthan', 'Gujarat'],
-  categories: ['F&B', 'Personal Care', 'Home Care', 'Health & Wellness', 'Baby Care'],
+  categories: [
+    // F&B categories
+    'Beverages', 'Snacks & Confectionery', 'Dairy Products', 'Packaged Foods', 'Frozen Foods', 'Bakery Products',
+    // Personal Care categories
+    'Skincare', 'Haircare', 'Oral Care', 'Fragrances', 'Color Cosmetics',
+    // Home Care categories
+    'Laundry Care', 'Dishwashing', 'Surface Cleaners', 'Air Care',
+    // Health & Wellness categories
+    'Vitamins & Supplements', 'Health Drinks', 'Ayurvedic Products',
+    // Baby Care categories
+    'Baby Food', 'Diapers', 'Baby Skincare', 'Feeding Accessories'
+  ],
   subCategories: [
     // F&B sub-categories
     'Soft Drinks', 'Biscuits & Cookies', 'Milk & Cream', 'Ready-to-Eat', 'Frozen Vegetables', 'Bread & Cakes',

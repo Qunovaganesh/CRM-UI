@@ -21,7 +21,7 @@
       @filter-change="onFilterChange"
       @clear-filters="clearAllFilters"
       @location-filter-change="onLocationFilterChange"
-      @industry-filter-change="onIndustryFilterChange"
+      @category-filter-change="onCategoryFilterChange"
     />
 
     <!-- Entity Selection Dropdown -->
@@ -50,7 +50,7 @@
             <button class="btn-change" @click="clearSelection">Change Selection</button>
           </div>
           <p>{{ selectedEntityItem.city }}, {{ selectedEntityItem.state }}</p>
-          <p>{{ selectedEntityItem.industry }} - {{ selectedEntityItem.category }}</p>
+          <p>{{ selectedEntityItem.category }} - {{ selectedEntityItem.subCategory }}</p>
           <span v-if="'status' in selectedEntityItem" :class="getStatusClass(selectedEntityItem.status)">
             {{ selectedEntityItem.status }}
           </span>
@@ -92,21 +92,21 @@
           </div>
 
           <div class="filter-group">
-            <label>Industry</label>
-            <select v-model="associatedFilters.industry" @change="onAssociatedFilterChange">
-              <option value="">All Industries</option>
-              <option v-for="industry in filterOptions.industries" :key="industry" :value="industry">
-                {{ industry }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
             <label>Category</label>
             <select v-model="associatedFilters.category" @change="onAssociatedFilterChange">
               <option value="">All Categories</option>
               <option v-for="category in filterOptions.categories" :key="category" :value="category">
                 {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Sub Category</label>
+            <select v-model="associatedFilters.subCategory" @change="onAssociatedFilterChange">
+              <option value="">All Sub Categories</option>
+              <option v-for="subCategory in filterOptions.subCategories" :key="subCategory" :value="subCategory">
+                {{ subCategory }}
               </option>
             </select>
           </div>
@@ -167,7 +167,7 @@ const {
   clearFilters,
   clearAssociatedFilters,
   updateLocationFilters,
-  updateIndustryFilters,
+  updateCategoryFilters,
   setSelectedEntity,
   setSelectedEntityId,
   setSelectedManufacturer,
@@ -214,11 +214,11 @@ const filteredPairedList = computed(() => {
   if (associatedFilters.state) {
     filtered = filtered.filter(item => item.state === associatedFilters.state);
   }
-  if (associatedFilters.industry) {
-    filtered = filtered.filter(item => item.industry === associatedFilters.industry);
-  }
   if (associatedFilters.category) {
     filtered = filtered.filter(item => item.category === associatedFilters.category);
+  }
+  if (associatedFilters.subCategory) {
+    filtered = filtered.filter(item => item.subCategory === associatedFilters.subCategory);
   }
   if (associatedFilters.status && filtered.length > 0 && 'status' in filtered[0]) {
     filtered = filtered.filter(item => 'status' in item && item.status === associatedFilters.status);
@@ -244,8 +244,8 @@ const tableColumns = computed(() => {
     { key: 'city', label: 'City' },
     { key: 'district', label: 'District' },
     { key: 'state', label: 'State' },
-    { key: 'industry', label: 'Industry' },
-    { key: 'category', label: 'Category' }
+    { key: 'category', label: 'Category' },
+    { key: 'subCategory', label: 'Sub Category' }
   ];
 
   // Both manufacturers and distributors now have status
@@ -341,8 +341,8 @@ const onLocationFilterChange = (type: 'city' | 'district' | 'state', values: str
   updateLocationFilters(type, values, false);
 };
 
-const onIndustryFilterChange = (type: 'industry' | 'category', values: string[]) => {
-  updateIndustryFilters(type, values, false);
+const onCategoryFilterChange = (type: 'category' | 'subCategory', values: string[]) => {
+  updateCategoryFilters(type, values, false);
 };
 
 const onAssociatedFilterChange = () => {
