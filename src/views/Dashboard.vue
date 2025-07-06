@@ -668,4 +668,3 @@ const getStatusClass = (status: string) => {
   }
 }
 </style>
-</template>
