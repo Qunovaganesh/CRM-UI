@@ -6,7 +6,9 @@ export interface Manufacturer {
   state: string;
   industry: string;
   category: string;
+  status: 'Lead' | 'Prospect' | 'Customer' | 'View';
   registrationDate: string;
+  daysSinceStatus: number;
 }
 
 export interface Distributor {
