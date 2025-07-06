@@ -319,6 +319,188 @@ export const mockDistributors: Distributor[] = [
     daysSinceStatus: 60
   },
   
+  // Additional manufacturers for better coverage
+  {
+    id: 'M016',
+    name: 'ITC Limited',
+    city: 'Kolkata',
+    district: 'Kolkata',
+    state: 'West Bengal',
+    category: 'Snacks & Confectionery',
+    subCategory: 'Biscuits & Cookies',
+    status: 'Lead',
+    registrationDate: '2023-07-25',
+    daysSinceStatus: 8
+  },
+  {
+    id: 'M017',
+    name: 'Marico Limited',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    category: 'Haircare',
+    subCategory: 'Hair Oil',
+    status: 'Customer',
+    registrationDate: '2023-03-12',
+    daysSinceStatus: 95
+  },
+  {
+    id: 'M018',
+    name: 'Emami Limited',
+    city: 'Kolkata',
+    district: 'Kolkata',
+    state: 'West Bengal',
+    category: 'Skincare',
+    subCategory: 'Face Care',
+    status: 'Prospect',
+    registrationDate: '2023-06-08',
+    daysSinceStatus: 35
+  },
+  {
+    id: 'M019',
+    name: 'Wipro Consumer Care',
+    city: 'Bangalore',
+    district: 'Bangalore Urban',
+    state: 'Karnataka',
+    category: 'Laundry Care',
+    subCategory: 'Detergent Powder',
+    status: 'View',
+    registrationDate: '2023-02-15',
+    daysSinceStatus: 110
+  },
+  {
+    id: 'M020',
+    name: 'Tata Consumer Products',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    category: 'Beverages',
+    subCategory: 'Soft Drinks',
+    status: 'Lead',
+    registrationDate: '2023-07-18',
+    daysSinceStatus: 12
+  },
+  {
+    id: 'M021',
+    name: 'Bajaj Consumer Care',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    category: 'Haircare',
+    subCategory: 'Hair Oil',
+    status: 'Customer',
+    registrationDate: '2023-04-22',
+    daysSinceStatus: 68
+  },
+  {
+    id: 'M022',
+    name: 'Jyothy Labs',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    category: 'Laundry Care',
+    subCategory: 'Fabric Softener',
+    status: 'Prospect',
+    registrationDate: '2023-05-28',
+    daysSinceStatus: 45
+  },
+  {
+    id: 'M023',
+    name: 'Cavinkare Pvt Ltd',
+    city: 'Chennai',
+    district: 'Chennai',
+    state: 'Tamil Nadu',
+    category: 'Haircare',
+    subCategory: 'Shampoo & Conditioner',
+    status: 'Lead',
+    registrationDate: '2023-07-05',
+    daysSinceStatus: 20
+  },
+  {
+    id: 'M024',
+    name: 'Nirma Limited',
+    city: 'Ahmedabad',
+    district: 'Ahmedabad',
+    state: 'Gujarat',
+    category: 'Laundry Care',
+    subCategory: 'Detergent Powder',
+    status: 'Customer',
+    registrationDate: '2023-03-08',
+    daysSinceStatus: 88
+  },
+  {
+    id: 'M025',
+    name: 'Zydus Wellness',
+    city: 'Ahmedabad',
+    district: 'Ahmedabad',
+    state: 'Gujarat',
+    category: 'Health Drinks',
+    subCategory: 'Protein Drinks',
+    status: 'View',
+    registrationDate: '2023-01-30',
+    daysSinceStatus: 165
+  },
+  {
+    id: 'M026',
+    name: 'Patanjali Ayurved',
+    city: 'Delhi',
+    district: 'New Delhi',
+    state: 'Delhi',
+    category: 'Ayurvedic Products',
+    subCategory: 'Health Supplements',
+    status: 'Prospect',
+    registrationDate: '2023-06-20',
+    daysSinceStatus: 28
+  },
+  {
+    id: 'M027',
+    name: 'Himalaya Drug Company',
+    city: 'Bangalore',
+    district: 'Bangalore Urban',
+    state: 'Karnataka',
+    category: 'Baby Skincare',
+    subCategory: 'Baby Lotion',
+    status: 'Lead',
+    registrationDate: '2023-07-12',
+    daysSinceStatus: 15
+  },
+  {
+    id: 'M028',
+    name: 'Kellogg India',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    category: 'Baby Food',
+    subCategory: 'Baby Cereal',
+    status: 'Customer',
+    registrationDate: '2023-04-10',
+    daysSinceStatus: 75
+  },
+  {
+    id: 'M029',
+    name: 'Perfetti Van Melle',
+    city: 'Gurgaon',
+    district: 'South Delhi',
+    state: 'Delhi',
+    category: 'Snacks & Confectionery',
+    subCategory: 'Chocolates',
+    status: 'View',
+    registrationDate: '2023-02-05',
+    daysSinceStatus: 125
+  },
+  {
+    id: 'M030',
+    name: 'Mondelez India',
+    city: 'Mumbai',
+    district: 'Mumbai',
+    state: 'Maharashtra',
+    category: 'Snacks & Confectionery',
+    subCategory: 'Chocolates',
+    status: 'Prospect',
+    registrationDate: '2023-06-02',
+    daysSinceStatus: 42
+  }
+  
   // Home Care Distributors
   {
     id: 'D011',
