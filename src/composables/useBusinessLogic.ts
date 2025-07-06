@@ -12,6 +12,30 @@ const getStoredState = (key: string, defaultValue: any) => {
   }
 };
 
+const getValidatedFiltersState = (key: string, defaultValue: any) => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (!stored) return defaultValue;
+    
+    const parsed = JSON.parse(stored);
+    if (!parsed || typeof parsed !== 'object') return defaultValue;
+    
+    // Ensure all filter properties are arrays
+    const validated = { ...defaultValue };
+    Object.keys(defaultValue).forEach(filterKey => {
+      if (Array.isArray(parsed[filterKey])) {
+        validated[filterKey] = parsed[filterKey];
+      } else {
+        validated[filterKey] = defaultValue[filterKey];
+      }
+    });
+    
+    return validated;
+  } catch {
+    return defaultValue;
+  }
+};
+
 const setStoredState = (key: string, value: any) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -34,26 +58,21 @@ export const useBusinessLogic = () => {
     getStoredState('selectedEntityId', '')
   );
   
+  const defaultFilters = {
+    city: [] as string[],
+    district: [] as string[],
+    state: [] as string[],
+    industry: [] as string[],
+    category: [] as string[],
+    status: [] as string[]
+  };
+  
   const filters = reactive(
-    getStoredState('filters', {
-      city: [] as string[],
-      district: [] as string[],
-      state: [] as string[],
-      industry: [] as string[],
-      category: [] as string[],
-      status: [] as string[]
-    })
+    getValidatedFiltersState('filters', defaultFilters)
   );
 
   const associatedFilters = reactive(
-    getStoredState('associatedFilters', {
-      city: [] as string[],
-      district: [] as string[],
-      state: [] as string[],
-      industry: [] as string[],
-      category: [] as string[],
-      status: [] as string[]
-    })
+    getValidatedFiltersState('associatedFilters', defaultFilters)
   );
 
   const manufacturers = ref<Manufacturer[]>(mockManufacturers);
