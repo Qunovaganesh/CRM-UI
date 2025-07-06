@@ -167,9 +167,6 @@ const newInteraction = ref({
   attachments: [] as string[]
 });
 
-const distributorData = computed(() => {
-  return mockDistributors.find(d => d.id === props.id) || mockDistributors[0];
-});
 
 const manufacturerData = computed(() => {
   // Check if we're dealing with a distributor or manufacturer lead

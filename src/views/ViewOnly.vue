@@ -287,9 +287,6 @@ const activeTab = ref('interactions');
 const invoiceFilter = ref('all');
 const customerId = ref(props.id);
 
-const distributorData = computed(() => {
-  return mockDistributors.find(d => d.id === props.id) || mockDistributors[0];
-});
 
 const manufacturerData = computed(() => {
   // Check if we're dealing with a distributor or manufacturer view
