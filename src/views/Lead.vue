@@ -212,6 +212,8 @@ const isManufacturerLead = computed(() => {
 
 const manufacturerName = computed(() => manufacturerData.value.name);
 
+const distributorName = computed(() => distributorData.value.name);
+
 const today = computed(() => {
   return new Date().toISOString().split('T')[0];
 });

@@ -34,9 +34,10 @@ body {
   font-size: 14px;
   line-height: 1.6;
   color: var(--gray-700);
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
 #app {
