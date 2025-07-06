@@ -739,6 +739,9 @@ export const categoryToSubCategoryMapping: Record<string, string[]> = {
   'Feeding Accessories': ['Baby Bottles', 'Sippy Cups', 'Bibs']
 };
 
+// Export alias for backward compatibility
+export const industryToCategoryMapping = categoryToSubCategoryMapping;
+
 export const termsOptions = {
   clauses: [
     'Payment Terms',
