@@ -258,8 +258,15 @@
           <button class="action-card success" @click="convertToRegistered" v-if="isValidated">
             <div class="action-icon">🎯</div>
             <div class="action-content">
-              <h4>Convert to Customer</h4>
+              <h4>Convert to Registered</h4>
               <p>Complete registration process</p>
+            </div>
+          </button>
+          <button class="action-card convert-customer" @click="convertToCustomer" v-if="showConvertButton">
+            <div class="action-icon">🎯</div>
+            <div class="action-content">
+              <h4>Convert to Customer</h4>
+              <p>Upgrade to customer status</p>
             </div>
           </button>
         </div>
@@ -379,6 +386,7 @@ const uploadType = ref<'proforma' | 'tax'>('proforma');
 const invoiceFilter = ref('all');
 const showValidateButton = ref(false);
 const isValidated = ref(false);
+const showConvertButton = ref(false);
 const showPaymentModal = ref(false);
 const paymentAmount = ref<number>(0);
 const paymentMethod = ref('bank_transfer');
@@ -558,6 +566,9 @@ const submitPayment = () => {
     
     paymentHistory.value.unshift(newPayment);
     
+    // Show convert button after successful payment upload
+    showConvertButton.value = true;
+    
     alert('Payment uploaded successfully!');
     closePaymentModal();
   } else {
@@ -578,6 +589,14 @@ const convertToRegistered = () => {
   alert('Customer converted to registered status! Redirecting...');
   setTimeout(() => {
     router.push({ name: 'ViewOnly', params: { id: props.id } });
+  }, 1000);
+};
+
+const convertToCustomer = () => {
+  alert('Converting to Customer status...');
+  // Add your conversion logic here
+  setTimeout(() => {
+    alert('Successfully converted to Customer!');
   }, 1000);
 };
 
@@ -919,7 +938,6 @@ onMounted(() => {
   border: none;
   min-height: 44px;
   min-width: 120px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -929,6 +947,7 @@ onMounted(() => {
 .btn-primary {
   background: #1c1c1e;
   color: white;
+  box-shadow: 0 1px 3px rgba(28, 28, 30, 0.2);
 }
 
 .btn-primary:hover {
@@ -941,6 +960,7 @@ onMounted(() => {
   background: #ffffff;
   color: #1d1d1f;
   border: 1px solid #c7c7cc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary:hover {
@@ -1158,50 +1178,74 @@ onMounted(() => {
 }
 
 .action-card {
-  background: #fafafa;
-  border: 1px solid #f2f2f7;
-  border-radius: 8px;
-  padding: 16px;
+  background: #1c1c1e;
+  color: white;
+  border: 1px solid #1c1c1e;
+  border-radius: 12px;
+  padding: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 16px;
   text-align: left;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(28, 28, 30, 0.2);
 }
 
 .action-card:hover {
-  background: #ffffff;
+  background: #000000;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #c7c7cc;
+  box-shadow: 0 4px 16px rgba(28, 28, 30, 0.3);
 }
 
 .action-card.success {
-  background: #f0f9ff;
-  border-color: #bfdbfe;
+  background: #1c1c1e;
+  border-color: #1c1c1e;
 }
 
 .action-card.success:hover {
-  background: #e0f2fe;
-  border-color: #93c5fd;
+  background: #000000;
+  box-shadow: 0 4px 16px rgba(28, 28, 30, 0.4);
 }
 
-.action-icon {
-  font-size: 24px;
+.action-card.convert-customer {
+  background: #1c1c1e;
+  border-color: #1c1c1e;
+  position: relative;
+}
+
+.action-card.convert-customer::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #1c1c1e, #000000, #1c1c1e);
+  border-radius: 14px;
+  z-index: -1;
   opacity: 0.8;
 }
 
+.action-card.convert-customer:hover {
+  background: #000000;
+  box-shadow: 0 4px 20px rgba(28, 28, 30, 0.5);
+}
+
+.action-icon {
+  font-size: 32px;
+  opacity: 0.9;
+}
+
 .action-content h4 {
-  color: #1d1d1f;
+  color: white;
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 4px 0;
 }
 
 .action-content p {
-  color: #86868b;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
   margin: 0;
 }
@@ -1352,6 +1396,13 @@ onMounted(() => {
 .modal-footer .btn-primary,
 .modal-footer .btn-secondary {
   min-width: 100px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .payment-form {
