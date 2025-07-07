@@ -231,11 +231,20 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Category</label>
-              <input 
-                type="text" 
-                v-model="manufacturerForm.category" 
-                placeholder="Enter category"
-                class="form-input"
+              <ModernMultiSelect 
+                :options="filterOptions.categories"
+                :selected="manufacturerForm.categories"
+                placeholder="Select categories..."
+                @update:selected="(val) => updateManufacturerCategories(val)"
+              />
+            </div>
+            <div class="form-group">
+              <label>Sub Category</label>
+              <ModernMultiSelect 
+                :options="availableManufacturerSubCategories"
+                :selected="manufacturerForm.subCategories"
+                placeholder="Select sub-categories..."
+                @update:selected="(val) => manufacturerForm.subCategories = val"
               />
             </div>
             <div class="form-group">
@@ -334,12 +343,12 @@
             </div>
             <div class="form-group full-width">
               <label>Distributor needed in states</label>
-              <textarea 
-                v-model="manufacturerForm.distributorNeededStates" 
-                placeholder="Enter states"
-                class="form-textarea"
-                rows="2"
-              ></textarea>
+              <ModernMultiSelect 
+                :options="filterOptions.states"
+                :selected="manufacturerForm.distributorNeededStates"
+                placeholder="Select states..."
+                @update:selected="(val) => updateManufacturerStates(val)"
+              />
             </div>
           </div>
         </div>
@@ -571,11 +580,20 @@
             </div>
             <div class="form-group full-width">
               <label>Category</label>
-              <input 
-                type="text" 
-                v-model="distributorForm.category" 
-                placeholder="Enter category"
-                class="form-input"
+              <ModernMultiSelect 
+                :options="filterOptions.categories"
+                :selected="distributorForm.categories"
+                placeholder="Select categories..."
+                @update:selected="(val) => updateDistributorCategories(val)"
+              />
+            </div>
+            <div class="form-group full-width">
+              <label>Sub Category</label>
+              <ModernMultiSelect 
+                :options="availableDistributorSubCategories"
+                :selected="distributorForm.subCategories"
+                placeholder="Select sub-categories..."
+                @update:selected="(val) => distributorForm.subCategories = val"
               />
             </div>
             <div class="form-group full-width">
@@ -596,12 +614,12 @@
           <div class="form-grid">
             <div class="form-group full-width">
               <label>Address</label>
-              <textarea 
-                v-model="addressForm.streetAddress" 
-                placeholder="Enter Door No. and Area Name"
-                class="form-textarea"
-                rows="3"
-              ></textarea>
+              <ModernMultiSelect 
+                :options="availableManufacturerDistricts"
+                :selected="manufacturerForm.distributorNeededDistricts"
+                placeholder="Select districts..."
+                @update:selected="(val) => manufacturerForm.distributorNeededDistricts = val"
+              />
             </div>
             <div class="form-group">
               <label>Pincode *</label>
@@ -742,20 +760,20 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Categories interested in</label>
-              <input 
-                type="text" 
-                v-model="distributorForm.categoriesInterested" 
-                placeholder="Enter categories"
-                class="form-input"
+              <ModernMultiSelect 
+                :options="filterOptions.categories"
+                :selected="distributorForm.categoriesInterested"
+                placeholder="Select categories..."
+                @update:selected="(val) => distributorForm.categoriesInterested = val"
               />
             </div>
             <div class="form-group">
               <label>Need manufacturers from States</label>
-              <input 
-                type="text" 
-                v-model="distributorForm.needManufacturerStates" 
-                placeholder="Enter states"
-                class="form-input"
+              <ModernMultiSelect 
+                :options="filterOptions.states"
+                :selected="distributorForm.needManufacturerStates"
+                placeholder="Select states..."
+                @update:selected="(val) => updateDistributorNeededStates(val)"
               />
             </div>
             <div class="form-group">
@@ -770,11 +788,11 @@
             </div>
             <div class="form-group">
               <label>Need manufacturers from Districts</label>
-              <input 
-                type="text" 
-                v-model="distributorForm.needManufacturerDistricts" 
-                placeholder="Enter districts"
-                class="form-input"
+              <ModernMultiSelect 
+                :options="availableDistributorNeededDistricts"
+                :selected="distributorForm.needManufacturerDistricts"
+                placeholder="Select districts..."
+                @update:selected="(val) => distributorForm.needManufacturerDistricts = val"
               />
             </div>
           </div>
@@ -832,6 +850,8 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBusinessLogic } from '../composables/useBusinessLogic'
+import ModernMultiSelect from '../components/ModernMultiSelect.vue'
+import { filterOptions, locationMapping, industryToCategoryMapping } from '../data/mockData'
 
 const router = useRouter()
 const { manufacturers, distributors } = useBusinessLogic()
@@ -865,7 +885,8 @@ const manufacturerForm = reactive({
   inspirational: '',
   brandName2: '',
   brandName3: '',
-  category: '',
+  categories: [] as string[],
+  subCategories: [] as string[],
   exporting: '',
   currentDistributors: '',
   presenceStates: '',
@@ -873,8 +894,8 @@ const manufacturerForm = reactive({
   annualRevenue: '',
   listed: '',
   distributorsNeeded: '',
-  distributorNeededDistricts: '',
-  distributorNeededStates: '',
+  distributorNeededDistricts: [] as string[],
+  distributorNeededStates: [] as string[],
   minimumOrderValue: '',
   distributorMargin: '',
   logistics: '',
@@ -901,7 +922,8 @@ const distributorForm = reactive({
   brandsCount: '',
   website: '',
   manufacturerStates: '',
-  category: '',
+  categories: [] as string[],
+  subCategories: [] as string[],
   manufacturerDistricts: '',
   accountingSystem: '',
   logisticsWillingness: '',
@@ -912,13 +934,95 @@ const distributorForm = reactive({
   warehouseManagementSystem: '',
   salesForceCount: '',
   ownSalesForce: '',
-  categoriesInterested: '',
-  needManufacturerStates: '',
+  categoriesInterested: [] as string[],
+  needManufacturerStates: [] as string[],
   newBrandsInterest: '',
-  needManufacturerDistricts: '',
+  needManufacturerDistricts: [] as string[],
   annualRevenue: '',
   marginRange: ''
 })
+
+// Computed properties for dependent dropdowns
+const availableManufacturerSubCategories = computed(() => {
+  if (manufacturerForm.categories.length > 0) {
+    const relatedSubCategories = new Set<string>()
+    manufacturerForm.categories.forEach(category => {
+      const subCategories = industryToCategoryMapping[category]
+      if (subCategories) {
+        subCategories.forEach(subCategory => relatedSubCategories.add(subCategory))
+      }
+    })
+    return Array.from(relatedSubCategories)
+  }
+  return filterOptions.subCategories
+})
+
+const availableManufacturerDistricts = computed(() => {
+  if (manufacturerForm.distributorNeededStates.length > 0) {
+    const relatedDistricts = new Set<string>()
+    manufacturerForm.distributorNeededStates.forEach(state => {
+      const mapping = locationMapping[state]
+      if (mapping) {
+        mapping.districts.forEach(district => relatedDistricts.add(district))
+      }
+    })
+    return Array.from(relatedDistricts)
+  }
+  return filterOptions.districts
+})
+
+const availableDistributorSubCategories = computed(() => {
+  if (distributorForm.categories.length > 0) {
+    const relatedSubCategories = new Set<string>()
+    distributorForm.categories.forEach(category => {
+      const subCategories = industryToCategoryMapping[category]
+      if (subCategories) {
+        subCategories.forEach(subCategory => relatedSubCategories.add(subCategory))
+      }
+    })
+    return Array.from(relatedSubCategories)
+  }
+  return filterOptions.subCategories
+})
+
+const availableDistributorNeededDistricts = computed(() => {
+  if (distributorForm.needManufacturerStates.length > 0) {
+    const relatedDistricts = new Set<string>()
+    distributorForm.needManufacturerStates.forEach(state => {
+      const mapping = locationMapping[state]
+      if (mapping) {
+        mapping.districts.forEach(district => relatedDistricts.add(district))
+      }
+    })
+    return Array.from(relatedDistricts)
+  }
+  return filterOptions.districts
+})
+
+// Methods for handling dependent updates
+const updateManufacturerCategories = (categories: string[]) => {
+  manufacturerForm.categories = categories
+  // Clear sub-categories when categories change
+  manufacturerForm.subCategories = []
+}
+
+const updateManufacturerStates = (states: string[]) => {
+  manufacturerForm.distributorNeededStates = states
+  // Clear districts when states change
+  manufacturerForm.distributorNeededDistricts = []
+}
+
+const updateDistributorCategories = (categories: string[]) => {
+  distributorForm.categories = categories
+  // Clear sub-categories when categories change
+  distributorForm.subCategories = []
+}
+
+const updateDistributorNeededStates = (states: string[]) => {
+  distributorForm.needManufacturerStates = states
+  // Clear districts when states change
+  distributorForm.needManufacturerDistricts = []
+}
 
 // Methods
 const fetchLocationData = async () => {
@@ -974,13 +1078,19 @@ const resetForm = () => {
   
   // Reset manufacturer form
   Object.keys(manufacturerForm).forEach(key => {
-    manufacturerForm[key] = ''
+    if (Array.isArray(manufacturerForm[key])) {
+      manufacturerForm[key] = []
+    } else {
+      manufacturerForm[key] = ''
+    }
   })
   
   // Reset distributor form
   Object.keys(distributorForm).forEach(key => {
     if (key === 'leadOwner') {
       distributorForm[key] = 'ganesh.t@qunovatec.com'
+    } else if (Array.isArray(distributorForm[key])) {
+      distributorForm[key] = []
     } else {
       distributorForm[key] = ''
     }
@@ -1005,8 +1115,8 @@ const submitForm = async () => {
         city: addressForm.city,
         district: addressForm.district,
         state: addressForm.state,
-        category: manufacturerForm.category || 'General',
-        subCategory: 'General', // Default subcategory
+        category: manufacturerForm.categories[0] || 'General',
+        subCategory: manufacturerForm.subCategories[0] || 'General',
         status: 'Registration' as const,
         registrationDate: new Date().toISOString(),
         daysSinceStatus: 0,
@@ -1030,8 +1140,8 @@ const submitForm = async () => {
         city: addressForm.city,
         district: addressForm.district,
         state: addressForm.state,
-        category: distributorForm.category || 'General',
-        subCategory: 'General', // Default subcategory
+        category: distributorForm.categories[0] || 'General',
+        subCategory: distributorForm.subCategories[0] || 'General',
         status: 'Registration' as const,
         registrationDate: new Date().toISOString(),
         daysSinceStatus: 0,
@@ -1206,15 +1316,17 @@ const submitForm = async () => {
 .form-input,
 .form-select,
 .form-textarea {
-  padding: 12px 16px;
+  padding: 10px 12px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
   color: #1d1d1f;
   background: white;
   transition: all 0.2s ease;
   font-family: inherit;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .form-input:focus,
@@ -1233,16 +1345,20 @@ const submitForm = async () => {
 
 .form-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 70px;
+  padding: 8px 12px;
 }
 
 .form-file {
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 2px dashed #d2d2d7;
   border-radius: 8px;
   background: #fafafa;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
 }
 
 .form-file:hover {
@@ -1397,7 +1513,9 @@ const submitForm = async () => {
   .form-input,
   .form-select,
   .form-textarea {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 14px;
+    padding: 8px 10px;
+    min-height: 36px;
   }
   
   .category-btn {
