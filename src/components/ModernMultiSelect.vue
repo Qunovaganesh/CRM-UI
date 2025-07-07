@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 
 const props = defineProps<{
   options: string[]
@@ -139,6 +139,18 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
     searchTerm.value = ''
+    // Position dropdown correctly
+    nextTick(() => {
+      if (dropdown.value) {
+        const rect = dropdown.value.getBoundingClientRect()
+        const panel = dropdown.value.querySelector('.dropdown-panel') as HTMLElement
+        if (panel) {
+          panel.style.left = rect.left + 'px'
+          panel.style.top = (rect.bottom + 8) + 'px'
+          panel.style.width = rect.width + 'px'
+        }
+      }
+    })
   }
 }
 
@@ -286,13 +298,16 @@ onUnmounted(() => {
   border: 1px solid #d1d1d6;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  z-index: 999999999;
+  z-index: 9999;
   margin-top: 8px;
   max-height: 360px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(20px);
+  position: fixed;
+  width: auto;
+  min-width: 200px;
 }
 
 .search-container {
