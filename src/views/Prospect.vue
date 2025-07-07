@@ -34,17 +34,9 @@
               <button 
                 type="button" 
                 class="btn-edit"
-                @click="toggleEditMode"
+                @click="editMode = !editMode"
               >
-                {{ editMode ? '💾 Save Changes' : '✏️ Edit Terms' }}
-              </button>
-              <button 
-                type="button" 
-                class="btn-add" 
-                @click="addTerm"
-                v-if="editMode"
-              >
-                ➕ Add Term
+                {{ editMode ? 'Cancel' : 'Edit Terms' }}
               </button>
             </div>
           </div>
@@ -87,15 +79,41 @@
                   <div class="term-actions" v-if="editMode">
                     <button 
                       type="button" 
-                      class="btn-remove" 
+                      class="btn-delete" 
                       @click="removeTerm(term.id)"
                       :disabled="agreement.terms.length <= 1"
                     >
-                      🗑️
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <!-- Action buttons at bottom of terms container -->
+            <div class="terms-actions" v-if="editMode">
+              <button 
+                type="button" 
+                class="btn-add-term" 
+                @click="addTerm"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 3.5V10.5M3.5 7H10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Add Term
+              </button>
+              <button 
+                type="button" 
+                class="btn-save-changes"
+                @click="toggleEditMode"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M11.667 3.5L5.25 9.917L2.333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Save Changes
+              </button>
             </div>
           </div>
         </div>
@@ -615,7 +633,7 @@ onMounted(() => {
   border: 1px solid #f2f2f7;
   border-radius: 12px;
   background: #fafafa;
-  padding: 16px;
+  padding: 16px 16px 0 16px;
 }
 
 .terms-list {
@@ -680,31 +698,80 @@ onMounted(() => {
   align-items: center;
 }
 
-.btn-remove {
+.btn-delete {
   background: #ff3b30;
   color: white;
   border: none;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 6px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
   transition: all 0.2s ease;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.btn-remove:hover:not(:disabled) {
+.btn-delete:hover:not(:disabled) {
   background: #d70015;
-  transform: scale(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
 }
 
-.btn-remove:disabled {
+.btn-delete:disabled {
   background: #86868b;
   cursor: not-allowed;
   transform: none;
+  opacity: 0.5;
+}
+
+.terms-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #f2f2f7;
+  background: white;
+  border-radius: 0 0 12px 12px;
+  margin: 16px -16px 0 -16px;
+}
+
+.btn-add-term,
+.btn-save-changes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-height: 36px;
+}
+
+.btn-add-term {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+}
+
+.btn-add-term:hover {
+  background: #e8e8ed;
+  transform: translateY(-1px);
+}
+
+.btn-save-changes {
+  background: #1c1c1e;
+  color: white;
+}
+
+.btn-save-changes:hover {
+  background: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(28, 28, 30, 0.3);
 }
 
 .agreement-info-card {
@@ -1049,6 +1116,11 @@ onMounted(() => {
     gap: 12px;
   }
   
+  .terms-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
   .content-wrapper {
     margin-top: 160px;
     padding: 16px;
@@ -1092,6 +1164,11 @@ onMounted(() => {
   .modal-body,
   .modal-footer {
     padding: 16px;
+  }
+  
+  .btn-add-term,
+  .btn-save-changes {
+    justify-content: center;
   }
   
   .upload-area {
