@@ -380,12 +380,12 @@ const filteredPairedList = computed(() => {
     // Safety check: ensure item exists before accessing properties
     if (!item) return false
     
-    return (!associatedFilters.value.city.length || associatedFilters.value.city.includes(item.city)) &&
-           (!associatedFilters.value.district.length || associatedFilters.value.district.includes(item.district)) &&
-           (!associatedFilters.value.state.length || associatedFilters.value.state.includes(item.state)) &&
-           (!associatedFilters.value.category.length || associatedFilters.value.category.includes(item.category)) &&
-           (!associatedFilters.value.subCategory.length || associatedFilters.value.subCategory.includes(item.subCategory)) &&
-           (!associatedFilters.value.status.length || associatedFilters.value.status.includes(item.status))
+    return (!associatedFilters.city.length || associatedFilters.city.includes(item.city)) &&
+           (!associatedFilters.district.length || associatedFilters.district.includes(item.district)) &&
+           (!associatedFilters.state.length || associatedFilters.state.includes(item.state)) &&
+           (!associatedFilters.category.length || associatedFilters.category.includes(item.category)) &&
+           (!associatedFilters.subCategory.length || associatedFilters.subCategory.includes(item.subCategory)) &&
+           (!associatedFilters.status.length || associatedFilters.status.includes(item.status))
   })
 })
 
@@ -410,20 +410,20 @@ const tableColumns = computed(() => [
 
 // Filter availability computed properties
 const availableStates = computed(() => {
-  if (filters.value.city.length > 0 || filters.value.district.length > 0) {
+  if (filters.city.length > 0 || filters.district.length > 0) {
     const relatedStates = new Set()
     
-    if (filters.value.city.length > 0) {
+    if (filters.city.length > 0) {
       Object.entries(locationMapping).forEach(([state, mapping]) => {
-        if (mapping.cities.some(city => filters.value.city.includes(city))) {
+        if (mapping.cities.some(city => filters.city.includes(city))) {
           relatedStates.add(state)
         }
       })
     }
     
-    if (filters.value.district.length > 0) {
+    if (filters.district.length > 0) {
       Object.entries(locationMapping).forEach(([state, mapping]) => {
-        if (mapping.districts.some(district => filters.value.district.includes(district))) {
+        if (mapping.districts.some(district => filters.district.includes(district))) {
           relatedStates.add(state)
         }
       })
@@ -435,9 +435,9 @@ const availableStates = computed(() => {
 })
 
 const availableDistricts = computed(() => {
-  if (filters.value.state.length > 0) {
+  if (filters.state.length > 0) {
     const relatedDistricts = new Set()
-    filters.value.state.forEach(state => {
+    filters.state.forEach(state => {
       const mapping = locationMapping[state]
       if (mapping) {
         mapping.districts.forEach(district => relatedDistricts.add(district))
@@ -449,9 +449,9 @@ const availableDistricts = computed(() => {
 })
 
 const availableCities = computed(() => {
-  if (filters.value.state.length > 0) {
+  if (filters.state.length > 0) {
     const relatedCities = new Set()
-    filters.value.state.forEach(state => {
+    filters.state.forEach(state => {
       const mapping = locationMapping[state]
       if (mapping) {
         mapping.cities.forEach(city => relatedCities.add(city))
@@ -463,9 +463,9 @@ const availableCities = computed(() => {
 })
 
 const availableCategories = computed(() => {
-  if (filters.value.subCategory.length > 0) {
+  if (filters.subCategory.length > 0) {
     const relatedCategories = new Set()
-    filters.value.subCategory.forEach(subCategory => {
+    filters.subCategory.forEach(subCategory => {
       Object.entries(industryToCategoryMapping).forEach(([category, subCategories]) => {
         if (subCategories.includes(subCategory)) {
           relatedCategories.add(category)
@@ -478,9 +478,9 @@ const availableCategories = computed(() => {
 })
 
 const availableSubCategories = computed(() => {
-  if (filters.value.category.length > 0) {
+  if (filters.category.length > 0) {
     const relatedSubCategories = new Set()
-    filters.value.category.forEach(category => {
+    filters.category.forEach(category => {
       const subCategories = industryToCategoryMapping[category]
       if (subCategories) {
         subCategories.forEach(subCategory => relatedSubCategories.add(subCategory))
@@ -493,20 +493,20 @@ const availableSubCategories = computed(() => {
 
 // Associated filters availability
 const availableAssociatedStates = computed(() => {
-  if (associatedFilters.value.city.length > 0 || associatedFilters.value.district.length > 0) {
+  if (associatedFilters.city.length > 0 || associatedFilters.district.length > 0) {
     const relatedStates = new Set()
     
-    if (associatedFilters.value.city.length > 0) {
+    if (associatedFilters.city.length > 0) {
       Object.entries(locationMapping).forEach(([state, mapping]) => {
-        if (mapping.cities.some(city => associatedFilters.value.city.includes(city))) {
+        if (mapping.cities.some(city => associatedFilters.city.includes(city))) {
           relatedStates.add(state)
         }
       })
     }
     
-    if (associatedFilters.value.district.length > 0) {
+    if (associatedFilters.district.length > 0) {
       Object.entries(locationMapping).forEach(([state, mapping]) => {
-        if (mapping.districts.some(district => associatedFilters.value.district.includes(district))) {
+        if (mapping.districts.some(district => associatedFilters.district.includes(district))) {
           relatedStates.add(state)
         }
       })
@@ -518,9 +518,9 @@ const availableAssociatedStates = computed(() => {
 })
 
 const availableAssociatedDistricts = computed(() => {
-  if (associatedFilters.value.state.length > 0) {
+  if (associatedFilters.state.length > 0) {
     const relatedDistricts = new Set()
-    associatedFilters.value.state.forEach(state => {
+    associatedFilters.state.forEach(state => {
       const mapping = locationMapping[state]
       if (mapping) {
         mapping.districts.forEach(district => relatedDistricts.add(district))
@@ -532,9 +532,9 @@ const availableAssociatedDistricts = computed(() => {
 })
 
 const availableAssociatedCities = computed(() => {
-  if (associatedFilters.value.state.length > 0) {
+  if (associatedFilters.state.length > 0) {
     const relatedCities = new Set()
-    associatedFilters.value.state.forEach(state => {
+    associatedFilters.state.forEach(state => {
       const mapping = locationMapping[state]
       if (mapping) {
         mapping.cities.forEach(city => relatedCities.add(city))
@@ -546,9 +546,9 @@ const availableAssociatedCities = computed(() => {
 })
 
 const availableAssociatedCategories = computed(() => {
-  if (associatedFilters.value.subCategory.length > 0) {
+  if (associatedFilters.subCategory.length > 0) {
     const relatedCategories = new Set()
-    associatedFilters.value.subCategory.forEach(subCategory => {
+    associatedFilters.subCategory.forEach(subCategory => {
       Object.entries(industryToCategoryMapping).forEach(([category, subCategories]) => {
         if (subCategories.includes(subCategory)) {
           relatedCategories.add(category)
@@ -561,9 +561,9 @@ const availableAssociatedCategories = computed(() => {
 })
 
 const availableAssociatedSubCategories = computed(() => {
-  if (associatedFilters.value.category.length > 0) {
+  if (associatedFilters.category.length > 0) {
     const relatedSubCategories = new Set()
-    associatedFilters.value.category.forEach(category => {
+    associatedFilters.category.forEach(category => {
       const subCategories = industryToCategoryMapping[category]
       if (subCategories) {
         subCategories.forEach(subCategory => relatedSubCategories.add(subCategory))
@@ -631,7 +631,7 @@ const onEntityChange = (newEntity) => {
 }
 
 const onFilterChange = (updated) => {
-  Object.assign(filters.value, updated)
+  Object.assign(filters, updated)
   if (selectedEntityItem.value) {
     const exists = currentEntityList.value.some(e => e.id === selectedEntityItem.value?.id)
     if (!exists) clearSelection()
@@ -639,19 +639,19 @@ const onFilterChange = (updated) => {
 }
 
 const onAssociatedFilterChange = (type, values) => {
-  associatedFilters.value[type] = values
+  associatedFilters[type] = values
 }
 
 const updateAssociatedLocationFilters = (type, values) => {
-  associatedFilters.value[type] = values
+  associatedFilters[type] = values
 }
 
 const updateAssociatedCategoryFilters = (type, values) => {
-  associatedFilters.value[type] = values
+  associatedFilters[type] = values
 }
 
 const removeFilterValue = (filterType, value) => {
-  const currentValues = filters.value[filterType]
+  const currentValues = filters[filterType]
   const newValues = currentValues.filter(v => v !== value)
   
   if (filterType === 'city' || filterType === 'district' || filterType === 'state') {
@@ -664,7 +664,7 @@ const removeFilterValue = (filterType, value) => {
 }
 
 const removeAssociatedFilterValue = (filterType, value) => {
-  const currentValues = associatedFilters.value[filterType]
+  const currentValues = associatedFilters[filterType]
   const newValues = currentValues.filter(v => v !== value)
   
   if (filterType === 'city' || filterType === 'district' || filterType === 'state') {
