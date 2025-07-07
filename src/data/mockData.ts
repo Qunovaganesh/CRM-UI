@@ -794,7 +794,6 @@ export const filterOptions: FilterOptions = {
     // Baby Care sub-categories
     'Baby Cereal', 'Disposable Diapers', 'Baby Lotion', 'Baby Shampoo', 'Baby Bottles'
   ],
-  statuses: ['Lead', 'Prospect', 'Customer', 'View']
   statuses: ['Registration', 'Lead', 'Prospect', 'Customer', 'View']
 };
 
