@@ -831,8 +831,10 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useBusinessLogic } from '../composables/useBusinessLogic'
 
 const router = useRouter()
+const { manufacturers, distributors } = useBusinessLogic()
 
 // Form state
 const leadCategory = ref<'manufacturer' | 'super-stockist' | 'distributor'>('manufacturer')
@@ -991,21 +993,70 @@ const submitForm = async () => {
   isSubmitting.value = true
   
   try {
-    // Prepare form data based on lead category
-    const formData = {
-      leadCategory: leadCategory.value,
-      address: addressForm,
-      ...(leadCategory.value === 'manufacturer' ? manufacturerForm : distributorForm)
+    // Generate unique ID
+    const timestamp = Date.now()
+    const id = leadCategory.value === 'manufacturer' ? `M${timestamp}` : `D${timestamp}`
+    
+    // Prepare the record based on lead category
+    if (leadCategory.value === 'manufacturer') {
+      const newManufacturer = {
+        id,
+        name: manufacturerForm.companyName || manufacturerForm.name,
+        city: addressForm.city,
+        district: addressForm.district,
+        state: addressForm.state,
+        category: manufacturerForm.category || 'General',
+        subCategory: 'General', // Default subcategory
+        status: 'Registration' as const,
+        registrationDate: new Date().toISOString(),
+        daysSinceStatus: 0,
+        // Store additional manufacturer data
+        contactName: manufacturerForm.name,
+        email: manufacturerForm.email,
+        mobile: manufacturerForm.mobile,
+        companyName: manufacturerForm.companyName,
+        address: addressForm.streetAddress,
+        pincode: addressForm.pincode
+      }
+      
+      // Add to manufacturers array
+      manufacturers.value.push(newManufacturer)
+      
+    } else {
+      // For both super-stockist and distributor, treat as distributor
+      const newDistributor = {
+        id,
+        name: distributorForm.companyName || distributorForm.name,
+        city: addressForm.city,
+        district: addressForm.district,
+        state: addressForm.state,
+        category: distributorForm.category || 'General',
+        subCategory: 'General', // Default subcategory
+        status: 'Registration' as const,
+        registrationDate: new Date().toISOString(),
+        daysSinceStatus: 0,
+        // Store additional distributor data
+        contactName: distributorForm.name,
+        email: distributorForm.email,
+        mobile: distributorForm.mobile,
+        companyName: distributorForm.companyName,
+        address: addressForm.streetAddress,
+        pincode: addressForm.pincode,
+        type: distributorForm.type || leadCategory.value
+      }
+      
+      // Add to distributors array
+      distributors.value.push(newDistributor)
     }
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500))
     
-    console.log('Form submitted:', formData)
-    alert('Lead registered successfully!')
+    alert(`${leadCategory.value === 'manufacturer' ? 'Manufacturer' : 'Distributor'} registered successfully!`)
     
-    // Redirect to dashboard or lead list
-    router.push('/')
+    // Reset form and redirect to dashboard
+    resetForm()
+    router.push('/dashboard')
     
   } catch (error) {
     console.error('Error submitting form:', error)

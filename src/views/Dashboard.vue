@@ -3,6 +3,11 @@
     <div class="page-header">
       <h1>Manufacturer-Distributor Management</h1>
       <p>Manage your business relationships and workflow processes</p>
+      <div class="header-actions">
+        <button class="btn-add-new" @click="$router.push('/')">
+          <span>➕</span> Add New Lead
+        </button>
+      </div>
     </div>
 
     <!-- Modern Entity Type Selection -->
@@ -710,6 +715,7 @@ const handleActionClick = (row) => {
 
 const getRouteNameFromStatus = (status) => {
   switch (status) {
+    case 'Registration': return 'Lead' // Process registration as lead
     case 'Lead': return 'Lead'
     case 'Prospect': return 'Prospect'
     case 'Customer': return 'Customer'
@@ -721,6 +727,7 @@ const getRouteNameFromStatus = (status) => {
 const getStatusBadgeClass = (status) => {
   const base = 'status-badge'
   return `${base} ${{
+    Registration: 'status-registration',
     Lead: 'status-lead',
     Prospect: 'status-prospect',
     Customer: 'status-customer',
@@ -753,6 +760,7 @@ watch(selectedEntityId, (newId) => {
 .page-header {
   margin-bottom: 32px;
   text-align: center;
+  position: relative;
 }
 
 .page-header h1 {
@@ -767,6 +775,36 @@ watch(selectedEntityId, (newId) => {
   color: #86868b;
   font-size: 18px;
   font-weight: 300;
+}
+
+.header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 12px;
+}
+
+.btn-add-new {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #1c1c1e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-add-new:hover {
+  background: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(28, 28, 30, 0.3);
 }
 
 .entity-type-selection {
@@ -1157,6 +1195,11 @@ watch(selectedEntityId, (newId) => {
   color: #8e8e93;
 }
 
+.status-registration {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
 .btn-change-selection {
   display: flex;
   align-items: center;
@@ -1202,6 +1245,16 @@ watch(selectedEntityId, (newId) => {
 @media (max-width: 768px) {
   .dashboard {
     padding: 16px;
+  }
+  
+  .page-header {
+    text-align: left;
+  }
+  
+  .header-actions {
+    position: static;
+    margin-top: 16px;
+    justify-content: center;
   }
   
   .page-header h1 {

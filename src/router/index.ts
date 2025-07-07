@@ -9,18 +9,18 @@ import Registration from '../views/Registration.vue';
 const routes = [
   {
     path: '/',
-    name: 'Dashboard',
-    component: Dashboard,
-    meta: {
-      title: 'Dashboard - Manufacturer-Distributor Management'
-    }
-  },
-  {
-    path: '/registration',
     name: 'Registration',
     component: Registration,
     meta: {
       title: 'New Lead Registration'
+    }
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: Dashboard,
+    meta: {
+      title: 'Dashboard - Manufacturer-Distributor Management'
     }
   },
   {

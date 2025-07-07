@@ -165,6 +165,7 @@ const getColumnClass = (key: string) => {
 
 const getActionButton = (row: any) => {
   if ('status' in row) {
+    if (row.status === 'Registration') return 'Process Lead';
     if (row.status === 'Lead') return 'Manage Lead';
     if (row.status === 'Prospect') return 'Manage Prospect';
     if (row.status === 'Customer') return 'Manage Customer';
@@ -176,6 +177,7 @@ const getActionButton = (row: any) => {
 const getActionButtonClass = (row: any) => {
   const baseClass = 'btn-action';
   if ('status' in row) {
+    if (row.status === 'Registration') return `${baseClass} btn-registration`;
     if (row.status === 'Lead') return `${baseClass} btn-lead`;
     if (row.status === 'Prospect') return `${baseClass} btn-prospect`;
     if (row.status === 'Customer') return `${baseClass} btn-customer`;
@@ -186,6 +188,7 @@ const getActionButtonClass = (row: any) => {
 
 const getStatusClass = (status: string) => {
   const baseClass = 'status-badge';
+  if (status === 'Registration') return `${baseClass} status-registration`;
   if (status === 'Lead') return `${baseClass} status-lead`;
   if (status === 'Prospect') return `${baseClass} status-prospect`;
   if (status === 'Customer') return `${baseClass} status-customer`;
@@ -393,6 +396,15 @@ onUnmounted(() => {
   background: #4b5563;
 }
 
+.btn-registration {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btn-registration:hover {
+  background: #7c3aed;
+}
+
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -422,6 +434,11 @@ onUnmounted(() => {
 .status-view {
   background: #f3f4f6;
   color: #374151;
+}
+
+.status-registration {
+  background: #ede9fe;
+  color: #7c3aed;
 }
 
 /* Mobile Cards */
