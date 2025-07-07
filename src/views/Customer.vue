@@ -26,191 +26,277 @@
     </div>
 
     <div class="content-wrapper">
-
-    <div class="customer-content">
-      <div class="invoice-section">
-        <h2>Invoice Management</h2>
-        
-        <div class="invoice-form">
-          <h3>{{ uploadType === 'proforma' ? 'Upload Proforma Invoice' : 'Upload Tax Invoice' }}</h3>
+      <div class="customer-content">
+        <div class="invoice-section">
+          <div class="section-header">
+            <h2>Invoice Management</h2>
+            <div class="section-icon">📄</div>
+          </div>
           
-          <div class="form-group">
-            <label>Invoice Type</label>
-            <select v-model="uploadType" @change="resetForm">
-              <option value="proforma">Proforma Invoice</option>
-              <option value="tax">Tax Invoice</option>
-            </select>
+          <div class="invoice-form-card">
+            <div class="form-header">
+              <h3>{{ uploadType === 'proforma' ? '📋 Upload Proforma Invoice' : '🧾 Upload Tax Invoice' }}</h3>
+              <div class="type-toggle">
+                <button 
+                  :class="{ active: uploadType === 'proforma' }"
+                  @click="uploadType = 'proforma'; resetForm()"
+                  class="toggle-btn"
+                >
+                  Proforma
+                </button>
+                <button 
+                  :class="{ active: uploadType === 'tax' }"
+                  @click="uploadType = 'tax'; resetForm()"
+                  class="toggle-btn"
+                >
+                  Tax Invoice
+                </button>
+              </div>
+            </div>
+
+            <form @submit.prevent="uploadInvoice" class="modern-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Invoice Number</label>
+                  <input 
+                    type="text" 
+                    v-model="newInvoice.invoiceNo" 
+                    placeholder="Enter invoice number"
+                    required
+                    class="modern-input"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Amount (₹)</label>
+                  <input 
+                    type="number" 
+                    v-model="newInvoice.amount" 
+                    @input="calculateCommission"
+                    placeholder="Enter amount"
+                    required
+                    class="modern-input"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Commission (%)</label>
+                  <input 
+                    type="number" 
+                    v-model="newInvoice.commissionPercent" 
+                    @input="calculateCommission"
+                    placeholder="Enter commission percentage"
+                    step="0.01"
+                    required
+                    class="modern-input"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Commission Amount (₹)</label>
+                  <input 
+                    type="number" 
+                    v-model="newInvoice.commissionAmount" 
+                    readonly
+                    placeholder="Auto-calculated"
+                    class="modern-input readonly"
+                  >
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Upload Invoice File</label>
+                  <div class="file-upload-area">
+                    <input 
+                      type="file" 
+                      @change="handleFileUpload"
+                      accept=".pdf,.jpg,.png"
+                      required
+                      class="file-input-hidden"
+                      id="invoice-upload"
+                    >
+                    <label for="invoice-upload" class="file-upload-label">
+                      <div class="upload-icon">📎</div>
+                      <div class="upload-text">
+                        <span>Click to upload invoice</span>
+                        <small>PDF, JPG, or PNG files</small>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-secondary" @click="resetForm">
+                  Reset
+                </button>
+                <button type="submit" class="btn-primary">
+                  📤 Upload Invoice
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="invoice-list">
+          <div class="section-header">
+            <h2>Invoice History</h2>
+            <div class="filter-controls">
+              <select v-model="invoiceFilter" @change="filterInvoices" class="modern-select">
+                <option value="all">All Invoices</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="month">This Month</option>
+                <option value="lastmonth">Last Month</option>
+                <option value="quarter">This Quarter</option>
+              </select>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label>Invoice Number</label>
-            <input 
-              type="text" 
-              v-model="newInvoice.invoiceNo" 
-              placeholder="Enter invoice number"
-              required
-            >
+          <div class="invoice-summary">
+            <div class="summary-cards">
+              <div class="summary-card">
+                <div class="summary-icon">📊</div>
+                <div class="summary-content">
+                  <h4>Total Invoices</h4>
+                  <p class="summary-value">{{ filteredInvoices.length }}</p>
+                </div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-icon">💰</div>
+                <div class="summary-content">
+                  <h4>Total Amount</h4>
+                  <p class="summary-value">₹{{ totalInvoiceAmount.toLocaleString() }}</p>
+                </div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-icon">💸</div>
+                <div class="summary-content">
+                  <h4>Total Commission</h4>
+                  <p class="summary-value">₹{{ totalCommissionAmount.toLocaleString() }}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label>Amount</label>
-            <input 
-              type="number" 
-              v-model="newInvoice.amount" 
-              @input="calculateCommission"
-              placeholder="Enter amount"
-              required
-            >
+          <div class="table-container">
+            <div class="table-wrapper">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Invoice No</th>
+                    <th>Amount</th>
+                    <th>Commission</th>
+                    <th>Upload Date</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="invoice in filteredInvoices" :key="invoice.id" class="table-row">
+                    <td>
+                      <span :class="getInvoiceTypeClass(invoice.type)" class="type-badge">
+                        {{ invoice.type }}
+                      </span>
+                    </td>
+                    <td class="invoice-number">{{ invoice.invoiceNo }}</td>
+                    <td class="amount">₹{{ invoice.amount.toLocaleString() }}</td>
+                    <td class="commission">₹{{ invoice.commissionAmount.toLocaleString() }}</td>
+                    <td class="date">{{ formatDate(invoice.uploadDate) }}</td>
+                    <td class="duration">{{ invoice.durationBetween ? `${invoice.durationBetween} days` : '-' }}</td>
+                    <td>
+                      <span class="status-pending">Pending</span>
+                    </td>
+                    <td>
+                      <button class="btn-action-small" @click="viewInvoice(invoice)">
+                        👁️ View
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label>Commission %</label>
-            <input 
-              type="number" 
-              v-model="newInvoice.commissionPercent" 
-              @input="calculateCommission"
-              placeholder="Enter commission percentage"
-              step="0.01"
-              required
-            >
-          </div>
-
-          <div class="form-group">
-            <label>Commission Amount</label>
-            <input 
-              type="number" 
-              v-model="newInvoice.commissionAmount" 
-              readonly
-              placeholder="Auto-calculated"
-            >
-          </div>
-
-          <div class="form-group">
-            <label>Upload Invoice</label>
-            <input 
-              type="file" 
-              @change="handleFileUpload"
-              accept=".pdf,.jpg,.png"
-              required
-            >
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-primary" @click="uploadInvoice">
-              Upload Invoice
-            </button>
+          <div v-if="!filteredInvoices.length" class="no-invoices">
+            <div class="no-data-content">
+              <div class="no-data-icon">📄</div>
+              <h4>No invoices found</h4>
+              <p>No invoices found for the selected period</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="invoice-list">
-        <h2>Invoice History</h2>
-        
-        <div class="filter-controls">
-          <select v-model="invoiceFilter" @change="filterInvoices">
-            <option value="all">All Invoices</option>
-            <option value="7days">Last 7 Days</option>
-            <option value="month">This Month</option>
-            <option value="lastmonth">Last Month</option>
-            <option value="quarter">This Quarter</option>
-          </select>
+      <div class="customer-actions">
+        <div class="section-header">
+          <h2>Customer Actions</h2>
+          <div class="section-icon">⚡</div>
         </div>
-
-        <div class="invoice-summary">
-          <div class="summary-cards">
-            <div class="summary-card">
-              <h4>Total Invoices</h4>
-              <p class="summary-value">{{ filteredInvoices.length }}</p>
+        <div class="action-grid">
+          <button class="action-card" @click="submitToCompliance">
+            <div class="action-icon">📋</div>
+            <div class="action-content">
+              <h4>Submit to Compliance</h4>
+              <p>Send for compliance review</p>
             </div>
-            <div class="summary-card">
-              <h4>Total Amount</h4>
-              <p class="summary-value">₹{{ totalInvoiceAmount.toLocaleString() }}</p>
+          </button>
+          <button class="action-card" @click="validateCustomer" v-if="showValidateButton">
+            <div class="action-icon">✅</div>
+            <div class="action-content">
+              <h4>Validate Customer</h4>
+              <p>Approve customer status</p>
             </div>
-            <div class="summary-card">
-              <h4>Total Commission</h4>
-              <p class="summary-value">₹{{ totalCommissionAmount.toLocaleString() }}</p>
+          </button>
+          <button class="action-card" @click="uploadPayment">
+            <div class="action-icon">💳</div>
+            <div class="action-content">
+              <h4>Upload Payment</h4>
+              <p>Record payment receipt</p>
             </div>
-          </div>
-        </div>
-
-        <div class="table-container">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Invoice No</th>
-                <th>Amount</th>
-                <th>Commission</th>
-                <th>Upload Date</th>
-                <th>Duration</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="invoice in filteredInvoices" :key="invoice.id">
-                <td>
-                  <span :class="getInvoiceTypeClass(invoice.type)">
-                    {{ invoice.type }}
-                  </span>
-                </td>
-                <td>{{ invoice.invoiceNo }}</td>
-                <td>₹{{ invoice.amount.toLocaleString() }}</td>
-                <td>₹{{ invoice.commissionAmount.toLocaleString() }}</td>
-                <td>{{ formatDate(invoice.uploadDate) }}</td>
-                <td>{{ invoice.durationBetween ? `${invoice.durationBetween} days` : '-' }}</td>
-                <td>
-                  <span class="status-pending">Pending</span>
-                </td>
-                <td>
-                  <button class="btn-link" @click="viewInvoice(invoice)">
-                    View
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div v-if="!filteredInvoices.length" class="no-invoices">
-          <p>No invoices found for the selected period</p>
+          </button>
+          <button class="action-card success" @click="convertToRegistered" v-if="isValidated">
+            <div class="action-icon">🎯</div>
+            <div class="action-content">
+              <h4>Convert to Registered</h4>
+              <p>Complete registration process</p>
+            </div>
+          </button>
         </div>
       </div>
-    </div>
-    </div>
 
-    <div class="customer-actions">
-      <h2>Customer Actions</h2>
-      <div class="action-buttons">
-        <button class="btn-secondary" @click="submitToCompliance">
-          Submit to Compliance
-        </button>
-        <button class="btn-primary" @click="validateCustomer" v-if="showValidateButton">
-          Validate Customer
-        </button>
-        <button class="btn-success" @click="uploadPayment">
-          Upload Payment
-        </button>
-        <button class="btn-success" @click="convertToRegistered" v-if="isValidated">
-          Convert to Registered Customer
-        </button>
-      </div>
-    </div>
-
-    <!-- Payment History -->
-    <div v-if="paymentHistory.length" class="payment-history">
-      <h2>Payment History</h2>
-      <div class="payment-list">
-        <div v-for="payment in paymentHistory" :key="payment.id" class="payment-item">
-          <div class="payment-info">
-            <h4>Payment #{{ payment.id }}</h4>
-            <p><strong>Amount:</strong> ₹{{ payment.amount.toLocaleString() }}</p>
-            <p><strong>Method:</strong> {{ payment.method }}</p>
-            <p><strong>Date:</strong> {{ formatDate(payment.date) }}</p>
-            <p><strong>Status:</strong> <span class="status-success">Completed</span></p>
-          </div>
-          <div class="payment-file">
-            <p><strong>Receipt:</strong> {{ payment.fileName }}</p>
+      <!-- Payment History -->
+      <div v-if="paymentHistory.length" class="payment-history">
+        <div class="section-header">
+          <h2>Payment History</h2>
+          <div class="section-icon">💰</div>
+        </div>
+        <div class="payment-list">
+          <div v-for="payment in paymentHistory" :key="payment.id" class="payment-card">
+            <div class="payment-info">
+              <div class="payment-header">
+                <h4>Payment #{{ payment.id }}</h4>
+                <span class="status-success">Completed</span>
+              </div>
+              <div class="payment-details">
+                <div class="detail-item">
+                  <span class="detail-label">Amount:</span>
+                  <span class="detail-value">₹{{ payment.amount.toLocaleString() }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Method:</span>
+                  <span class="detail-value">{{ payment.method }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Date:</span>
+                  <span class="detail-value">{{ formatDate(payment.date) }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Receipt:</span>
+                  <span class="detail-value">{{ payment.fileName }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -224,34 +310,46 @@
           <button class="btn-close" @click="closePaymentModal">×</button>
         </div>
         <div class="modal-body">
-          <div class="payment-form">
+          <form @submit.prevent="submitPayment" class="payment-form">
             <div class="form-group">
-              <label>Payment Amount</label>
+              <label>Payment Amount (₹)</label>
               <input 
                 type="number" 
                 v-model="paymentAmount" 
                 placeholder="Enter payment amount"
                 required
+                class="modern-input"
               >
             </div>
             <div class="form-group">
               <label>Payment Method</label>
-              <select v-model="paymentMethod">
-                <option value="bank_transfer">Bank Transfer</option>
-                <option value="cheque">Cheque</option>
-                <option value="online">Online Payment</option>
+              <select v-model="paymentMethod" class="modern-select">
+                <option value="bank_transfer">🏦 Bank Transfer</option>
+                <option value="cheque">📝 Cheque</option>
+                <option value="online">💻 Online Payment</option>
               </select>
             </div>
             <div class="form-group">
               <label>Payment Receipt</label>
-              <input 
-                type="file" 
-                @change="handlePaymentFileUpload"
-                accept=".pdf,.jpg,.png"
-                required
-              >
+              <div class="file-upload-area">
+                <input 
+                  type="file" 
+                  @change="handlePaymentFileUpload"
+                  accept=".pdf,.jpg,.png"
+                  required
+                  class="file-input-hidden"
+                  id="payment-upload"
+                >
+                <label for="payment-upload" class="file-upload-label">
+                  <div class="upload-icon">📎</div>
+                  <div class="upload-text">
+                    <span>Upload payment receipt</span>
+                    <small>PDF, JPG, or PNG files</small>
+                  </div>
+                </label>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" @click="closePaymentModal">Cancel</button>
@@ -301,13 +399,10 @@ const distributorData = computed(() => {
 });
 
 const manufacturerData = computed(() => {
-  // Check if we're dealing with a distributor or manufacturer customer
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
-    // This is a distributor customer, find matching manufacturer
     return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
   } else {
-    // This is a manufacturer customer
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
       return manufacturer;
@@ -321,7 +416,6 @@ const isManufacturerCustomer = computed(() => {
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
-
 const distributorName = computed(() => distributorData.value.name);
 
 const filteredInvoices = computed(() => {
@@ -464,9 +558,6 @@ const submitPayment = () => {
     
     paymentHistory.value.unshift(newPayment);
     
-    // Update status to Customer after successful payment
-    // This logic would be handled by the business logic layer
-    
     alert('Payment uploaded successfully!');
     closePaymentModal();
   } else {
@@ -476,14 +567,12 @@ const submitPayment = () => {
 
 const convertToRegistered = () => {
   if (isManufacturerCustomer.value) {
-    // Update manufacturer status
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
       manufacturer.status = 'View';
       manufacturer.daysSinceStatus = 0;
     }
   } else {
-    // Update distributor status
     updateDistributorStatus(props.id, 'View');
   }
   alert('Customer converted to registered status! Redirecting...');
@@ -498,21 +587,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.customer-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f5f5f7;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 .floating-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #d2d2d7;
   padding: 20px;
   z-index: 100;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .content-wrapper {
   margin-top: 140px;
-  padding: 20px;
+  padding: 24px;
 }
 
 .floating-back-button {
@@ -523,39 +620,26 @@ onMounted(() => {
 }
 
 .btn-floating-back {
-  background: #0066cc;
+  background: #1c1c1e;
   color: white;
   border: none;
   padding: 12px 20px;
   border-radius: 25px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(28, 28, 30, 0.3);
   transition: all 0.3s ease;
 }
 
 .btn-floating-back:hover {
-  background: #0052a3;
+  background: #000000;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
-}
-
-.customer-page {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 30px;
-}
-
-.relationship-header {
-  margin-bottom: 10px;
+  box-shadow: 0 6px 25px rgba(28, 28, 30, 0.4);
 }
 
 .relationship-header h1 {
-  color: #1f2937;
+  color: #1d1d1f;
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 10px 0;
@@ -570,34 +654,36 @@ onMounted(() => {
 }
 
 .manufacturer {
-  background: #dbeafe;
+  background: #e8f4fd;
   color: #1e40af;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   font-weight: 600;
   font-size: 14px;
+  border: 1px solid #bfdbfe;
 }
 
 .distributor {
   background: #fef3c7;
   color: #92400e;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   font-weight: 600;
   font-size: 14px;
+  border: 1px solid #fde68a;
 }
 
 .connector {
-  color: #6b7280;
+  color: #86868b;
   font-size: 18px;
   font-weight: bold;
 }
 
 .status-badge {
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -605,310 +691,527 @@ onMounted(() => {
 .status-customer {
   background: #d1fae5;
   color: #065f46;
+  border: 1px solid #a7f3d0;
 }
 
 .selected-entity {
-  border: 2px solid #0066cc !important;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
-}
-
-.page-header p {
-  color: #6b7280;
-  margin: 0;
+  border: 2px solid #1c1c1e !important;
+  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2);
 }
 
 .customer-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: 32px;
+  margin-bottom: 32px;
 }
 
 .invoice-section,
 .invoice-list {
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid #d2d2d7;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f2f2f7;
+}
+
+.section-header h2 {
+  color: #1d1d1f;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.section-icon {
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.invoice-form-card {
+  background: #fafafa;
+  border: 1px solid #f2f2f7;
+  border-radius: 12px;
   padding: 20px;
 }
 
-.invoice-section h2,
-.invoice-list h2 {
-  color: #374151;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.invoice-form h3 {
-  color: #4b5563;
+.form-header h3 {
+  color: #1d1d1f;
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 15px;
+  margin: 0;
+}
+
+.type-toggle {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid #d2d2d7;
+}
+
+.toggle-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #86868b;
+}
+
+.toggle-btn.active {
+  background: #1c1c1e;
+  color: white;
+}
+
+.modern-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 15px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
 .form-group label {
   font-weight: 600;
-  color: #374151;
+  color: #1d1d1f;
   font-size: 14px;
 }
 
-.form-group input,
-.form-group select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+.modern-input,
+.modern-select {
+  padding: 10px 12px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
   font-size: 14px;
+  color: #1d1d1f;
+  background: white;
+  transition: all 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.modern-input:focus,
+.modern-select:focus {
   outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+  border-color: #1c1c1e;
+  box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.1);
 }
 
-.form-group input[readonly] {
-  background: #f3f4f6;
-  color: #6b7280;
+.modern-input.readonly {
+  background: #f5f5f7;
+  color: #86868b;
+  cursor: not-allowed;
+}
+
+.file-upload-area {
+  border: 2px dashed #d2d2d7;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-upload-area:hover {
+  border-color: #1c1c1e;
+  background: #fafafa;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.file-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.upload-icon {
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.upload-text span {
+  color: #1d1d1f;
+  font-weight: 500;
+  display: block;
+}
+
+.upload-text small {
+  color: #86868b;
+  font-size: 12px;
 }
 
 .form-actions {
   display: flex;
+  gap: 12px;
   justify-content: flex-end;
-  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f2f2f7;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primary {
+  background: #1c1c1e;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #000000;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+}
+
+.btn-secondary:hover {
+  background: #e8e8ed;
+  transform: translateY(-1px);
 }
 
 .filter-controls {
-  margin-bottom: 20px;
-}
-
-.filter-controls select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 14px;
-  min-width: 150px;
+  display: flex;
+  align-items: center;
 }
 
 .invoice-summary {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+  gap: 16px;
 }
 
 .summary-card {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 15px;
-  text-align: center;
+  background: #fafafa;
+  border: 1px solid #f2f2f7;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.summary-card h4 {
-  color: #374151;
+.summary-icon {
+  font-size: 24px;
+  opacity: 0.7;
+}
+
+.summary-content h4 {
+  color: #86868b;
   font-size: 12px;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .summary-value {
-  color: #0066cc;
+  color: #1d1d1f;
   font-size: 18px;
   font-weight: 700;
   margin: 0;
 }
 
 .table-container {
-  overflow-x: auto;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #f2f2f7;
 }
 
-.table {
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modern-table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
 }
 
-.table th,
-.table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.table th {
-  background: #f8f9fa;
+.modern-table th {
+  background: #fafafa;
   font-weight: 600;
-  color: #374151;
-  font-size: 14px;
+  color: #1d1d1f;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f2f2f7;
+  white-space: nowrap;
 }
 
-.table td {
-  color: #4b5563;
+.modern-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8f8f8;
+  color: #1d1d1f;
   font-size: 14px;
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: #fafafa;
+}
+
+.type-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .type-proforma {
-  background: #fef3c7;
-  color: #92400e;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  background: #fff3cd;
+  color: #856404;
 }
 
 .type-tax {
   background: #d1fae5;
   color: #065f46;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .status-pending {
-  background: #fef3c7;
-  color: #92400e;
-  padding: 2px 8px;
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.btn-link {
-  background: none;
+.btn-action-small {
+  background: #1c1c1e;
+  color: white;
   border: none;
-  color: #0066cc;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  text-decoration: underline;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.btn-link:hover {
-  color: #0052a3;
+.btn-action-small:hover {
+  background: #000000;
+  transform: translateY(-1px);
 }
 
 .no-invoices {
-  padding: 40px;
+  padding: 40px 20px;
   text-align: center;
-  color: #6b7280;
 }
 
-.no-invoices p {
+.no-data-content {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.no-data-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.no-data-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.no-data-content p {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
+  color: #86868b;
 }
 
 .customer-actions {
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid #d2d2d7;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.action-card {
+  background: #fafafa;
+  border: 1px solid #f2f2f7;
+  border-radius: 12px;
   padding: 20px;
-}
-
-.customer-actions h2 {
-  color: #374151;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
-}
-
-.action-buttons {
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
 }
 
-.btn-primary {
-  background: #0066cc;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
+.action-card:hover {
+  background: #f5f5f7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary:hover {
-  background: #0052a3;
+.action-card.success {
+  background: #d1fae5;
+  border-color: #a7f3d0;
 }
 
-.btn-secondary {
-  background: #6b7280;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
+.action-card.success:hover {
+  background: #bbf7d0;
 }
 
-.btn-secondary:hover {
-  background: #4b5563;
+.action-icon {
+  font-size: 32px;
+  opacity: 0.8;
+}
+
+.action-content h4 {
+  color: #1d1d1f;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.action-content p {
+  color: #86868b;
+  font-size: 14px;
+  margin: 0;
 }
 
 .payment-history {
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 30px;
-}
-
-.payment-history h2 {
-  color: #374151;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
+  border: 1px solid #d2d2d7;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .payment-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
-.payment-item {
+.payment-card {
+  background: #fafafa;
+  border: 1px solid #f2f2f7;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.payment-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background: #f9fafb;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  margin-bottom: 12px;
 }
 
-.payment-info h4 {
-  margin: 0 0 8px 0;
-  color: #374151;
+.payment-header h4 {
+  margin: 0;
+  color: #1d1d1f;
   font-size: 16px;
   font-weight: 600;
 }
 
-.btn-success {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
+.status-success {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.btn-success:hover {
-  background: #059669;
+.payment-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #86868b;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  color: #1d1d1f;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .modal-overlay {
@@ -922,28 +1225,30 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
 }
 
 .modal-content {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 24px;
+  border-bottom: 1px solid #f2f2f7;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #374151;
+  color: #1d1d1f;
   font-size: 18px;
   font-weight: 600;
 }
@@ -953,38 +1258,48 @@ onMounted(() => {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: #86868b;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .btn-close:hover {
-  color: #374151;
+  background: #f5f5f7;
+  color: #1d1d1f;
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 20px;
-  border-top: 1px solid #e5e7eb;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #f2f2f7;
 }
 
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 @media (max-width: 768px) {
   .customer-content {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
   
   .content-wrapper {
     margin-top: 160px;
+    padding: 16px;
   }
   
   .relationship-info {
@@ -993,18 +1308,50 @@ onMounted(() => {
     gap: 8px;
   }
   
-  .action-buttons {
-    flex-direction: column;
+  .action-grid {
+    grid-template-columns: 1fr;
   }
   
   .summary-cards {
     grid-template-columns: 1fr;
   }
   
-  .table th,
-  .table td {
-    padding: 8px;
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .invoice-section,
+  .invoice-list,
+  .customer-actions,
+  .payment-history {
+    padding: 16px;
+  }
+  
+  .invoice-form-card {
+    padding: 16px;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 8px 12px;
     font-size: 12px;
+  }
+  
+  .action-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .action-icon {
+    font-size: 24px;
   }
 }
 </style>

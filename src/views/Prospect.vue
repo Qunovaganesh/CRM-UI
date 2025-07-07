@@ -26,130 +26,144 @@
     </div>
 
     <div class="content-wrapper">
-
-    <div class="prospect-content">
-      <div class="terms-section">
-        <h2>Terms & Conditions</h2>
-        <div class="terms-container">
-          <div class="terms-form">
-            <div v-for="term in agreement.terms" :key="term.id" class="term-item">
-              <div class="term-group">
-                <label>Clause</label>
-                <select 
-                  v-model="term.clause" 
-                  :disabled="!editMode"
-                  @change="onClauseChange(term)"
-                >
-                  <option value="">Select Clause</option>
-                  <option v-for="clause in termsOptions.clauses" :key="clause" :value="clause">
-                    {{ clause }}
-                  </option>
-                </select>
-              </div>
-              <div class="term-group">
-                <label>Response</label>
-                <select 
-                  v-model="term.response" 
-                  :disabled="!editMode || !term.clause"
-                >
-                  <option value="">Select Response</option>
-                  <option 
-                    v-for="response in getResponseOptions(term.clause)" 
-                    :key="response" 
-                    :value="response"
-                  >
-                    {{ response }}
-                  </option>
-                </select>
-              </div>
-              <div class="term-actions" v-if="editMode">
-                <button 
-                  type="button" 
-                  class="btn-remove" 
-                  @click="removeTerm(term.id)"
-                  :disabled="agreement.terms.length <= 1"
-                >
-                  Remove
-                </button>
+      <div class="prospect-content">
+        <div class="terms-section">
+          <div class="section-header">
+            <h2>Terms & Conditions</h2>
+            <div class="section-actions">
+              <button 
+                type="button" 
+                class="btn-edit"
+                @click="toggleEditMode"
+              >
+                {{ editMode ? '💾 Save Changes' : '✏️ Edit Terms' }}
+              </button>
+              <button 
+                type="button" 
+                class="btn-add" 
+                @click="addTerm"
+                v-if="editMode"
+              >
+                ➕ Add Term
+              </button>
+            </div>
+          </div>
+          
+          <div class="terms-container">
+            <div class="terms-list">
+              <div v-for="term in agreement.terms" :key="term.id" class="term-card">
+                <div class="term-content">
+                  <div class="term-field">
+                    <label>Clause</label>
+                    <select 
+                      v-model="term.clause" 
+                      :disabled="!editMode"
+                      @change="onClauseChange(term)"
+                      class="modern-select"
+                    >
+                      <option value="">Select Clause</option>
+                      <option v-for="clause in termsOptions.clauses" :key="clause" :value="clause">
+                        {{ clause }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="term-field">
+                    <label>Response</label>
+                    <select 
+                      v-model="term.response" 
+                      :disabled="!editMode || !term.clause"
+                      class="modern-select"
+                    >
+                      <option value="">Select Response</option>
+                      <option 
+                        v-for="response in getResponseOptions(term.clause)" 
+                        :key="response" 
+                        :value="response"
+                      >
+                        {{ response }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="term-actions" v-if="editMode">
+                    <button 
+                      type="button" 
+                      class="btn-remove" 
+                      @click="removeTerm(term.id)"
+                      :disabled="agreement.terms.length <= 1"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        
-        <div class="form-actions">
-          <button 
-            type="button" 
-            class="btn-primary" 
-            @click="toggleEditMode"
-          >
-            {{ editMode ? 'Save Changes' : 'Edit Terms' }}
-          </button>
-          <button 
-            type="button" 
-            class="btn-secondary" 
-            @click="addTerm"
-            v-if="editMode"
-          >
-            Add Term
-          </button>
+
+        <div class="agreement-section">
+          <div class="section-header">
+            <h2>Agreement Management</h2>
+            <div class="section-icon">📋</div>
+          </div>
+          
+          <div class="agreement-info-card">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Status</span>
+                <span :class="getStatusClass(agreement.status)" class="status-indicator">
+                  {{ agreement.status }}
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Version</span>
+                <span class="info-value">v{{ agreement.version }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Created</span>
+                <span class="info-value">{{ formatDate(agreement.createdDate) }}</span>
+              </div>
+              <div class="info-item" v-if="agreement.signedDate">
+                <span class="info-label">Signed</span>
+                <span class="info-value">{{ formatDate(agreement.signedDate) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="agreement-actions">
+            <button 
+              class="btn-primary" 
+              @click="generateAgreement"
+              :disabled="agreement.status === 'Signed'"
+            >
+              {{ agreement.status === 'Draft' ? '📄 Generate Agreement' : '🔄 Regenerate Agreement' }}
+            </button>
+            
+            <button 
+              class="btn-secondary" 
+              @click="downloadAgreement"
+              v-if="agreement.status !== 'Draft'"
+            >
+              📥 Download PDF
+            </button>
+            
+            <button 
+              class="btn-secondary" 
+              @click="uploadSigned"
+              v-if="agreement.status === 'Generated'"
+            >
+              📤 Upload Signed Copy
+            </button>
+            
+            <button 
+              class="btn-success" 
+              @click="convertToCustomer"
+              v-if="agreement.status === 'Signed'"
+            >
+              ✅ Convert to Customer
+            </button>
+          </div>
         </div>
       </div>
-
-      <div class="agreement-section">
-        <h2>Agreement Management</h2>
-        <div class="agreement-info">
-          <div class="info-item">
-            <strong>Status:</strong> 
-            <span :class="getStatusClass(agreement.status)">
-              {{ agreement.status }}
-            </span>
-          </div>
-          <div class="info-item">
-            <strong>Version:</strong> {{ agreement.version }}
-          </div>
-          <div class="info-item">
-            <strong>Created:</strong> {{ formatDate(agreement.createdDate) }}
-          </div>
-          <div class="info-item" v-if="agreement.signedDate">
-            <strong>Signed:</strong> {{ formatDate(agreement.signedDate) }}
-          </div>
-        </div>
-
-        <div class="agreement-actions">
-          <button 
-            class="btn-primary" 
-            @click="generateAgreement"
-            :disabled="agreement.status === 'Signed'"
-          >
-            {{ agreement.status === 'Draft' ? 'Generate Agreement' : 'Regenerate Agreement' }}
-          </button>
-          
-          <button 
-            class="btn-secondary" 
-            @click="downloadAgreement"
-            v-if="agreement.status !== 'Draft'"
-          >
-            Download PDF
-          </button>
-          
-          <button 
-            class="btn-secondary" 
-            @click="uploadSigned"
-            v-if="agreement.status === 'Generated'"
-          >
-            Upload Signed Copy
-          </button>
-          
-          <button 
-            class="btn-success" 
-            @click="convertToCustomer"
-            v-if="agreement.status === 'Signed'"
-          >
-            {{ isManufacturerProspect ? 'Convert to Customer' : 'Convert to Customer' }}
-          </button>
-        </div>
-      </div>
-    </div>
     </div>
 
     <!-- Agreement Preview Modal -->
@@ -161,22 +175,29 @@
         </div>
         <div class="modal-body">
           <div class="agreement-preview">
-            <h4>Distribution Agreement</h4>
-            <p><strong>Manufacturer:</strong> {{ manufacturerName }}</p>
-            <p><strong>Distributor:</strong> {{ distributorName }}</p>
-            <p><strong>Version:</strong> {{ agreement.version }}</p>
-            <p><strong>Date:</strong> {{ formatDate(agreement.createdDate) }}</p>
+            <div class="preview-header">
+              <h4>Distribution Agreement</h4>
+              <div class="preview-meta">
+                <p><strong>Manufacturer:</strong> {{ manufacturerName }}</p>
+                <p><strong>Distributor:</strong> {{ distributorName }}</p>
+                <p><strong>Version:</strong> {{ agreement.version }}</p>
+                <p><strong>Date:</strong> {{ formatDate(agreement.createdDate) }}</p>
+              </div>
+            </div>
             
             <div class="terms-preview">
               <h5>Terms & Conditions</h5>
-              <div v-for="term in agreement.terms" :key="term.id" class="term-preview">
-                <p><strong>{{ term.clause }}:</strong> {{ term.response }}</p>
+              <div class="terms-preview-list">
+                <div v-for="term in agreement.terms" :key="term.id" class="term-preview-item">
+                  <div class="term-preview-clause">{{ term.clause }}</div>
+                  <div class="term-preview-response">{{ term.response }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" @click="closePreview">Back</button>
+          <button class="btn-secondary" @click="closePreview">Cancel</button>
           <button class="btn-primary" @click="confirmGeneration">Confirm Generation</button>
         </div>
       </div>
@@ -191,21 +212,33 @@
         </div>
         <div class="modal-body">
           <div class="upload-section">
-            <input 
-              type="file" 
-              ref="fileInput"
-              @change="handleFileUpload"
-              accept=".pdf,.doc,.docx"
-            >
-            <p class="upload-note">
-              Please upload the signed agreement in PDF or DOC format.
-            </p>
+            <div class="upload-area">
+              <input 
+                type="file" 
+                ref="fileInput"
+                @change="handleFileUpload"
+                accept=".pdf,.doc,.docx"
+                class="file-input-hidden"
+                id="file-upload"
+              >
+              <label for="file-upload" class="upload-label">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">
+                  <p>Click to upload signed agreement</p>
+                  <span>PDF, DOC, or DOCX files only</span>
+                </div>
+              </label>
+            </div>
+            <div v-if="selectedFile" class="selected-file">
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <button @click="selectedFile = null" class="btn-remove-file">×</button>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" @click="closeUpload">Cancel</button>
           <button class="btn-primary" @click="submitUpload" :disabled="!selectedFile">
-            Upload
+            Upload Agreement
           </button>
         </div>
       </div>
@@ -239,13 +272,10 @@ const distributorData = computed(() => {
 });
 
 const manufacturerData = computed(() => {
-  // Check if we're dealing with a distributor or manufacturer prospect
   const distributor = mockDistributors.find(d => d.id === props.id);
   if (distributor) {
-    // This is a distributor prospect, find matching manufacturer
-    return mockManufacturers.find(m => m.industry === distributor.industry) || mockManufacturers[0];
+    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
   } else {
-    // This is a manufacturer prospect
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
       return manufacturer;
@@ -255,11 +285,9 @@ const manufacturerData = computed(() => {
 });
 
 const distributorName = computed(() => distributorData.value.name);
-
 const isManufacturerProspect = computed(() => {
   return mockManufacturers.some(m => m.id === props.id);
 });
-
 const manufacturerName = computed(() => manufacturerData.value.name);
 
 const formatDate = (dateString: string) => {
@@ -300,7 +328,6 @@ const removeTerm = (termId: string) => {
 };
 
 const onClauseChange = (term: TermsCondition) => {
-  // Reset response when clause changes
   term.response = '';
 };
 
@@ -310,7 +337,6 @@ const getResponseOptions = (clause: string) => {
 
 const toggleEditMode = () => {
   if (editMode.value) {
-    // Save changes
     updateAgreement(agreement.value);
   }
   editMode.value = !editMode.value;
@@ -378,14 +404,12 @@ const submitUpload = () => {
 
 const convertToCustomer = () => {
   if (isManufacturerProspect.value) {
-    // Update manufacturer status
     const manufacturer = mockManufacturers.find(m => m.id === props.id);
     if (manufacturer) {
       manufacturer.status = 'Customer';
       manufacturer.daysSinceStatus = 0;
     }
   } else {
-    // Update distributor status
     updateDistributorStatus(props.id, 'Customer');
   }
   alert('Status updated to Customer! Redirecting...');
@@ -400,21 +424,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.prospect-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f5f5f7;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 .floating-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #d2d2d7;
   padding: 20px;
   z-index: 100;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .content-wrapper {
   margin-top: 140px;
-  padding: 20px;
+  padding: 24px;
 }
 
 .floating-back-button {
@@ -425,39 +457,26 @@ onMounted(() => {
 }
 
 .btn-floating-back {
-  background: #0066cc;
+  background: #1c1c1e;
   color: white;
   border: none;
   padding: 12px 20px;
   border-radius: 25px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(28, 28, 30, 0.3);
   transition: all 0.3s ease;
 }
 
 .btn-floating-back:hover {
-  background: #0052a3;
+  background: #000000;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
-}
-
-.prospect-page {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 30px;
-}
-
-.relationship-header {
-  margin-bottom: 10px;
+  box-shadow: 0 6px 25px rgba(28, 28, 30, 0.4);
 }
 
 .relationship-header h1 {
-  color: #1f2937;
+  color: #1d1d1f;
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 10px 0;
@@ -472,131 +491,188 @@ onMounted(() => {
 }
 
 .manufacturer {
-  background: #dbeafe;
+  background: #e8f4fd;
   color: #1e40af;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   font-weight: 600;
   font-size: 14px;
+  border: 1px solid #bfdbfe;
 }
 
 .distributor {
   background: #fef3c7;
   color: #92400e;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   font-weight: 600;
   font-size: 14px;
+  border: 1px solid #fde68a;
 }
 
 .connector {
-  color: #6b7280;
+  color: #86868b;
   font-size: 18px;
   font-weight: bold;
 }
 
 .status-badge {
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .status-prospect {
-  background: #dbeafe;
+  background: #e8f4fd;
   color: #1e40af;
+  border: 1px solid #bfdbfe;
 }
 
 .selected-entity {
-  border: 2px solid #0066cc !important;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
-}
-
-.page-header p {
-  color: #6b7280;
-  margin: 0;
+  border: 2px solid #1c1c1e !important;
+  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2);
 }
 
 .prospect-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 32px;
 }
 
 .terms-section,
 .agreement-section {
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 20px;
+  border: 1px solid #d2d2d7;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.terms-section h2,
-.agreement-section h2 {
-  color: #374151;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f2f2f7;
+}
+
+.section-header h2 {
+  color: #1d1d1f;
   font-size: 20px;
   font-weight: 600;
-  margin: 0 0 20px 0;
+  margin: 0;
+}
+
+.section-icon {
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.section-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-edit,
+.btn-add {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  background: #1c1c1e;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #000000;
+  transform: translateY(-1px);
+}
+
+.btn-add {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+}
+
+.btn-add:hover {
+  background: #e8e8ed;
+  transform: translateY(-1px);
 }
 
 .terms-container {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
-  margin-bottom: 20px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 15px;
-  background: #f9fafb;
+  border: 1px solid #f2f2f7;
+  border-radius: 12px;
+  background: #fafafa;
+  padding: 16px;
 }
 
-.terms-form {
+.terms-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
-.term-item {
+.term-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #f2f2f7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.term-content {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
-  gap: 15px;
+  gap: 16px;
   align-items: end;
-  background: white;
-  border-radius: 6px;
-  padding: 15px;
-  border: 1px solid #e5e7eb;
 }
 
-.term-group {
+.term-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.term-group label {
+.term-field label {
   font-weight: 600;
-  color: #374151;
-  font-size: 14px;
+  color: #1d1d1f;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.term-group select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+.modern-select {
+  padding: 10px 12px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
   font-size: 14px;
+  color: #1d1d1f;
+  background: white;
+  transition: all 0.2s ease;
 }
 
-.term-group select:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
+.modern-select:disabled {
+  background: #f5f5f7;
+  color: #86868b;
   cursor: not-allowed;
 }
 
-.term-group select:focus {
+.modern-select:focus {
   outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+  border-color: #1c1c1e;
+  box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.1);
 }
 
 .term-actions {
@@ -605,127 +681,145 @@ onMounted(() => {
 }
 
 .btn-remove {
-  background: #ef4444;
+  background: #ff3b30;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-remove:hover:not(:disabled) {
-  background: #dc2626;
+  background: #d70015;
+  transform: scale(1.05);
 }
 
 .btn-remove:disabled {
-  background: #9ca3af;
+  background: #86868b;
   cursor: not-allowed;
+  transform: none;
 }
 
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+.agreement-info-card {
+  background: #fafafa;
+  border: 1px solid #f2f2f7;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
 }
 
-.agreement-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
 }
 
 .info-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #86868b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  color: #1d1d1f;
+  font-weight: 500;
   font-size: 14px;
 }
 
-.info-item strong {
-  color: #374151;
+.status-indicator {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
 }
 
 .status-draft {
-  background: #fef3c7;
-  color: #92400e;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  background: #fff3cd;
+  color: #856404;
 }
 
 .status-generated {
-  background: #dbeafe;
+  background: #e8f4fd;
   color: #1e40af;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .status-signed {
   background: #d1fae5;
   color: #065f46;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .agreement-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-success {
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-align: center;
 }
 
 .btn-primary {
-  background: #0066cc;
+  background: #1c1c1e;
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #0052a3;
+  background: #000000;
+  transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
-  background: #9ca3af;
+  background: #86868b;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
-  background: #6b7280;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
 }
 
 .btn-secondary:hover {
-  background: #4b5563;
+  background: #e8e8ed;
+  transform: translateY(-1px);
 }
 
 .btn-success {
-  background: #10b981;
+  background: #30d158;
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
 }
 
 .btn-success:hover {
-  background: #059669;
+  background: #28cd4f;
+  transform: translateY(-1px);
 }
 
 .modal-overlay {
@@ -739,15 +833,17 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
 }
 
 .modal-content {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .large-modal {
@@ -758,13 +854,13 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 24px;
+  border-bottom: 1px solid #f2f2f7;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #374151;
+  color: #1d1d1f;
   font-size: 18px;
   font-weight: 600;
 }
@@ -774,79 +870,192 @@ onMounted(() => {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: #86868b;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .btn-close:hover {
-  color: #374151;
+  background: #f5f5f7;
+  color: #1d1d1f;
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 20px;
-  border-top: 1px solid #e5e7eb;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #f2f2f7;
 }
 
-.agreement-preview h4 {
-  color: #1f2937;
+.agreement-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.preview-header h4 {
+  color: #1d1d1f;
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-.agreement-preview h5 {
-  color: #374151;
+.preview-meta {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #f2f2f7;
+}
+
+.preview-meta p {
+  margin: 4px 0;
+  color: #1d1d1f;
+  font-size: 14px;
+}
+
+.terms-preview h5 {
+  color: #1d1d1f;
   font-size: 18px;
   font-weight: 600;
-  margin: 20px 0 10px 0;
+  margin-bottom: 16px;
 }
 
-.term-preview {
-  margin-bottom: 15px;
-  padding: 10px;
-  background: #f9fafb;
-  border-radius: 4px;
+.terms-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.term-preview p {
-  margin: 0;
-  color: #4b5563;
-  line-height: 1.5;
+.term-preview-item {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #f2f2f7;
+}
+
+.term-preview-clause {
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.term-preview-response {
+  color: #86868b;
+  font-size: 14px;
 }
 
 .upload-section {
-  text-align: center;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.upload-note {
-  margin-top: 15px;
-  color: #6b7280;
+.upload-area {
+  border: 2px dashed #d2d2d7;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  border-color: #1c1c1e;
+  background: #fafafa;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.upload-icon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.upload-text p {
+  margin: 0;
+  color: #1d1d1f;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.upload-text span {
+  color: #86868b;
   font-size: 14px;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f5f7;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #d2d2d7;
+}
+
+.file-name {
+  color: #1d1d1f;
+  font-weight: 500;
+}
+
+.btn-remove-file {
+  background: none;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-file:hover {
+  background: #e8e8ed;
+  color: #1d1d1f;
 }
 
 @media (max-width: 768px) {
   .prospect-content {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
   
-  .term-item {
+  .term-content {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   
   .content-wrapper {
     margin-top: 160px;
+    padding: 16px;
   }
   
   .terms-container {
-    max-height: 300px;
+    max-height: 400px;
   }
   
   .relationship-info {
@@ -855,12 +1064,42 @@ onMounted(() => {
     gap: 8px;
   }
   
-  .form-actions {
+  .section-actions {
     flex-direction: column;
+    gap: 8px;
   }
   
   .modal-content {
     width: 95%;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .terms-section,
+  .agreement-section {
+    padding: 16px;
+  }
+  
+  .term-card {
+    padding: 16px;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 16px;
+  }
+  
+  .upload-area {
+    padding: 24px;
+  }
+  
+  .upload-icon {
+    font-size: 36px;
   }
 }
 </style>
