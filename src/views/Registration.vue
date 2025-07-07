@@ -273,23 +273,23 @@
                 class="form-input"
               />
             </div>
-            <div class="form-group full-width">
+            <div class="form-group">
               <label>Presence in states</label>
-              <textarea 
-                v-model="manufacturerForm.presenceStates" 
-                placeholder="Enter states"
-                class="form-textarea"
-                rows="2"
-              ></textarea>
+              <ModernMultiSelect 
+                :options="filterOptions.states"
+                :selected="manufacturerForm.presenceStates"
+                placeholder="Select states..."
+                @update:selected="(val) => updateManufacturerPresenceStates(val)"
+              />
             </div>
-            <div class="form-group full-width">
+            <div class="form-group">
               <label>Presence in districts</label>
-              <textarea 
-                v-model="manufacturerForm.presenceDistricts" 
-                placeholder="Enter districts"
-                class="form-textarea"
-                rows="2"
-              ></textarea>
+              <ModernMultiSelect 
+                :options="availableManufacturerPresenceDistricts"
+                :selected="manufacturerForm.presenceDistricts"
+                placeholder="Select districts..."
+                @update:selected="(val) => manufacturerForm.presenceDistricts = val"
+              />
             </div>
           </div>
         </div>
@@ -334,12 +334,12 @@
             </div>
             <div class="form-group full-width">
               <label>Distributor needed in districts</label>
-              <textarea 
-                v-model="manufacturerForm.distributorNeededDistricts" 
-                placeholder="Enter districts"
-                class="form-textarea"
-                rows="2"
-              ></textarea>
+              <ModernMultiSelect 
+                :options="availableManufacturerDistricts"
+                :selected="manufacturerForm.distributorNeededDistricts"
+                placeholder="Select districts..."
+                @update:selected="(val) => manufacturerForm.distributorNeededDistricts = val"
+              />
             </div>
             <div class="form-group full-width">
               <label>Distributor needed in states</label>
@@ -614,12 +614,12 @@
           <div class="form-grid">
             <div class="form-group full-width">
               <label>Address</label>
-              <ModernMultiSelect 
-                :options="availableManufacturerDistricts"
-                :selected="manufacturerForm.distributorNeededDistricts"
-                placeholder="Select districts..."
-                @update:selected="(val) => manufacturerForm.distributorNeededDistricts = val"
-              />
+              <textarea 
+                v-model="addressForm.streetAddress" 
+                placeholder="Enter Door No. and Area Name"
+                class="form-textarea"
+                rows="3"
+              ></textarea>
             </div>
             <div class="form-group">
               <label>Pincode *</label>
@@ -827,6 +827,9 @@
 
       <!-- Form Actions -->
       <div class="form-actions">
+        <button type="button" class="btn-navigate" @click="navigateToDashboard">
+          Go to Dashboard
+        </button>
         <button type="button" class="btn-secondary" @click="resetForm">
           Reset Form
         </button>
@@ -889,8 +892,8 @@ const manufacturerForm = reactive({
   subCategories: [] as string[],
   exporting: '',
   currentDistributors: '',
-  presenceStates: '',
-  presenceDistricts: '',
+  presenceStates: [] as string[],
+  presenceDistricts: [] as string[],
   annualRevenue: '',
   listed: '',
   distributorsNeeded: '',
@@ -971,6 +974,20 @@ const availableManufacturerDistricts = computed(() => {
   return filterOptions.districts
 })
 
+const availableManufacturerPresenceDistricts = computed(() => {
+  if (manufacturerForm.presenceStates.length > 0) {
+    const relatedDistricts = new Set<string>()
+    manufacturerForm.presenceStates.forEach(state => {
+      const mapping = locationMapping[state]
+      if (mapping) {
+        mapping.districts.forEach(district => relatedDistricts.add(district))
+      }
+    })
+    return Array.from(relatedDistricts)
+  }
+  return filterOptions.districts
+})
+
 const availableDistributorSubCategories = computed(() => {
   if (distributorForm.categories.length > 0) {
     const relatedSubCategories = new Set<string>()
@@ -1010,6 +1027,12 @@ const updateManufacturerStates = (states: string[]) => {
   manufacturerForm.distributorNeededStates = states
   // Clear districts when states change
   manufacturerForm.distributorNeededDistricts = []
+}
+
+const updateManufacturerPresenceStates = (states: string[]) => {
+  manufacturerForm.presenceStates = states
+  // Clear districts when states change
+  manufacturerForm.presenceDistricts = []
 }
 
 const updateDistributorCategories = (categories: string[]) => {
@@ -1097,6 +1120,10 @@ const resetForm = () => {
   })
   
   isLocationAutoFilled.value = false
+}
+
+const navigateToDashboard = () => {
+  router.push('/dashboard')
 }
 
 const submitForm = async () => {
@@ -1316,7 +1343,7 @@ const submitForm = async () => {
 .form-input,
 .form-select,
 .form-textarea {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 14px;
@@ -1325,8 +1352,10 @@ const submitForm = async () => {
   background: white;
   transition: all 0.2s ease;
   font-family: inherit;
-  min-height: 40px;
+  min-height: 36px;
   box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-input:focus,
@@ -1345,8 +1374,8 @@ const submitForm = async () => {
 
 .form-textarea {
   resize: vertical;
-  min-height: 70px;
-  padding: 8px 12px;
+  min-height: 60px;
+  line-height: 1.4;
 }
 
 .form-file {
@@ -1376,7 +1405,8 @@ const submitForm = async () => {
 }
 
 .btn-primary,
-.btn-secondary {
+.btn-secondary,
+.btn-navigate {
   padding: 12px 24px;
   border-radius: 8px;
   font-size: 16px;
@@ -1411,6 +1441,16 @@ const submitForm = async () => {
 
 .btn-secondary:hover {
   background: #e8e8ed;
+  transform: translateY(-1px);
+}
+
+.btn-navigate {
+  background: #007aff;
+  color: white;
+}
+
+.btn-navigate:hover {
+  background: #0056b3;
   transform: translateY(-1px);
 }
 
@@ -1514,8 +1554,8 @@ const submitForm = async () => {
   .form-select,
   .form-textarea {
     font-size: 14px;
-    padding: 8px 10px;
-    min-height: 36px;
+    padding: 6px 10px;
+    min-height: 32px;
   }
   
   .category-btn {
@@ -1524,7 +1564,8 @@ const submitForm = async () => {
   }
   
   .btn-primary,
-  .btn-secondary {
+  .btn-secondary,
+  .btn-navigate {
     padding: 10px 20px;
     font-size: 14px;
   }
