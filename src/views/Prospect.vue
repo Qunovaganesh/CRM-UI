@@ -597,13 +597,14 @@ onMounted(() => {
 
 .btn-edit,
 .btn-add {
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: none;
-  border-radius: 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-edit {
@@ -614,17 +615,19 @@ onMounted(() => {
 .btn-edit:hover {
   background: #000000;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .btn-add {
-  background: #f5f5f7;
+  background: #ffffff;
   color: #1d1d1f;
-  border: 1px solid #d2d2d7;
+  border: 1px solid #c7c7cc;
 }
 
 .btn-add:hover {
-  background: #e8e8ed;
+  background: #f2f2f7;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .terms-container {
@@ -702,37 +705,39 @@ onMounted(() => {
   background: #ff3b30;
   color: white;
   border: none;
-  padding: 6px;
-  border-radius: 6px;
+  padding: 4px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(255, 59, 48, 0.2);
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: #d70015;
+  background: #ff1744;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
 }
 
 .btn-delete:disabled {
-  background: #86868b;
+  background: #d1d1d6;
   cursor: not-allowed;
   transform: none;
-  opacity: 0.5;
+  opacity: 0.6;
+  box-shadow: none;
 }
 
 .terms-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px;
+  padding: 12px 16px;
   border-top: 1px solid #f2f2f7;
-  background: white;
+  background: #fafafa;
   border-radius: 0 0 12px 12px;
   margin: 16px -16px 0 -16px;
 }
@@ -742,25 +747,27 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
-  min-height: 36px;
+  min-height: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-add-term {
-  background: #f5f5f7;
+  background: #ffffff;
   color: #1d1d1f;
-  border: 1px solid #d2d2d7;
+  border: 1px solid #c7c7cc;
 }
 
 .btn-add-term:hover {
-  background: #e8e8ed;
+  background: #f2f2f7;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .btn-save-changes {
@@ -771,7 +778,7 @@ onMounted(() => {
 .btn-save-changes:hover {
   background: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(28, 28, 30, 0.3);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.4);
 }
 
 .agreement-info-card {
@@ -855,38 +862,45 @@ onMounted(() => {
 .btn-primary {
   background: #1c1c1e;
   color: white;
+  box-shadow: 0 1px 3px rgba(28, 28, 30, 0.2);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: #000000;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .btn-primary:disabled {
-  background: #86868b;
+  background: #d1d1d6;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+  opacity: 0.6;
 }
 
 .btn-secondary {
-  background: #f5f5f7;
+  background: #ffffff;
   color: #1d1d1f;
-  border: 1px solid #d2d2d7;
+  border: 1px solid #c7c7cc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary:hover {
-  background: #e8e8ed;
+  background: #f2f2f7;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .btn-success {
-  background: #30d158;
+  background: #007aff;
   color: white;
 }
 
 .btn-success:hover {
-  background: #28cd4f;
+  background: #0056cc;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .modal-overlay {
