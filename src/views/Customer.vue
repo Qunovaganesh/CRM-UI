@@ -701,7 +701,7 @@ onMounted(() => {
 
 .customer-content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.2fr 0.8fr;
   gap: 32px;
   margin-bottom: 32px;
 }
@@ -740,7 +740,9 @@ onMounted(() => {
   background: #fafafa;
   border: 1px solid #f2f2f7;
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-header {
@@ -792,19 +794,23 @@ onMounted(() => {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   align-items: start;
+  width: 100%;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .form-group.full-width {
   grid-column: 1 / -1;
+  width: 100%;
 }
 
 .form-group label {
@@ -816,15 +822,16 @@ onMounted(() => {
 .modern-input,
 .modern-select,
 .modern-textarea {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 14px;
   color: #1d1d1f;
   background: white;
   transition: all 0.2s ease;
-  min-height: 36px;
+  min-height: 40px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .modern-input:focus,
@@ -849,10 +856,12 @@ onMounted(() => {
 .file-upload-area {
   border: 2px dashed #d2d2d7;
   border-radius: 12px;
-  padding: 16px;
+  padding: 20px;
   text-align: center;
   transition: all 0.2s ease;
   cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .file-upload-area:hover {
@@ -894,19 +903,21 @@ onMounted(() => {
   justify-content: flex-end;
   padding-top: 16px;
   border-top: 1px solid #f2f2f7;
+  width: 100%;
 }
 
 .btn-primary,
 .btn-secondary {
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
-  min-height: 36px;
+  min-height: 40px;
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -1310,6 +1321,10 @@ onMounted(() => {
   .customer-content {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
   }
   
   .content-wrapper {
