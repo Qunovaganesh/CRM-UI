@@ -77,7 +77,9 @@ export default {
     }
   },
   watch: {
-    selected(newVal) {
+    selected: {
+      handler(newVal) {
+        this.localSelected = [...newVal]
       },
       immediate: true
     },
