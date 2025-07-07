@@ -478,17 +478,21 @@ onMounted(() => {
   overflow: hidden;
   border-radius: 12px;
   border: 1px solid #f2f2f7;
+  max-height: 400px;
 }
 
 .table-wrapper {
   overflow-x: auto;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  max-height: 400px;
 }
 
 .modern-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
+  position: relative;
 }
 
 .modern-table th {
@@ -505,6 +509,7 @@ onMounted(() => {
 }
 
 .modern-table td {
+  box-shadow: 0 1px 0 0 #f2f2f7;
   padding: 16px 20px;
   border-bottom: 1px solid #f8f8f8;
   color: #1d1d1f;
@@ -514,6 +519,42 @@ onMounted(() => {
 
 .table-row:hover {
   background: #fafafa;
+}
+
+/* Enhanced scrollbar styling for webkit browsers */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f8f8f8;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #c7c7cc;
+  border-radius: 4px;
+  border: 1px solid #f8f8f8;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #aeaeb2;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:active {
+  background: #8e8e93;
+}
+
+.table-wrapper::-webkit-scrollbar-corner {
+  background: #f8f8f8;
+}
+
+/* Firefox scrollbar */
+.table-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: #c7c7cc #f8f8f8;
 }
 
 .user-cell {
@@ -852,6 +893,14 @@ onMounted(() => {
     gap: 24px;
   }
   
+  .table-container {
+    max-height: 300px;
+  }
+  
+  .table-wrapper {
+    max-height: 300px;
+  }
+  
   .content-wrapper {
     margin-top: 140px;
     padding: 16px;
@@ -887,6 +936,14 @@ onMounted(() => {
 @media (max-width: 480px) {
   .content-wrapper {
     padding: 12px;
+  }
+  
+  .table-container {
+    max-height: 250px;
+  }
+  
+  .table-wrapper {
+    max-height: 250px;
   }
   
   .interactions-section,
