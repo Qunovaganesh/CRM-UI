@@ -919,7 +919,9 @@ onMounted(() => {
   border: none;
   min-height: 44px;
   min-width: 120px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0,
+  )
+} 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
