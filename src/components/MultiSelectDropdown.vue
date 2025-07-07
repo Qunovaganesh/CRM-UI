@@ -23,7 +23,7 @@
           <input 
             type="checkbox" 
             :value="option" 
-            v-model="selected" 
+            v-model="localSelected" 
             @click.stop
           />
           <span>{{ option }}</span>
