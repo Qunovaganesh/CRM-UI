@@ -893,14 +893,15 @@ onMounted(() => {
 }
 
 .btn-success {
-  background: #007aff;
+  background: #1c1c1e;
   color: white;
+  box-shadow: 0 1px 3px rgba(28, 28, 30, 0.2);
 }
 
 .btn-success:hover {
-  background: #0056cc;
+  background: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.4);
 }
 
 .modal-overlay {
