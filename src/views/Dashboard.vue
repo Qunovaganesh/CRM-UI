@@ -799,7 +799,7 @@ watch(selectedEntityId, (newId) => {
 }
 
 .entity-icon {
-  font-size: 20px;
+  display: none;
 }
 
 .entity-count {
@@ -885,18 +885,20 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: #1d1d1f;
-  color: #f5f5f7;
+  background: #ffffff;
+  color: #1d1d1f;
+  border-bottom: 1px solid #f2f2f7;
 }
 
 .filter-icon {
-  font-size: 20px;
+  display: none;
 }
 
 .filter-card-header h4 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+  color: #1d1d1f;
 }
 
 .filter-card-content {
@@ -1011,7 +1013,7 @@ watch(selectedEntityId, (newId) => {
 }
 
 .selection-icon {
-  font-size: 24px;
+  display: none;
 }
 
 .entity-dropdown-container {
@@ -1189,22 +1191,34 @@ watch(selectedEntityId, (newId) => {
     padding: 16px;
   }
   
+  .page-header h1 {
+    font-size: 24px;
+  }
+  
+  .page-header p {
+    font-size: 16px;
+  }
+  
   .filters-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .entity-toggle-container {
     flex-direction: column;
     width: 100%;
+    gap: 8px;
   }
   
   .entity-toggle-btn {
     justify-content: center;
+    padding: 16px 20px;
   }
   
   .entity-info-card {
     flex-direction: column;
     text-align: center;
+    gap: 16px;
   }
   
   .filter-tags {
@@ -1214,6 +1228,93 @@ watch(selectedEntityId, (newId) => {
   
   .filter-tag-group {
     width: 100%;
+  }
+  
+  .modern-filters,
+  .associated-filters {
+    padding: 16px;
+  }
+  
+  .filters-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .filter-card {
+    border-radius: 8px;
+  }
+  
+  .filter-card-content {
+    padding: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 12px;
+  }
+  
+  .page-header {
+    margin-bottom: 24px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+  }
+  
+  .page-header p {
+    font-size: 14px;
+  }
+  
+  .entity-toggle-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .modern-filters,
+  .associated-filters {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .filters-header h3 {
+    font-size: 18px;
+  }
+  
+  .filter-card-content {
+    padding: 12px;
+  }
+  
+  .filter-row {
+    margin-bottom: 12px;
+  }
+  
+  .active-filters {
+    padding: 12px;
+  }
+  
+  .filter-tag {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  .selection-card {
+    padding: 16px;
+  }
+  
+  .entity-info-card {
+    padding: 16px;
+  }
+  
+  .entity-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  .btn-change-selection {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
 </style>

@@ -6,10 +6,10 @@
         <div v-else class="selected-display">
           <span class="selected-count">{{ selected.length }} selected</span>
           <div class="selected-preview">
-            <span v-for="(item, index) in selected.slice(0, 2)" :key="item" class="preview-tag">
+            <span v-for="(item, index) in selected.slice(0, 3)" :key="item" class="preview-tag">
               {{ item }}
             </span>
-            <span v-if="selected.length > 2" class="more-count">+{{ selected.length - 2 }}</span>
+            <span v-if="selected.length > 3" class="more-count">+{{ selected.length - 3 }}</span>
           </div>
         </div>
       </div>
@@ -177,8 +177,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: white;
-  border: 1px solid #d2d2d7;
+  background: #ffffff;
+  border: 1px solid #e5e5e7;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -186,16 +186,19 @@ onUnmounted(() => {
 }
 
 .multiselect-trigger:hover {
-  border-color: #a1a1a6;
+  border-color: #c7c7cc;
+  background: #fafafa;
 }
 
 .multiselect-trigger.open {
   border-color: #007aff;
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  background: #ffffff;
 }
 
 .multiselect-trigger.has-selections {
-  border-color: #30d158;
+  border-color: #34c759;
+  background: #f0fff4;
 }
 
 .trigger-content {
@@ -204,20 +207,21 @@ onUnmounted(() => {
 }
 
 .placeholder {
-  color: #86868b;
-  font-size: 14px;
+  color: #8e8e93;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .selected-display {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .selected-count {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #30d158;
+  color: #34c759;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -225,34 +229,38 @@ onUnmounted(() => {
 .selected-preview {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
 }
 
 .preview-tag {
   background: #e8f5e8;
-  color: #30d158;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
+  color: #1d7324;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 500;
   border: 1px solid #b8e6b8;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .more-count {
-  background: #f5f5f7;
-  color: #86868b;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  background: #f2f2f7;
+  color: #8e8e93;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .trigger-icon {
-  color: #86868b;
+  color: #8e8e93;
   transition: transform 0.2s ease;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: 12px;
 }
 
 .trigger-icon.rotated {
@@ -264,22 +272,23 @@ onUnmounted(() => {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #d2d2d7;
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
-  margin-top: 4px;
-  max-height: 320px;
+  background: #ffffff;
+  border: 1px solid #e5e5e7;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  margin-top: 8px;
+  max-height: 360px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(20px);
 }
 
 .search-container {
-  padding: 12px;
-  border-bottom: 1px solid #d2d2d7;
-  background: #f5f5f7;
+  padding: 16px;
+  border-bottom: 1px solid #f2f2f7;
+  background: #fafafa;
 }
 
 .search-input-wrapper {
@@ -291,24 +300,25 @@ onUnmounted(() => {
 .search-icon {
   position: absolute;
   left: 12px;
-  color: #86868b;
+  color: #8e8e93;
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 8px 12px 8px 36px;
-  border: 1px solid #d2d2d7;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
+  padding: 10px 16px 10px 40px;
+  border: 1px solid #e5e5e7;
+  border-radius: 8px;
+  font-size: 16px;
+  background: #ffffff;
   transition: all 0.2s ease;
+  color: #1d1d1f;
 }
 
 .search-input:focus {
   outline: none;
   border-color: #007aff;
-  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 .options-container {
@@ -321,29 +331,30 @@ onUnmounted(() => {
 .options-header {
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
-  background: #f5f5f7;
-  border-bottom: 1px solid #d2d2d7;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f2f2f7;
 }
 
 .select-all-btn,
 .clear-all-btn {
-  padding: 4px 8px;
+  padding: 6px 12px;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .select-all-btn {
-  background: #cce7ff;
+  background: #e1f0ff;
   color: #007aff;
 }
 
 .select-all-btn:hover {
-  background: #b3d9ff;
+  background: #cce7ff;
+  transform: translateY(-1px);
 }
 
 .clear-all-btn {
@@ -353,32 +364,34 @@ onUnmounted(() => {
 
 .clear-all-btn:hover {
   background: #ffcccc;
+  transform: translateY(-1px);
 }
 
 .options-list {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: 8px 0;
 }
 
 .option-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
+  color: #1d1d1f;
 }
 
 .option-item:hover {
-  background: #f5f5f7;
-  border-left-color: #d2d2d7;
+  background: #f9f9f9;
+  border-left-color: #e5e5e7;
 }
 
 .option-item.selected {
-  background: #e8f5e8;
-  border-left-color: #30d158;
+  background: #f0fff4;
+  border-left-color: #34c759;
 }
 
 .option-checkbox {
@@ -394,11 +407,11 @@ onUnmounted(() => {
 }
 
 .checkbox-custom {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #d2d2d7;
-  border-radius: 3px;
-  background: white;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e5e5e7;
+  border-radius: 4px;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -406,9 +419,9 @@ onUnmounted(() => {
 }
 
 .option-item.selected .checkbox-custom {
-  background: #30d158;
-  border-color: #30d158;
-  color: white;
+  background: #34c759;
+  border-color: #34c759;
+  color: #ffffff;
 }
 
 .check-icon {
@@ -423,16 +436,16 @@ onUnmounted(() => {
 }
 
 .option-text {
-  font-size: 14px;
+  font-size: 16px;
   color: #1d1d1f;
-  font-weight: 500;
+  font-weight: 400;
   flex: 1;
   min-width: 0;
   word-break: break-word;
 }
 
 .no-options {
-  padding: 24px;
+  padding: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -440,23 +453,24 @@ onUnmounted(() => {
 
 .no-options-content {
   text-align: center;
-  color: #86868b;
+  color: #8e8e93;
 }
 
 .no-options-icon {
-  margin: 0 auto 8px;
+  margin: 0 auto 12px;
   opacity: 0.5;
 }
 
 .no-options p {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .dropdown-footer {
-  padding: 8px 12px;
-  background: #f5f5f7;
-  border-top: 1px solid #d2d2d7;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-top: 1px solid #f2f2f7;
 }
 
 .selected-summary {
@@ -464,58 +478,105 @@ onUnmounted(() => {
 }
 
 .summary-text {
-  font-size: 12px;
-  color: #86868b;
+  font-size: 13px;
+  color: #8e8e93;
   font-weight: 500;
 }
 
 /* Dropdown animation */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .dropdown-enter-from {
   opacity: 0;
-  transform: translateY(-8px) scale(0.95);
+  transform: translateY(-12px) scale(0.95);
 }
 
 .dropdown-leave-to {
   opacity: 0;
-  transform: translateY(-8px) scale(0.95);
+  transform: translateY(-12px) scale(0.95);
 }
 
 /* Scrollbar styling */
 .options-list::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .options-list::-webkit-scrollbar-track {
-  background: #f5f5f7;
+  background: #f2f2f7;
 }
 
 .options-list::-webkit-scrollbar-thumb {
-  background: #d2d2d7;
-  border-radius: 3px;
+  background: #c7c7cc;
+  border-radius: 4px;
 }
 
 .options-list::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a6;
+  background: #aeaeb2;
 }
 
 @media (max-width: 768px) {
   .dropdown-panel {
-    max-height: 240px;
+    max-height: 280px;
+    margin-top: 4px;
+    border-radius: 8px;
   }
   
   .selected-preview {
     flex-direction: column;
     align-items: flex-start;
+    gap: 4px;
   }
   
   .multiselect-trigger {
     padding: 10px 12px;
     min-height: 44px;
   }
+  
+  .search-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .option-item {
+    padding: 14px 16px;
+  }
+  
+  .option-text {
+    font-size: 16px;
+  }
+  
+  .preview-tag {
+    max-width: 100px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown-panel {
+    max-height: 240px;
+  }
+  
+  .multiselect-trigger {
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+  
+  .selected-preview {
+    gap: 3px;
+  }
+  
+  .preview-tag {
+    padding: 3px 6px;
+    font-size: 11px;
+    max-width: 80px;
+  }
+  
+  .placeholder,
+  .option-text {
+    font-size: 14px;
+  }
 }
 </style>
+</template>
