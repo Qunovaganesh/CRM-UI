@@ -56,27 +56,22 @@
           </div>
 
           <div class="options-list">
-            <label 
+            <div 
               v-for="option in filteredOptions" 
               :key="option" 
               class="option-item"
-              :class="{ selected: localSelected.includes(option) }"
+              :class="{ selected: isSelected(option) }"
+              @click="toggleOption(option)"
             >
               <div class="option-checkbox">
-                <input 
-                  type="checkbox" 
-                  :value="option" 
-                  v-model="localSelected" 
-                  @click.stop
-                />
                 <div class="checkbox-custom">
-                  <svg v-if="localSelected.includes(option)" class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                  <svg v-if="isSelected(option)" class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
                     <path d="M10.28 2.28a.75.75 0 00-1.06 0L5.25 6.25l-1.47-1.47a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5a.75.75 0 000-1.06z"/>
                   </svg>
                 </div>
               </div>
               <span class="option-text">{{ option }}</span>
-            </label>
+            </div>
           </div>
 
           <div v-if="filteredOptions.length === 0" class="no-options">
@@ -124,6 +119,21 @@ const filteredOptions = computed(() => {
     option.toLowerCase().includes(searchTerm.value.toLowerCase())
   )
 })
+
+const isSelected = (option: string) => {
+  return localSelected.value.includes(option)
+}
+
+const toggleOption = (option: string) => {
+  const index = localSelected.value.indexOf(option)
+  if (index > -1) {
+    // Remove option
+    localSelected.value = localSelected.value.filter(item => item !== option)
+  } else {
+    // Add option
+    localSelected.value = [...localSelected.value, option]
+  }
+}
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
@@ -178,7 +188,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 12px 16px;
   background: #ffffff;
-  border: 1px solid #e5e5e7;
+  border: 1px solid #d2d2d7;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -186,19 +196,19 @@ onUnmounted(() => {
 }
 
 .multiselect-trigger:hover {
-  border-color: #c7c7cc;
+  border-color: #a1a1a6;
   background: #fafafa;
 }
 
 .multiselect-trigger.open {
-  border-color: #007aff;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29, 29, 31, 0.1);
   background: #ffffff;
 }
 
 .multiselect-trigger.has-selections {
-  border-color: #34c759;
-  background: #f0fff4;
+  border-color: #1d1d1f;
+  background: #f5f5f7;
 }
 
 .trigger-content {
@@ -207,7 +217,7 @@ onUnmounted(() => {
 }
 
 .placeholder {
-  color: #8e8e93;
+  color: #86868b;
   font-size: 16px;
   font-weight: 400;
 }
@@ -221,7 +231,7 @@ onUnmounted(() => {
 .selected-count {
   font-size: 13px;
   font-weight: 600;
-  color: #34c759;
+  color: #1d1d1f;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -234,13 +244,13 @@ onUnmounted(() => {
 }
 
 .preview-tag {
-  background: #e8f5e8;
-  color: #1d7324;
+  background: #e8e8ed;
+  color: #1d1d1f;
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
-  border: 1px solid #b8e6b8;
+  border: 1px solid #d2d2d7;
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -249,7 +259,7 @@ onUnmounted(() => {
 
 .more-count {
   background: #f2f2f7;
-  color: #8e8e93;
+  color: #86868b;
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 13px;
@@ -257,7 +267,7 @@ onUnmounted(() => {
 }
 
 .trigger-icon {
-  color: #8e8e93;
+  color: #86868b;
   transition: transform 0.2s ease;
   flex-shrink: 0;
   margin-left: 12px;
@@ -273,7 +283,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   background: #ffffff;
-  border: 1px solid #e5e5e7;
+  border: 1px solid #d2d2d7;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   z-index: 9999;
@@ -300,14 +310,14 @@ onUnmounted(() => {
 .search-icon {
   position: absolute;
   left: 12px;
-  color: #8e8e93;
+  color: #86868b;
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: 10px 16px 10px 40px;
-  border: 1px solid #e5e5e7;
+  border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 16px;
   background: #ffffff;
@@ -317,8 +327,8 @@ onUnmounted(() => {
 
 .search-input:focus {
   outline: none;
-  border-color: #007aff;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29, 29, 31, 0.1);
 }
 
 .options-container {
@@ -348,22 +358,25 @@ onUnmounted(() => {
 }
 
 .select-all-btn {
-  background: #e1f0ff;
-  color: #007aff;
+  background: #f2f2f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
 }
 
 .select-all-btn:hover {
-  background: #cce7ff;
+  background: #e8e8ed;
   transform: translateY(-1px);
 }
 
 .clear-all-btn {
-  background: #ffe6e6;
-  color: #ff3b30;
+  background: #f2f2f7;
+  color: #86868b;
+  border: 1px solid #d2d2d7;
 }
 
 .clear-all-btn:hover {
-  background: #ffcccc;
+  background: #e8e8ed;
+  color: #1d1d1f;
   transform: translateY(-1px);
 }
 
@@ -386,12 +399,12 @@ onUnmounted(() => {
 
 .option-item:hover {
   background: #f9f9f9;
-  border-left-color: #e5e5e7;
+  border-left-color: #d2d2d7;
 }
 
 .option-item.selected {
-  background: #f0fff4;
-  border-left-color: #34c759;
+  background: #f5f5f7;
+  border-left-color: #1d1d1f;
 }
 
 .option-checkbox {
@@ -399,17 +412,10 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.option-checkbox input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
 .checkbox-custom {
   width: 18px;
   height: 18px;
-  border: 2px solid #e5e5e7;
+  border: 2px solid #d2d2d7;
   border-radius: 4px;
   background: #ffffff;
   display: flex;
@@ -419,8 +425,8 @@ onUnmounted(() => {
 }
 
 .option-item.selected .checkbox-custom {
-  background: #34c759;
-  border-color: #34c759;
+  background: #1d1d1f;
+  border-color: #1d1d1f;
   color: #ffffff;
 }
 
@@ -453,7 +459,7 @@ onUnmounted(() => {
 
 .no-options-content {
   text-align: center;
-  color: #8e8e93;
+  color: #86868b;
 }
 
 .no-options-icon {
@@ -479,7 +485,7 @@ onUnmounted(() => {
 
 .summary-text {
   font-size: 13px;
-  color: #8e8e93;
+  color: #86868b;
   font-weight: 500;
 }
 
