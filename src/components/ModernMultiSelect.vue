@@ -12,12 +12,6 @@
         <span v-if="selected.length === 0" class="placeholder">{{ placeholder }}</span>
         <div v-else class="selected-display">
           <span class="selected-count">{{ selected.length }} SELECTED</span>
-          <div class="selected-preview">
-            <span v-for="(item, index) in selected.slice(0, 2)" :key="item" class="preview-tag">
-              {{ item }}
-            </span>
-            <span v-if="selected.length > 2" class="more-count">+{{ selected.length - 2 }}</span>
-          </div>
         </div>
       </div>
       <div class="trigger-icon" :class="{ rotated: isOpen }">
@@ -31,6 +25,7 @@
       v-if="isOpen" 
       class="dropdown-panel" 
       ref="panel"
+      @mousedown.prevent
       @click.stop
     >
       <div class="search-container" v-if="searchable">
@@ -43,6 +38,7 @@
             v-model="searchTerm" 
             placeholder="Search options..." 
             class="search-input"
+            @mousedown.stop
             @click.stop
             ref="searchInput"
           />
@@ -53,14 +49,16 @@
         <div class="options-header" v-if="filteredOptions.length > 0">
           <button 
             class="select-all-btn" 
-            @click="selectAll"
+            @mousedown.prevent
+            @click.stop="selectAll"
             v-if="filteredOptions.length > selected.length"
           >
             Select All ({{ filteredOptions.length }})
           </button>
           <button 
             class="clear-all-btn" 
-            @click="clearAll"
+            @mousedown.prevent
+            @click.stop="clearAll"
             v-if="selected.length > 0"
           >
             Clear All
@@ -73,7 +71,8 @@
             :key="option" 
             class="option-item"
             :class="{ selected: isSelected(option) }"
-            @click="toggleOption(option)"
+            @mousedown.prevent
+            @click.stop="toggleOption(option)"
           >
             <div class="option-checkbox">
               <div class="checkbox-custom" :class="{ checked: isSelected(option) }">
@@ -179,9 +178,8 @@ const positionDropdown = () => {
   const triggerRect = dropdown.value.getBoundingClientRect()
   const panelElement = panel.value
   const viewportHeight = window.innerHeight
-  const viewportWidth = window.innerWidth
   
-  // Reset any previous positioning
+  // Reset positioning
   panelElement.style.position = 'absolute'
   panelElement.style.top = ''
   panelElement.style.bottom = ''
@@ -193,18 +191,18 @@ const positionDropdown = () => {
   
   const spaceBelow = viewportHeight - triggerRect.bottom - 10
   const spaceAbove = triggerRect.top - 10
-  const panelHeight = Math.min(320, filteredOptions.value.length * 44 + 120)
+  const maxPanelHeight = 320
   
-  if (spaceBelow >= panelHeight || spaceBelow >= spaceAbove) {
+  if (spaceBelow >= 200 || spaceBelow >= spaceAbove) {
     // Position below
     panelElement.style.top = '100%'
     panelElement.style.marginTop = '4px'
-    panelElement.style.maxHeight = Math.min(panelHeight, spaceBelow) + 'px'
+    panelElement.style.maxHeight = Math.min(maxPanelHeight, spaceBelow) + 'px'
   } else {
     // Position above
     panelElement.style.bottom = '100%'
     panelElement.style.marginBottom = '4px'
-    panelElement.style.maxHeight = Math.min(panelHeight, spaceAbove) + 'px'
+    panelElement.style.maxHeight = Math.min(maxPanelHeight, spaceAbove) + 'px'
   }
 }
 
@@ -225,12 +223,13 @@ const handleClickOutside = (event: Event) => {
 
 const handleResize = () => {
   if (isOpen.value) {
-    closeDropdown()
+    positionDropdown()
   }
 }
 
-const handleScroll = () => {
-  if (isOpen.value) {
+const handleScroll = (event: Event) => {
+  // Only close if scroll is outside the dropdown
+  if (isOpen.value && !dropdown.value?.contains(event.target as Node)) {
     closeDropdown()
   }
 }
@@ -248,13 +247,13 @@ watch(localSelected, (newVal) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('resize', handleResize)
-  window.addEventListener('scroll', handleScroll, true)
+  document.addEventListener('scroll', handleScroll, true)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('resize', handleResize)
-  window.removeEventListener('scroll', handleScroll, true)
+  document.removeEventListener('scroll', handleScroll, true)
 })
 </script>
 
@@ -311,40 +310,11 @@ onUnmounted(() => {
 }
 
 .selected-count {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   color: #1c1c1e;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.selected-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-}
-
-.preview-tag {
-  background: #1c1c1e;
-  color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.more-count {
-  background: #8e8e93;
-  color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .trigger-icon {
@@ -369,12 +339,14 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-height: 320px;
 }
 
 .search-container {
   padding: 12px;
   border-bottom: 1px solid #f2f2f7;
   background: #fafafa;
+  flex-shrink: 0;
 }
 
 .search-input-wrapper {
@@ -412,6 +384,7 @@ onUnmounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .options-header {
@@ -421,6 +394,7 @@ onUnmounted(() => {
   background: #fafafa;
   border-bottom: 1px solid #f2f2f7;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .select-all-btn,
@@ -460,8 +434,11 @@ onUnmounted(() => {
 .options-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 4px 0;
   overscroll-behavior: contain;
+  min-height: 0;
+  max-height: 200px;
 }
 
 .option-item {
@@ -473,6 +450,7 @@ onUnmounted(() => {
   transition: all 0.15s ease;
   color: #1c1c1e;
   position: relative;
+  user-select: none;
 }
 
 .option-item:hover {
@@ -525,6 +503,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex: 1;
 }
 
 .no-options-content {
@@ -547,6 +526,7 @@ onUnmounted(() => {
   padding: 8px 12px;
   background: #fafafa;
   border-top: 1px solid #f2f2f7;
+  flex-shrink: 0;
 }
 
 .selected-summary {
@@ -561,39 +541,41 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* Scrollbar styling */
+/* Enhanced scrollbar styling */
 .options-list::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .options-list::-webkit-scrollbar-track {
-  background: #f2f2f7;
-  border-radius: 3px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  margin: 4px 0;
 }
 
 .options-list::-webkit-scrollbar-thumb {
   background: #c7c7cc;
-  border-radius: 3px;
+  border-radius: 4px;
+  border: 1px solid #f8f8f8;
 }
 
 .options-list::-webkit-scrollbar-thumb:hover {
   background: #aeaeb2;
 }
 
+.options-list::-webkit-scrollbar-thumb:active {
+  background: #8e8e93;
+}
+
+/* Firefox scrollbar */
+.options-list {
+  scrollbar-width: thin;
+  scrollbar-color: #c7c7cc #f8f8f8;
+}
+
 @media (max-width: 768px) {
   .multiselect-trigger {
     padding: 8px 10px;
     min-height: 40px;
-  }
-  
-  .selected-preview {
-    gap: 3px;
-  }
-  
-  .preview-tag {
-    max-width: 80px;
-    font-size: 10px;
-    padding: 2px 5px;
   }
   
   .search-input {
@@ -629,6 +611,14 @@ onUnmounted(() => {
     padding: 10px 12px;
     font-size: 12px;
   }
+  
+  .dropdown-panel {
+    max-height: 280px;
+  }
+  
+  .options-list {
+    max-height: 160px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -651,12 +641,15 @@ onUnmounted(() => {
   }
   
   .selected-count {
-    font-size: 9px;
+    font-size: 11px;
   }
   
-  .more-count {
-    font-size: 9px;
-    padding: 1px 4px;
+  .dropdown-panel {
+    max-height: 240px;
+  }
+  
+  .options-list {
+    max-height: 140px;
   }
 }
 
@@ -668,3 +661,4 @@ onUnmounted(() => {
   }
 }
 </style>
+</invoke>
