@@ -702,25 +702,25 @@ onMounted(() => {
 }
 
 .btn-delete {
-  background: #ff3b30;
+  background: #d70015;
   color: white;
   border: none;
-  padding: 4px;
+  padding: 3px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(255, 59, 48, 0.2);
+  box-shadow: 0 1px 2px rgba(215, 0, 21, 0.3);
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: #ff1744;
+  background: #b8001c;
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 2px 4px rgba(215, 0, 21, 0.5);
 }
 
 .btn-delete:disabled {
@@ -732,6 +732,8 @@ onMounted(() => {
 }
 
 .terms-actions {
+  width: 10px;
+  height: 10px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -880,27 +882,28 @@ onMounted(() => {
 }
 
 .btn-secondary {
-  background: #ffffff;
-  color: #1d1d1f;
-  border: 1px solid #c7c7cc;
+  background: #1c1c1e;
+  color: white;
+  border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary:hover {
-  background: #f2f2f7;
+  background: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .btn-success {
-  background: #007aff;
+  background: #1c1c1e;
   color: white;
+  box-shadow: 0 1px 3px rgba(28, 28, 30, 0.2);
 }
 
 .btn-success:hover {
-  background: #0056cc;
+  background: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .modal-overlay {
