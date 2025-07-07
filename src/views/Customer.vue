@@ -766,15 +766,17 @@ onMounted(() => {
 }
 
 .toggle-btn {
-  padding: 6px 12px;
+  padding: 4px 10px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.2s ease;
   background: transparent;
   color: #86868b;
+  min-height: 28px;
+  box-sizing: border-box;
 }
 
 .toggle-btn.active {
@@ -812,14 +814,17 @@ onMounted(() => {
 }
 
 .modern-input,
-.modern-select {
-  padding: 10px 12px;
+.modern-select,
+.modern-textarea {
+  padding: 8px 12px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 14px;
   color: #1d1d1f;
   background: white;
   transition: all 0.2s ease;
+  min-height: 36px;
+  box-sizing: border-box;
 }
 
 .modern-input:focus,
@@ -835,10 +840,16 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.modern-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
 .file-upload-area {
   border: 2px dashed #d2d2d7;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   text-align: center;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -862,7 +873,7 @@ onMounted(() => {
 }
 
 .upload-icon {
-  font-size: 24px;
+  font-size: 20px;
   opacity: 0.6;
 }
 
@@ -887,13 +898,15 @@ onMounted(() => {
 
 .btn-primary,
 .btn-secondary {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
+  min-height: 36px;
+  box-sizing: border-box;
 }
 
 .btn-primary {
@@ -936,14 +949,14 @@ onMounted(() => {
   background: #fafafa;
   border: 1px solid #f2f2f7;
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .summary-icon {
-  font-size: 24px;
+  font-size: 20px;
   opacity: 0.7;
 }
 
@@ -958,7 +971,7 @@ onMounted(() => {
 
 .summary-value {
   color: #1d1d1f;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   margin: 0;
 }
@@ -985,7 +998,7 @@ onMounted(() => {
   font-weight: 600;
   color: #1d1d1f;
   text-align: left;
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -994,7 +1007,7 @@ onMounted(() => {
 }
 
 .modern-table td {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid #f8f8f8;
   color: #1d1d1f;
   font-size: 14px;
@@ -1039,12 +1052,14 @@ onMounted(() => {
   background: #1c1c1e;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.2s ease;
+  min-height: 28px;
+  box-sizing: border-box;
 }
 
 .btn-action-small:hover {
@@ -1100,7 +1115,7 @@ onMounted(() => {
   background: #fafafa;
   border: 1px solid #f2f2f7;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -1125,7 +1140,7 @@ onMounted(() => {
 }
 
 .action-icon {
-  font-size: 32px;
+  font-size: 24px;
   opacity: 0.8;
 }
 
@@ -1160,7 +1175,7 @@ onMounted(() => {
   background: #fafafa;
   border: 1px solid #f2f2f7;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
 }
 
 .payment-header {
@@ -1233,7 +1248,7 @@ onMounted(() => {
   border-radius: 16px;
   max-width: 500px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
@@ -1242,7 +1257,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: 20px;
   border-bottom: 1px solid #f2f2f7;
 }
 
@@ -1274,21 +1289,21 @@ onMounted(() => {
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 20px;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 24px;
+  padding: 20px;
   border-top: 1px solid #f2f2f7;
 }
 
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 @media (max-width: 768px) {
@@ -1330,28 +1345,28 @@ onMounted(() => {
   .invoice-list,
   .customer-actions,
   .payment-history {
-    padding: 16px;
+    padding: 14px;
   }
   
   .invoice-form-card {
-    padding: 16px;
+    padding: 14px;
   }
   
   .modern-table th,
   .modern-table td {
-    padding: 8px 12px;
+    padding: 6px 10px;
     font-size: 12px;
   }
   
   .action-card {
-    padding: 16px;
+    padding: 12px;
     flex-direction: column;
     text-align: center;
     gap: 12px;
   }
   
   .action-icon {
-    font-size: 24px;
+    font-size: 20px;
   }
 }
 </style>
