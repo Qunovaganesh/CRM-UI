@@ -65,7 +65,7 @@ export default {
     return {
       isOpen: false,
       searchTerm: '',
-      localSelected: [...this.selected]
+      localSelected: []
     }
   },
   computed: {
@@ -78,7 +78,8 @@ export default {
   },
   watch: {
     selected(newVal) {
-      this.localSelected = [...newVal]
+      },
+      immediate: true
     },
     localSelected(newVal) {
       this.$emit('update:selected', newVal)
