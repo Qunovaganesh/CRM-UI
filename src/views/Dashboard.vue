@@ -793,9 +793,9 @@ watch(selectedEntityId, (newId) => {
 }
 
 .entity-toggle-btn.active {
-  background: #007aff;
+  background: #1c1c1e;
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(28, 28, 30, 0.3);
 }
 
 .entity-icon {
@@ -845,7 +845,7 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #ff3b30;
+  background: #1c1c1e;
   color: white;
   border: none;
   border-radius: 8px;
@@ -856,7 +856,7 @@ watch(selectedEntityId, (newId) => {
 }
 
 .btn-clear-all:hover {
-  background: #d70015;
+  background: #000000;
   transform: translateY(-1px);
 }
 
@@ -961,7 +961,7 @@ watch(selectedEntityId, (newId) => {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #007aff;
+  background: #1c1c1e;
   color: white;
   padding: 4px 8px;
   border-radius: 8px;
@@ -1037,8 +1037,8 @@ watch(selectedEntityId, (newId) => {
 
 .modern-select:focus {
   outline: none;
-  border-color: #007aff;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  border-color: #1c1c1e;
+  box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.1);
 }
 
 .selection-stats {
@@ -1082,7 +1082,7 @@ watch(selectedEntityId, (newId) => {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #007aff;
+  background: #1c1c1e;
   color: white;
   display: flex;
   align-items: center;
@@ -1125,23 +1125,23 @@ watch(selectedEntityId, (newId) => {
 }
 
 .status-lead {
-  background: #fff2cc;
-  color: #bf8f00;
+  background: #f2f2f7;
+  color: #8e8e93;
 }
 
 .status-prospect {
-  background: #cce7ff;
-  color: #0066cc;
+  background: #e5e5ea;
+  color: #1c1c1e;
 }
 
 .status-customer {
-  background: #ccf2e8;
-  color: #007a5e;
+  background: #d1d1d6;
+  color: #1c1c1e;
 }
 
 .status-view {
   background: #f5f5f7;
-  color: #86868b;
+  color: #8e8e93;
 }
 
 .btn-change-selection {
