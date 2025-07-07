@@ -1014,9 +1014,9 @@ watch(selectedEntityId, (newId) => {
   gap: 6px;
   background: #1c1c1e;
   color: white;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -1025,11 +1025,11 @@ watch(selectedEntityId, (newId) => {
   border: none;
   color: white;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   padding: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
