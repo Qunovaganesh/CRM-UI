@@ -64,9 +64,9 @@
               @click="toggleOption(option)"
             >
               <div class="option-checkbox">
-                <div class="checkbox-custom">
-                  <svg v-if="isSelected(option)" class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                    <path d="M10.28 2.28a.75.75 0 00-1.06 0L5.25 6.25l-1.47-1.47a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5a.75.75 0 000-1.06z"/>
+                <div class="checkbox-custom" :class="{ checked: isSelected(option) }">
+                  <svg v-if="isSelected(option)" class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </div>
               </div>
@@ -285,8 +285,8 @@ onUnmounted(() => {
   background: #ffffff;
   border: 1px solid #d1d1d6;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  z-index: 99999;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  z-index: 999999;
   margin-top: 8px;
   max-height: 360px;
   overflow: hidden;
@@ -413,8 +413,8 @@ onUnmounted(() => {
 }
 
 .checkbox-custom {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 2px solid #d1d1d6;
   border-radius: 4px;
   background: #ffffff;
@@ -422,23 +422,20 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  position: relative;
 }
 
-.option-item.selected .checkbox-custom {
+.checkbox-custom.checked {
   background: #1c1c1e;
   border-color: #1c1c1e;
   color: #ffffff;
 }
 
 .check-icon {
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.2s ease;
-}
-
-.option-item.selected .check-icon {
+  color: #ffffff;
   opacity: 1;
   transform: scale(1);
+  transition: all 0.2s ease;
 }
 
 .option-text {
@@ -528,7 +525,8 @@ onUnmounted(() => {
     max-height: 280px;
     margin-top: 4px;
     border-radius: 8px;
-    z-index: 999999;
+    z-index: 9999999;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   }
   
   .selected-preview {
@@ -562,15 +560,16 @@ onUnmounted(() => {
 
 @media (max-width: 480px) {
   .dropdown-panel {
-    max-height: 240px;
-    z-index: 9999999;
-    position: fixed;
-    left: 8px;
-    right: 8px;
-    top: auto;
-    bottom: 8px;
-    margin: 0;
-    border-radius: 16px;
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 70vh !important;
+    z-index: 99999999 !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3) !important;
   }
   
   .multiselect-trigger {
@@ -603,6 +602,16 @@ onUnmounted(() => {
   
   .option-item {
     padding: 12px;
+  }
+  
+  .checkbox-custom {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .check-icon {
+    width: 12px;
+    height: 12px;
   }
 }
 </style>
