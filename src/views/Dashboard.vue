@@ -604,6 +604,32 @@ const activeAssociatedFilterTags = computed(() => {
 })
 
 // Methods
+const clearAllFilters = () => {
+  // Clear all filter arrays
+  filters.state = []
+  filters.district = []
+  filters.city = []
+  filters.category = []
+  filters.subCategory = []
+  filters.status = []
+  
+  // Call the composable's clear function
+  clearFilters()
+}
+
+const clearAssociatedFilters = () => {
+  // Clear all associated filter arrays
+  associatedFilters.state = []
+  associatedFilters.district = []
+  associatedFilters.city = []
+  associatedFilters.category = []
+  associatedFilters.subCategory = []
+  associatedFilters.status = []
+  
+  // Call the composable's clear function
+  clearAssociatedFilters()
+}
+
 const onEntitySelect = () => {
   selectedEntityItem.value = currentEntityList.value.find(e => e.id === selectedEntityId.value) || null
   if (selectedEntityItem.value) {
