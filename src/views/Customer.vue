@@ -258,7 +258,7 @@
           <button class="action-card success" @click="convertToRegistered" v-if="isValidated">
             <div class="action-icon">🎯</div>
             <div class="action-content">
-              <h4>Convert to Registered</h4>
+              <h4>Convert to Customer</h4>
               <p>Complete registration process</p>
             </div>
           </button>
@@ -911,7 +911,7 @@ onMounted(() => {
 .btn-primary,
 .btn-secondary {
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -919,6 +919,11 @@ onMounted(() => {
   border: none;
   min-height: 44px;
   min-width: 120px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary {
@@ -929,17 +934,44 @@ onMounted(() => {
 .btn-primary:hover {
   background: #000000;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .btn-secondary {
-  background: #f5f5f7;
+  background: #ffffff;
   color: #1d1d1f;
-  border: 1px solid #d2d2d7;
+  border: 1px solid #c7c7cc;
 }
 
 .btn-secondary:hover {
-  background: #e8e8ed;
+  background: #f2f2f7;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-success {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-height: 44px;
+  min-width: 120px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1c1c1e;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .filter-controls {
@@ -1065,18 +1097,20 @@ onMounted(() => {
   color: white;
   border: none;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
   transition: all 0.2s ease;
   min-height: 28px;
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(28, 28, 30, 0.2);
 }
 
 .btn-action-small:hover {
   background: #000000;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(28, 28, 30, 0.3);
 }
 
 .no-invoices {
@@ -1126,7 +1160,7 @@ onMounted(() => {
 .action-card {
   background: #fafafa;
   border: 1px solid #f2f2f7;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1134,21 +1168,24 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .action-card:hover {
-  background: #f5f5f7;
+  background: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #c7c7cc;
 }
 
 .action-card.success {
-  background: #d1fae5;
-  border-color: #a7f3d0;
+  background: #f0f9ff;
+  border-color: #bfdbfe;
 }
 
 .action-card.success:hover {
-  background: #bbf7d0;
+  background: #e0f2fe;
+  border-color: #93c5fd;
 }
 
 .action-icon {
@@ -1312,6 +1349,11 @@ onMounted(() => {
   border-top: 1px solid #f2f2f7;
 }
 
+.modal-footer .btn-primary,
+.modal-footer .btn-secondary {
+  min-width: 100px;
+}
+
 .payment-form {
   display: flex;
   flex-direction: column;
@@ -1392,6 +1434,13 @@ onMounted(() => {
   
   .action-icon {
     font-size: 20px;
+  }
+  
+  .btn-primary,
+  .btn-secondary,
+  .btn-success {
+    min-width: auto;
+    width: 100%;
   }
 }
 </style>
