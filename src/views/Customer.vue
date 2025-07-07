@@ -259,7 +259,7 @@
             <div class="action-icon">🎯</div>
             <div class="action-content">
               <h4>Convert to Customer</h4>
-              <p>Complete registration process</p>
+              <p>Complete customer conversion</p>
             </div>
           </button>
         </div>
@@ -1168,24 +1168,26 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   text-align: left;
+ background: #1c1c1e;
+ color: white;
+ border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .action-card:hover {
-  background: #ffffff;
+ background: #000000;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-color: #c7c7cc;
 }
 
-.action-card.success {
-  background: #f0f9ff;
+ background: #1c1c1e;
+ color: white;
   border-color: #bfdbfe;
 }
 
 .action-card.success:hover {
-  background: #e0f2fe;
-  border-color: #93c5fd;
+ background: #000000;
 }
 
 .action-icon {
@@ -1194,14 +1196,14 @@ onMounted(() => {
 }
 
 .action-content h4 {
-  color: #1d1d1f;
+ color: white;
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 4px 0;
 }
 
 .action-content p {
-  color: #86868b;
+ color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
   margin: 0;
 }
