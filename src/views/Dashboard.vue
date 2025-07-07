@@ -330,6 +330,22 @@ const tableColumns = computed(() => {
   ];
 });
 
+const manufacturerData = computed(() => {
+  // Check if we're dealing with a distributor or manufacturer lead
+  const distributor = mockDistributors.find(d => d.id === props.id);
+  if (distributor) {
+    // This is a distributor lead, find matching manufacturer
+    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
+  } else {
+    // This is a manufacturer lead, find matching distributor
+    const manufacturer = mockManufacturers.find(m => m.id === props.id);
+    if (manufacturer) {
+      return manufacturer;
+    }
+    return mockManufacturers[0];
+  }
+});
+
 // Load selected entity from storage on mount
 onMounted(() => {
   if (selectedEntityId.value) {
