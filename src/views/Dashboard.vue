@@ -732,8 +732,9 @@ watch(selectedEntityId, (newId) => {
   padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
-  background: #f8fafc;
+  background: #f5f5f7;
   min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .page-header {
@@ -743,19 +744,16 @@ watch(selectedEntityId, (newId) => {
 
 .page-header h1 {
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1f2937;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1d1d1f;
 }
 
 .page-header p {
-  color: #6b7280;
+  color: #86868b;
   font-size: 18px;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .entity-type-selection {
@@ -767,37 +765,37 @@ watch(selectedEntityId, (newId) => {
 .entity-toggle-container {
   display: flex;
   background: white;
-  border-radius: 16px;
-  padding: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d2d2d7;
 }
 
 .entity-toggle-btn {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 24px;
+  padding: 12px 20px;
   background: transparent;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: 600;
-  color: #6b7280;
+  font-weight: 500;
+  color: #86868b;
   transition: all 0.3s ease;
   position: relative;
 }
 
 .entity-toggle-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: #f5f5f7;
+  color: #1d1d1f;
 }
 
 .entity-toggle-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #007aff;
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .entity-icon {
@@ -805,25 +803,25 @@ watch(selectedEntityId, (newId) => {
 }
 
 .entity-count {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   padding: 4px 8px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .entity-toggle-btn.active .entity-count {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .modern-filters,
 .associated-filters {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 24px;
   margin-bottom: 32px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d2d2d7;
 }
 
 .filters-header {
@@ -832,13 +830,13 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 1px solid #d2d2d7;
 }
 
 .filters-header h3 {
   font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
+  font-weight: 600;
+  color: #1d1d1f;
   margin: 0;
 }
 
@@ -847,7 +845,7 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #ef4444;
+  background: #ff3b30;
   color: white;
   border: none;
   border-radius: 8px;
@@ -858,7 +856,7 @@ watch(selectedEntityId, (newId) => {
 }
 
 .btn-clear-all:hover {
-  background: #dc2626;
+  background: #d70015;
   transform: translateY(-1px);
 }
 
@@ -870,15 +868,15 @@ watch(selectedEntityId, (newId) => {
 }
 
 .filter-card {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: #f5f5f7;
+  border: 1px solid #d2d2d7;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s ease;
 }
 
 .filter-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -887,8 +885,8 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #1d1d1f;
+  color: #f5f5f7;
 }
 
 .filter-icon {
@@ -917,13 +915,13 @@ watch(selectedEntityId, (newId) => {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #374151;
+  color: #1d1d1f;
   font-size: 14px;
 }
 
 .active-filters {
-  background: #f0f9ff;
-  border: 1px solid #0ea5e9;
+  background: #f5f5f7;
+  border: 1px solid #d2d2d7;
   border-radius: 12px;
   padding: 16px;
   margin-top: 24px;
@@ -931,7 +929,7 @@ watch(selectedEntityId, (newId) => {
 
 .active-filters h4 {
   margin: 0 0 12px 0;
-  color: #0c4a6e;
+  color: #1d1d1f;
   font-size: 14px;
   font-weight: 600;
 }
@@ -951,7 +949,7 @@ watch(selectedEntityId, (newId) => {
 
 .filter-tag-label {
   font-weight: 600;
-  color: #0c4a6e;
+  color: #1d1d1f;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -961,10 +959,10 @@ watch(selectedEntityId, (newId) => {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #0ea5e9;
+  background: #007aff;
   color: white;
   padding: 4px 8px;
-  border-radius: 16px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
 }
@@ -996,10 +994,10 @@ watch(selectedEntityId, (newId) => {
 
 .selection-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d2d2d7;
 }
 
 .selection-card h3 {
@@ -1007,8 +1005,8 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 12px;
   font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
+  font-weight: 600;
+  color: #1d1d1f;
   margin: 0 0 20px 0;
 }
 
@@ -1025,11 +1023,11 @@ watch(selectedEntityId, (newId) => {
 .modern-select {
   width: 100%;
   padding: 16px 20px;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #d2d2d7;
   border-radius: 12px;
   font-size: 16px;
   font-weight: 500;
-  color: #374151;
+  color: #1d1d1f;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1037,26 +1035,26 @@ watch(selectedEntityId, (newId) => {
 
 .modern-select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 .selection-stats {
   display: flex;
   justify-content: center;
   padding: 12px;
-  background: #f9fafb;
+  background: #f5f5f7;
   border-radius: 8px;
 }
 
 .stat-item {
-  color: #6b7280;
+  color: #86868b;
   font-size: 14px;
 }
 
 .stat-item strong {
-  color: #374151;
-  font-weight: 700;
+  color: #1d1d1f;
+  font-weight: 600;
 }
 
 .selected-entity-section {
@@ -1072,23 +1070,23 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 20px;
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d2d2d7;
 }
 
 .entity-avatar {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #007aff;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -1098,14 +1096,14 @@ watch(selectedEntityId, (newId) => {
 
 .entity-details h3 {
   font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
+  font-weight: 600;
+  color: #1d1d1f;
   margin: 0 0 8px 0;
 }
 
 .entity-location,
 .entity-category {
-  color: #6b7280;
+  color: #86868b;
   font-size: 14px;
   margin: 4px 0;
   display: flex;
@@ -1116,7 +1114,7 @@ watch(selectedEntityId, (newId) => {
 .status-badge {
   display: inline-block;
   padding: 6px 12px;
-  border-radius: 16px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1125,23 +1123,23 @@ watch(selectedEntityId, (newId) => {
 }
 
 .status-lead {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fff2cc;
+  color: #bf8f00;
 }
 
 .status-prospect {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #cce7ff;
+  color: #0066cc;
 }
 
 .status-customer {
-  background: #d1fae5;
-  color: #065f46;
+  background: #ccf2e8;
+  color: #007a5e;
 }
 
 .status-view {
-  background: #f3f4f6;
-  color: #374151;
+  background: #f5f5f7;
+  color: #86868b;
 }
 
 .btn-change-selection {
@@ -1149,9 +1147,9 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
   border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
@@ -1161,7 +1159,7 @@ watch(selectedEntityId, (newId) => {
 }
 
 .btn-change-selection:hover {
-  background: #e5e7eb;
+  background: #e8e8ed;
   transform: translateY(-1px);
 }
 
@@ -1170,18 +1168,18 @@ watch(selectedEntityId, (newId) => {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #f0f9ff;
+  background: #f5f5f7;
   border-radius: 8px;
 }
 
 .summary-count {
   font-size: 18px;
-  font-weight: 700;
-  color: #0c4a6e;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .summary-text {
-  color: #0369a1;
+  color: #86868b;
   font-size: 14px;
   font-weight: 500;
 }
