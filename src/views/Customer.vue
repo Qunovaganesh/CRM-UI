@@ -259,7 +259,7 @@
             <div class="action-icon">🎯</div>
             <div class="action-content">
               <h4>Convert to Customer</h4>
-              <p>Complete customer conversion</p>
+              <p>Complete registration process</p>
             </div>
           </button>
         </div>
@@ -919,9 +919,7 @@ onMounted(() => {
   border: none;
   min-height: 44px;
   min-width: 120px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0,
-  )
-} 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1170,26 +1168,24 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   text-align: left;
- background: #1c1c1e;
- color: white;
- border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .action-card:hover {
- background: #000000;
+  background: #ffffff;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-color: #c7c7cc;
 }
 
- background: #1c1c1e;
- color: white;
+.action-card.success {
+  background: #f0f9ff;
   border-color: #bfdbfe;
 }
 
 .action-card.success:hover {
- background: #000000;
+  background: #e0f2fe;
+  border-color: #93c5fd;
 }
 
 .action-icon {
@@ -1198,14 +1194,14 @@ onMounted(() => {
 }
 
 .action-content h4 {
- color: white;
+  color: #1d1d1f;
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 4px 0;
 }
 
 .action-content p {
- color: rgba(255, 255, 255, 0.7);
+  color: #86868b;
   font-size: 14px;
   margin: 0;
 }
