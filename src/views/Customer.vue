@@ -701,7 +701,7 @@ onMounted(() => {
 
 .customer-content {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1.5fr 1fr;
   gap: 32px;
   margin-bottom: 32px;
 }
@@ -713,6 +713,7 @@ onMounted(() => {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  min-width: 0;
 }
 
 .section-header {
@@ -741,8 +742,7 @@ onMounted(() => {
   border: 1px solid #f2f2f7;
   border-radius: 12px;
   padding: 24px;
-  width: 100%;
-  box-sizing: border-box;
+  min-width: 500px;
 }
 
 .form-header {
@@ -794,44 +794,43 @@ onMounted(() => {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   align-items: start;
-  width: 100%;
+  min-width: 450px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
-  min-width: 0;
+  min-width: 200px;
 }
 
 .form-group.full-width {
   grid-column: 1 / -1;
-  width: 100%;
 }
 
 .form-group label {
   font-weight: 600;
   color: #1d1d1f;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .modern-input,
 .modern-select,
 .modern-textarea {
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 14px;
   color: #1d1d1f;
   background: white;
   transition: all 0.2s ease;
-  min-height: 40px;
-  box-sizing: border-box;
+  min-height: 44px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .modern-input:focus,
@@ -849,19 +848,21 @@ onMounted(() => {
 
 .modern-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
   line-height: 1.5;
 }
 
 .file-upload-area {
   border: 2px dashed #d2d2d7;
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   text-align: center;
   transition: all 0.2s ease;
   cursor: pointer;
-  width: 100%;
-  box-sizing: border-box;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .file-upload-area:hover {
@@ -879,10 +880,11 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  width: 100%;
 }
 
 .upload-icon {
-  font-size: 20px;
+  font-size: 32px;
   opacity: 0.6;
 }
 
@@ -890,11 +892,12 @@ onMounted(() => {
   color: #1d1d1f;
   font-weight: 500;
   display: block;
+  font-size: 16px;
 }
 
 .upload-text small {
   color: #86868b;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .form-actions {
@@ -903,21 +906,19 @@ onMounted(() => {
   justify-content: flex-end;
   padding-top: 16px;
   border-top: 1px solid #f2f2f7;
-  width: 100%;
 }
 
 .btn-primary,
 .btn-secondary {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
-  min-height: 40px;
-  box-sizing: border-box;
-  white-space: nowrap;
+  min-height: 44px;
+  min-width: 120px;
 }
 
 .btn-primary {
@@ -1323,8 +1324,17 @@ onMounted(() => {
     gap: 24px;
   }
   
+  .invoice-form-card {
+    min-width: auto;
+  }
+  
   .form-grid {
     grid-template-columns: 1fr;
+    min-width: auto;
+  }
+  
+  .form-group {
+    min-width: auto;
   }
   
   .content-wrapper {
