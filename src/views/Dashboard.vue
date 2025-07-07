@@ -573,16 +573,16 @@ const availableAssociatedSubCategories = computed(() => {
 
 // Active filters
 const hasActiveFilters = computed(() => {
-  return Object.values(filters.value).some(arr => arr.length > 0)
+  return Object.values(filters).some(arr => arr.length > 0)
 })
 
 const hasActiveAssociatedFilters = computed(() => {
-  return Object.values(associatedFilters.value).some(arr => arr.length > 0)
+  return Object.values(associatedFilters).some(arr => arr.length > 0)
 })
 
 const activeFilterTags = computed(() => {
   const tags = {}
-  Object.entries(filters.value).forEach(([key, values]) => {
+  Object.entries(filters).forEach(([key, values]) => {
     if (values.length > 0) {
       tags[key] = values
     }
@@ -592,7 +592,7 @@ const activeFilterTags = computed(() => {
 
 const activeAssociatedFilterTags = computed(() => {
   const tags = {}
-  Object.entries(associatedFilters.value).forEach(([key, values]) => {
+  Object.entries(associatedFilters).forEach(([key, values]) => {
     if (values.length > 0) {
       tags[key] = values
     }
