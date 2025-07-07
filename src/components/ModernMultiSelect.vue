@@ -1,0 +1,521 @@
+<template>
+  <div class="modern-multiselect" ref="dropdown">
+    <div class="multiselect-trigger" @click="toggleDropdown" :class="{ open: isOpen, 'has-selections': selected.length > 0 }">
+      <div class="trigger-content">
+        <span v-if="selected.length === 0" class="placeholder">{{ placeholder }}</span>
+        <div v-else class="selected-display">
+          <span class="selected-count">{{ selected.length }} selected</span>
+          <div class="selected-preview">
+            <span v-for="(item, index) in selected.slice(0, 2)" :key="item" class="preview-tag">
+              {{ item }}
+            </span>
+            <span v-if="selected.length > 2" class="more-count">+{{ selected.length - 2 }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="trigger-icon" :class="{ rotated: isOpen }">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M4.427 6.427a.75.75 0 011.06 0L8 8.94l2.513-2.513a.75.75 0 111.06 1.06l-3.043 3.044a.75.75 0 01-1.06 0L4.427 7.487a.75.75 0 010-1.06z"/>
+        </svg>
+      </div>
+    </div>
+
+    <transition name="dropdown">
+      <div v-if="isOpen" class="dropdown-panel">
+        <div class="search-container" v-if="searchable">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z"/>
+            </svg>
+            <input 
+              type="text" 
+              v-model="searchTerm" 
+              placeholder="Search options..." 
+              class="search-input"
+              @click.stop
+            />
+          </div>
+        </div>
+
+        <div class="options-container">
+          <div class="options-header" v-if="filteredOptions.length > 0">
+            <button 
+              class="select-all-btn" 
+              @click="selectAll"
+              v-if="filteredOptions.length > selected.length"
+            >
+              Select All ({{ filteredOptions.length }})
+            </button>
+            <button 
+              class="clear-all-btn" 
+              @click="clearAll"
+              v-if="selected.length > 0"
+            >
+              Clear All
+            </button>
+          </div>
+
+          <div class="options-list">
+            <label 
+              v-for="option in filteredOptions" 
+              :key="option" 
+              class="option-item"
+              :class="{ selected: localSelected.includes(option) }"
+            >
+              <div class="option-checkbox">
+                <input 
+                  type="checkbox" 
+                  :value="option" 
+                  v-model="localSelected" 
+                  @click.stop
+                />
+                <div class="checkbox-custom">
+                  <svg v-if="localSelected.includes(option)" class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M10.28 2.28a.75.75 0 00-1.06 0L5.25 6.25l-1.47-1.47a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5a.75.75 0 000-1.06z"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="option-text">{{ option }}</span>
+            </label>
+          </div>
+
+          <div v-if="filteredOptions.length === 0" class="no-options">
+            <div class="no-options-content">
+              <svg class="no-options-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              <p>No options found</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dropdown-footer" v-if="selected.length > 0">
+          <div class="selected-summary">
+            <span class="summary-text">{{ selected.length }} item{{ selected.length !== 1 ? 's' : '' }} selected</span>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+
+const props = defineProps<{
+  options: string[]
+  selected: string[]
+  placeholder?: string
+  searchable?: boolean
+}>()
+
+const emit = defineEmits<{
+  'update:selected': [value: string[]]
+}>()
+
+const dropdown = ref<HTMLElement>()
+const isOpen = ref(false)
+const searchTerm = ref('')
+const localSelected = ref<string[]>([])
+
+const filteredOptions = computed(() => {
+  if (!searchTerm.value) return props.options
+  return props.options.filter(option =>
+    option.toLowerCase().includes(searchTerm.value.toLowerCase())
+  )
+})
+
+const toggleDropdown = () => {
+  isOpen.value = !isOpen.value
+  if (isOpen.value) {
+    searchTerm.value = ''
+  }
+}
+
+const selectAll = () => {
+  const newSelected = [...new Set([...localSelected.value, ...filteredOptions.value])]
+  localSelected.value = newSelected
+}
+
+const clearAll = () => {
+  localSelected.value = []
+}
+
+const handleClickOutside = (event: Event) => {
+  if (dropdown.value && !dropdown.value.contains(event.target as Node)) {
+    isOpen.value = false
+  }
+}
+
+// Watch for prop changes
+watch(() => props.selected, (newVal) => {
+  localSelected.value = [...newVal]
+}, { immediate: true })
+
+// Emit changes
+watch(localSelected, (newVal) => {
+  emit('update:selected', newVal)
+}, { deep: true })
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+</script>
+
+<style scoped>
+.modern-multiselect {
+  position: relative;
+  width: 100%;
+}
+
+.multiselect-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.multiselect-trigger:hover {
+  border-color: #d1d5db;
+}
+
+.multiselect-trigger.open {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.multiselect-trigger.has-selections {
+  border-color: #10b981;
+}
+
+.trigger-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.selected-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selected-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selected-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.preview-tag {
+  background: #ecfdf5;
+  color: #059669;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #a7f3d0;
+}
+
+.more-count {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.trigger-icon {
+  color: #6b7280;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.trigger-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 320px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-container {
+  padding: 12px;
+  border-bottom: 1px solid #f3f4f6;
+  background: #f9fafb;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.options-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.options-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.select-all-btn,
+.clear-all-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select-all-btn {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.select-all-btn:hover {
+  background: #bfdbfe;
+}
+
+.clear-all-btn {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.clear-all-btn:hover {
+  background: #fecaca;
+}
+
+.options-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.option-item:hover {
+  background: #f9fafb;
+  border-left-color: #e5e7eb;
+}
+
+.option-item.selected {
+  background: #ecfdf5;
+  border-left-color: #10b981;
+}
+
+.option-checkbox {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.option-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 3px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.option-item.selected .checkbox-custom {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+.check-icon {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+}
+
+.option-item.selected .check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.option-text {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.no-options {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-options-content {
+  text-align: center;
+  color: #9ca3af;
+}
+
+.no-options-icon {
+  margin: 0 auto 8px;
+  opacity: 0.5;
+}
+
+.no-options p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dropdown-footer {
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-top: 1px solid #f3f4f6;
+}
+
+.selected-summary {
+  text-align: center;
+}
+
+.summary-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Dropdown animation */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+}
+
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+}
+
+/* Scrollbar styling */
+.options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.options-list::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.options-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.options-list::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+@media (max-width: 768px) {
+  .dropdown-panel {
+    max-height: 240px;
+  }
+  
+  .selected-preview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .multiselect-trigger {
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+}
+</style>
