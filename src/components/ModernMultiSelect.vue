@@ -21,84 +21,87 @@
       </div>
     </div>
 
-    <div 
-      v-if="isOpen" 
-      class="dropdown-panel" 
-      ref="panel"
-      @mousedown.prevent
-      @click.stop
-    >
-      <div class="search-container" v-if="searchable">
-        <div class="search-input-wrapper">
-          <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-            <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z"/>
-          </svg>
-          <input 
-            type="text" 
-            v-model="searchTerm" 
-            placeholder="Search options..." 
-            class="search-input"
-            @mousedown.stop
-            @click.stop
-            ref="searchInput"
-          />
-        </div>
-      </div>
-
-      <div class="options-container">
-        <div class="options-header" v-if="filteredOptions.length > 0">
-          <button 
-            class="select-all-btn" 
-            @mousedown.prevent
-            @click.stop="selectAll"
-            v-if="filteredOptions.length > selected.length"
-          >
-            Select All ({{ filteredOptions.length }})
-          </button>
-          <button 
-            class="clear-all-btn" 
-            @mousedown.prevent
-            @click.stop="clearAll"
-            v-if="selected.length > 0"
-          >
-            Clear All
-          </button>
+    <!-- Portal the dropdown to body to avoid clipping -->
+    <Teleport to="body" v-if="isOpen">
+      <div 
+        class="dropdown-panel" 
+        ref="panel"
+        :style="panelStyles"
+        @mousedown.prevent
+        @click.stop
+      >
+        <div class="search-container" v-if="searchable">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+              <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z"/>
+            </svg>
+            <input 
+              type="text" 
+              v-model="searchTerm" 
+              placeholder="Search options..." 
+              class="search-input"
+              @mousedown.stop
+              @click.stop
+              ref="searchInput"
+            />
+          </div>
         </div>
 
-        <div class="options-list" ref="optionsList">
-          <div 
-            v-for="option in filteredOptions" 
-            :key="option" 
-            class="option-item"
-            :class="{ selected: isSelected(option) }"
-            @mousedown.prevent
-            @click.stop="toggleOption(option)"
-          >
-            <div class="option-checkbox">
-              <div class="checkbox-custom" :class="{ checked: isSelected(option) }">
-                <svg v-if="isSelected(option)" class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+        <div class="options-container">
+          <div class="options-header" v-if="filteredOptions.length > 0">
+            <button 
+              class="select-all-btn" 
+              @mousedown.prevent
+              @click.stop="selectAll"
+              v-if="filteredOptions.length > selected.length"
+            >
+              SELECT ALL ({{ filteredOptions.length }})
+            </button>
+            <button 
+              class="clear-all-btn" 
+              @mousedown.prevent
+              @click.stop="clearAll"
+              v-if="selected.length > 0"
+            >
+              CLEAR ALL
+            </button>
+          </div>
+
+          <div class="options-list" ref="optionsList">
+            <div 
+              v-for="option in filteredOptions" 
+              :key="option" 
+              class="option-item"
+              :class="{ selected: isSelected(option) }"
+              @mousedown.prevent
+              @click.stop="toggleOption(option)"
+            >
+              <div class="option-checkbox">
+                <div class="checkbox-custom" :class="{ checked: isSelected(option) }">
+                  <svg v-if="isSelected(option)" class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
               </div>
+              <span class="option-text">{{ option }}</span>
             </div>
-            <span class="option-text">{{ option }}</span>
+          </div>
+
+          <div v-if="filteredOptions.length === 0" class="no-options">
+            <div class="no-options-content">
+              <p>No options found</p>
+              <span v-if="searchTerm">Try adjusting your search</span>
+            </div>
           </div>
         </div>
 
-        <div v-if="filteredOptions.length === 0" class="no-options">
-          <div class="no-options-content">
-            <p>No options found</p>
-            <span v-if="searchTerm">Try adjusting your search</span>
+        <div class="dropdown-footer" v-if="selected.length > 0">
+          <div class="selected-summary">
+            <span class="summary-text">{{ selected.length }} item{{ selected.length !== 1 ? 's' : '' }} selected</span>
           </div>
         </div>
       </div>
-
-      <div class="dropdown-footer" v-if="selected.length > 0">
-        <div class="selected-summary">
-          <span class="summary-text">{{ selected.length }} item{{ selected.length !== 1 ? 's' : '' }} selected</span>
-        </div>
-      </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
@@ -126,6 +129,7 @@ const optionsList = ref<HTMLElement>()
 const isOpen = ref(false)
 const searchTerm = ref('')
 const localSelected = ref<string[]>([])
+const panelStyles = ref({})
 
 const filteredOptions = computed(() => {
   if (!searchTerm.value) return props.options
@@ -170,39 +174,59 @@ const openDropdown = () => {
 const closeDropdown = () => {
   isOpen.value = false
   searchTerm.value = ''
+  panelStyles.value = {}
 }
 
 const positionDropdown = () => {
   if (!dropdown.value || !panel.value) return
   
   const triggerRect = dropdown.value.getBoundingClientRect()
-  const panelElement = panel.value
   const viewportHeight = window.innerHeight
+  const viewportWidth = window.innerWidth
   
-  // Reset positioning
-  panelElement.style.position = 'absolute'
-  panelElement.style.top = ''
-  panelElement.style.bottom = ''
-  panelElement.style.left = '0'
-  panelElement.style.right = '0'
-  panelElement.style.width = '100%'
-  panelElement.style.zIndex = '999999'
-  panelElement.style.transform = 'none'
-  
+  // Calculate available space
   const spaceBelow = viewportHeight - triggerRect.bottom - 10
   const spaceAbove = triggerRect.top - 10
   const maxPanelHeight = 320
+  const minPanelHeight = 200
   
-  if (spaceBelow >= 200 || spaceBelow >= spaceAbove) {
+  let top = 0
+  let maxHeight = maxPanelHeight
+  
+  // Determine if dropdown should open above or below
+  if (spaceBelow >= minPanelHeight || spaceBelow >= spaceAbove) {
     // Position below
-    panelElement.style.top = '100%'
-    panelElement.style.marginTop = '4px'
-    panelElement.style.maxHeight = Math.min(maxPanelHeight, spaceBelow) + 'px'
+    top = triggerRect.bottom + 4
+    maxHeight = Math.min(maxPanelHeight, spaceBelow - 10)
   } else {
     // Position above
-    panelElement.style.bottom = '100%'
-    panelElement.style.marginBottom = '4px'
-    panelElement.style.maxHeight = Math.min(maxPanelHeight, spaceAbove) + 'px'
+    top = triggerRect.top - Math.min(maxPanelHeight, spaceAbove - 10) - 4
+    maxHeight = Math.min(maxPanelHeight, spaceAbove - 10)
+  }
+  
+  // Ensure minimum height
+  maxHeight = Math.max(maxHeight, 150)
+  
+  // Calculate horizontal position
+  let left = triggerRect.left
+  const panelWidth = triggerRect.width
+  
+  // Ensure panel doesn't go off screen horizontally
+  if (left + panelWidth > viewportWidth - 10) {
+    left = viewportWidth - panelWidth - 10
+  }
+  if (left < 10) {
+    left = 10
+  }
+  
+  panelStyles.value = {
+    position: 'fixed',
+    top: `${top}px`,
+    left: `${left}px`,
+    width: `${triggerRect.width}px`,
+    maxHeight: `${maxHeight}px`,
+    zIndex: '999999',
+    transform: 'none'
   }
 }
 
@@ -216,7 +240,8 @@ const clearAll = () => {
 }
 
 const handleClickOutside = (event: Event) => {
-  if (dropdown.value && !dropdown.value.contains(event.target as Node)) {
+  if (dropdown.value && !dropdown.value.contains(event.target as Node) && 
+      panel.value && !panel.value.contains(event.target as Node)) {
     closeDropdown()
   }
 }
@@ -227,10 +252,9 @@ const handleResize = () => {
   }
 }
 
-const handleScroll = (event: Event) => {
-  // Only close if scroll is outside the dropdown
-  if (isOpen.value && !dropdown.value?.contains(event.target as Node)) {
-    closeDropdown()
+const handleScroll = () => {
+  if (isOpen.value) {
+    positionDropdown()
   }
 }
 
@@ -329,17 +353,14 @@ onUnmounted(() => {
 }
 
 .dropdown-panel {
-  position: absolute;
   background: #ffffff;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  z-index: 999999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-height: 320px;
+  min-height: 150px;
 }
 
 .search-container {
@@ -438,7 +459,7 @@ onUnmounted(() => {
   padding: 4px 0;
   overscroll-behavior: contain;
   min-height: 0;
-  max-height: 200px;
+  max-height: none;
 }
 
 .option-item {
@@ -611,14 +632,6 @@ onUnmounted(() => {
     padding: 10px 12px;
     font-size: 12px;
   }
-  
-  .dropdown-panel {
-    max-height: 280px;
-  }
-  
-  .options-list {
-    max-height: 160px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -642,14 +655,6 @@ onUnmounted(() => {
   
   .selected-count {
     font-size: 11px;
-  }
-  
-  .dropdown-panel {
-    max-height: 240px;
-  }
-  
-  .options-list {
-    max-height: 140px;
   }
 }
 
