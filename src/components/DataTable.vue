@@ -123,7 +123,7 @@ interface Column {
   label: string;
 }
 
-defineProps<{
+const props = defineProps<{
   title: string;
   columns: Column[];
   data: (Manufacturer | Distributor)[];
