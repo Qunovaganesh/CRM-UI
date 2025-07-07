@@ -1445,12 +1445,12 @@ const submitForm = async () => {
 }
 
 .btn-navigate {
-  background: #007aff;
+  background: #1c1c1e;
   color: white;
 }
 
 .btn-navigate:hover {
-  background: #0056b3;
+  background: #000000;
   transform: translateY(-1px);
 }
 

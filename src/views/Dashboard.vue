@@ -1014,13 +1014,14 @@ watch(selectedEntityId, (newId) => {
   gap: 6px;
   background: #1c1c1e;
   color: white;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
-  line-height: 1.2;
-  min-height: 24px;
+  line-height: 1;
+  height: 28px;
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .tag-remove {
@@ -1031,14 +1032,15 @@ watch(selectedEntityId, (newId) => {
   font-size: 14px;
   font-weight: bold;
   padding: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: all 0.2s ease;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .tag-remove:hover {
