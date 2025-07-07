@@ -377,6 +377,9 @@ const filteredPairedList = computed(() => {
   
   // Apply associated filters
   return list.filter(item => {
+    // Safety check: ensure item exists before accessing properties
+    if (!item) return false
+    
     return (!associatedFilters.value.city.length || associatedFilters.value.city.includes(item.city)) &&
            (!associatedFilters.value.district.length || associatedFilters.value.district.includes(item.district)) &&
            (!associatedFilters.value.state.length || associatedFilters.value.state.includes(item.state)) &&
