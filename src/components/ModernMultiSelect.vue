@@ -286,7 +286,7 @@ onUnmounted(() => {
   border: 1px solid #d1d1d6;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  z-index: 999999;
+  z-index: 999999999;
   margin-top: 8px;
   max-height: 360px;
   overflow: hidden;
@@ -525,7 +525,7 @@ onUnmounted(() => {
     max-height: 280px;
     margin-top: 4px;
     border-radius: 8px;
-    z-index: 9999999;
+    z-index: 999999999 !important;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   }
   
@@ -568,7 +568,7 @@ onUnmounted(() => {
     margin: 0 !important;
     border-radius: 16px 16px 0 0 !important;
     max-height: 70vh !important;
-    z-index: 99999999 !important;
+    z-index: 999999999 !important;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3) !important;
   }
   
