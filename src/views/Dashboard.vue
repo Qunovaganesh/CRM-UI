@@ -207,9 +207,9 @@
 <script>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import DataTable from './DataTable.vue'
-import FilterSection from './FilterSection.vue'
-import MultiSelectDropdown from './MultiSelectDropdown.vue'
+import DataTable from '../components/DataTable.vue'
+import FilterSection from '../components/FilterSection.vue'
+import MultiSelectDropdown from '../components/MultiSelectDropdown.vue'
 import { filterOptions } from '../data/mockData'
 
 export default {
