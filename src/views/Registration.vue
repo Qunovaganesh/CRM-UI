@@ -1259,7 +1259,7 @@ const submitForm = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 10px 18px;
   background: #f5f5f7;
   border: 1px solid #d2d2d7;
   border-radius: 12px;
@@ -1270,6 +1270,7 @@ const submitForm = async () => {
   transition: all 0.3s ease;
   min-width: 160px;
   justify-content: center;
+  min-height: 40px;
 }
 
 .category-btn:hover {
@@ -1343,7 +1344,7 @@ const submitForm = async () => {
 .form-input,
 .form-select,
 .form-textarea {
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 14px;
@@ -1352,7 +1353,7 @@ const submitForm = async () => {
   background: white;
   transition: all 0.2s ease;
   font-family: inherit;
-  min-height: 36px;
+  min-height: 32px;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
@@ -1379,13 +1380,13 @@ const submitForm = async () => {
 }
 
 .form-file {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border: 2px dashed #d2d2d7;
   border-radius: 8px;
   background: #fafafa;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-height: 40px;
+  min-height: 32px;
   display: flex;
   align-items: center;
 }
@@ -1407,14 +1408,15 @@ const submitForm = async () => {
 .btn-primary,
 .btn-secondary,
 .btn-navigate {
-  padding: 12px 24px;
+  padding: 8px 20px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
-  min-width: 120px;
+  min-width: 100px;
+  min-height: 36px;
 }
 
 .btn-primary {
@@ -1559,15 +1561,17 @@ const submitForm = async () => {
   }
   
   .category-btn {
-    padding: 10px 16px;
+    padding: 8px 14px;
     font-size: 14px;
+    min-height: 36px;
   }
   
   .btn-primary,
   .btn-secondary,
   .btn-navigate {
-    padding: 10px 20px;
+    padding: 6px 16px;
     font-size: 14px;
+    min-height: 32px;
   }
 }
 

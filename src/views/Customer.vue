@@ -840,14 +840,14 @@ onMounted(() => {
 .modern-input,
 .modern-select,
 .modern-textarea {
-  padding: 12px 16px;
+  padding: 8px 12px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
   font-size: 14px;
   color: #1d1d1f;
   background: white;
   transition: all 0.2s ease;
-  min-height: 44px;
+  min-height: 36px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -867,18 +867,18 @@ onMounted(() => {
 
 .modern-textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 80px;
   line-height: 1.5;
 }
 
 .file-upload-area {
   border: 2px dashed #d2d2d7;
   border-radius: 12px;
-  padding: 24px;
+  padding: 16px;
   text-align: center;
   transition: all 0.2s ease;
   cursor: pointer;
-  min-height: 120px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -929,15 +929,15 @@ onMounted(() => {
 
 .btn-primary,
 .btn-secondary {
-  padding: 12px 24px;
+  padding: 8px 20px;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
-  min-height: 44px;
-  min-width: 120px;
+  min-height: 36px;
+  min-width: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -970,15 +970,15 @@ onMounted(() => {
 }
 
 .btn-success {
-  padding: 12px 24px;
+  padding: 8px 20px;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
-  min-height: 44px;
-  min-width: 120px;
+  min-height: 36px;
+  min-width: 100px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
@@ -1116,13 +1116,13 @@ onMounted(() => {
   background: #1c1c1e;
   color: white;
   border: none;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
   transition: all 0.2s ease;
-  min-height: 28px;
+  min-height: 24px;
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(28, 28, 30, 0.2);
 }
@@ -1182,7 +1182,7 @@ onMounted(() => {
   color: white;
   border: 1px solid #1c1c1e;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -1395,7 +1395,8 @@ onMounted(() => {
 
 .modal-footer .btn-primary,
 .modal-footer .btn-secondary {
-  min-width: 100px;
+  min-width: 80px;
+  min-height: 32px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -1490,7 +1491,8 @@ onMounted(() => {
   .btn-primary,
   .btn-secondary,
   .btn-success {
-    min-width: auto;
+    min-width: 80px;
+    min-height: 32px;
     width: 100%;
   }
 }
