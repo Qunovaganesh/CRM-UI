@@ -229,48 +229,51 @@
       </div>
 
       <div class="customer-actions">
-        <div class="section-header">
-          <h2>Customer Actions</h2>
-          <div class="section-icon">⚡</div>
-        </div>
-        <div class="action-grid">
-          <button class="action-card" @click="submitToCompliance">
-            <div class="action-icon">📋</div>
-            <div class="action-content">
-              <h4>Submit to Compliance</h4>
-              <p>Send for compliance review</p>
-            </div>
-          </button>
-          <button class="action-card" @click="validateCustomer" v-if="showValidateButton">
-            <div class="action-icon">✅</div>
-            <div class="action-content">
-              <h4>Validate Customer</h4>
-              <p>Approve customer status</p>
-            </div>
-          </button>
-          <button class="action-card" @click="uploadPayment">
-            <div class="action-icon">💳</div>
-            <div class="action-content">
-              <h4>Upload Payment</h4>
-              <p>Record payment receipt</p>
-            </div>
-          </button>
-          <button class="action-card success" @click="convertToRegistered" v-if="isValidated">
-            <div class="action-icon">🎯</div>
-            <div class="action-content">
-              <h4>Convert to Registered</h4>
-              <p>Complete registration process</p>
-            </div>
-          </button>
-          <button class="action-card convert-customer" @click="convertToCustomer" v-if="showConvertButton">
-            <div class="action-icon">🎯</div>
-            <div class="action-content">
-              <h4>Convert to Customer</h4>
-              <p>Upgrade to customer status</p>
-            </div>
-          </button>
-        </div>
+  <div class="section-header">
+    <h2>Customer Actions</h2>
+    <div class="section-icon">⚡</div>
+  </div>
+  <div class="action-grid">
+
+    <!-- 1. Upload Payment -->
+    <button class="action-card" @click="uploadPayment">
+      <div class="action-icon">💳</div>
+      <div class="action-content">
+        <h4>Upload Payment</h4>
+        <p>Record payment receipt</p>
       </div>
+    </button>
+
+    <!-- 2. Submit to Compliance -->
+    <button class="action-card" @click="submitToCompliance">
+      <div class="action-icon">📋</div>
+      <div class="action-content">
+        <h4>Submit to Compliance</h4>
+        <p>Send for compliance review</p>
+      </div>
+    </button>
+
+    <!-- 3. Validate Customer -->
+    <button class="action-card" @click="validateCustomer" v-if="showValidateButton">
+      <div class="action-icon">✅</div>
+      <div class="action-content">
+        <h4>Validate Customer</h4>
+        <p>Approve customer status</p>
+      </div>
+    </button>
+
+    <!-- 4. Convert to Customer -->
+    <button class="action-card convert-customer" @click="convertToCustomer" v-if="showConvertButton">
+      <div class="action-icon">🎯</div>
+      <div class="action-content">
+        <h4>Convert to Customer</h4>
+        <p>Upgrade to customer status</p>
+      </div>
+    </button>
+
+  </div>
+</div>
+    
 
       <!-- Payment History -->
       <div v-if="paymentHistory.length" class="payment-history">
