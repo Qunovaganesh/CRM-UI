@@ -62,7 +62,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/crm/'),
   routes,
   scrollBehavior(_, __, savedPosition) {
     if (savedPosition) {

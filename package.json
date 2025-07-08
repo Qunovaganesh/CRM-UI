@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "npm run build:public && npm run build:www",
+    "build:public": "vue-tsc -b && vite build --outDir ../public/crm --base /assets/bizz_plus/crm/",
+    "build:www": "vite build --outDir ../www/crm --base /assets/bizz_plus/crm/",
     "preview": "vite preview"
   },
   "dependencies": {
