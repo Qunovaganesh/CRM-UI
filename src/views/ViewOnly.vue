@@ -436,6 +436,7 @@ const isManufacturerView = computed(() => {
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
+const distributorName = computed(() => distributorData.value.name);
 
 const relatedDistributors = computed(() => {
   return mockDistributors.filter(d => 

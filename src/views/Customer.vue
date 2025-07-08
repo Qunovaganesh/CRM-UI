@@ -429,6 +429,8 @@ const isManufacturerCustomer = computed(() => {
 const manufacturerName = computed(() => manufacturerData.value.name);
 const distributorName = computed(() => distributorData.value.name);
 
+const distributorName = computed(() => distributorData.value.name);
+
 const filteredInvoices = computed(() => {
   let filtered = invoices.value;
   
