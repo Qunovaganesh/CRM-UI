@@ -601,7 +601,7 @@ onMounted(() => {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -702,7 +702,7 @@ onMounted(() => {
 }
 
 .btn-delete {
-  background: #ff3b30;
+  background: #620c08;
   color: white;
   border: none;
   padding: 4px;
@@ -718,7 +718,7 @@ onMounted(() => {
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: #ff1744;
+  background: #970a27;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
 }
