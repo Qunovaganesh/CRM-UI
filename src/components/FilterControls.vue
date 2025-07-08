@@ -29,7 +29,7 @@
           <select 
             multiple 
             :value="internalFilters.state" 
-            @change="onLocationFilterChange('state', Array.from($event.target.selectedOptions).map(option => option.value))"
+            @change="onLocationFilterChange('state', Array.from(($event.target as HTMLSelectElement).selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="state in availableStates" :key="state" :value="state">
@@ -51,7 +51,7 @@
           <select 
             multiple 
             :value="internalFilters.district" 
-            @change="onLocationFilterChange('district', Array.from($event.target.selectedOptions).map(option => option.value))"
+            @change="onLocationFilterChange('district', Array.from(($event.target as HTMLSelectElement).selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="district in availableDistricts" :key="district" :value="district">
@@ -73,7 +73,7 @@
           <select 
             multiple 
             :value="internalFilters.city" 
-            @change="onLocationFilterChange('city', Array.from($event.target.selectedOptions).map(option => option.value))"
+            @change="onLocationFilterChange('city', Array.from(($event.target as HTMLSelectElement).selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="city in availableCities" :key="city" :value="city">
@@ -95,7 +95,7 @@
           <select 
             multiple 
             :value="internalFilters.category" 
-            @change="onCategoryFilterChange('category', Array.from($event.target.selectedOptions).map(option => option.value))"
+            @change="onCategoryFilterChange('category', Array.from(($event.target as HTMLSelectElement).selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="category in availableCategories" :key="category" :value="category">
@@ -117,7 +117,7 @@
           <select 
             multiple 
             :value="internalFilters.subCategory" 
-            @change="onCategoryFilterChange('subCategory', Array.from($event.target.selectedOptions).map(option => option.value))"
+            @change="onCategoryFilterChange('subCategory', Array.from(($event.target as HTMLSelectElement).selectedOptions).map(option => option.value))"
             class="multiselect"
           >
             <option v-for="subCategory in availableSubCategories" :key="subCategory" :value="subCategory">
@@ -139,7 +139,7 @@
           <select 
             multiple 
             :value="internalFilters.status" 
-            @change="internalFilters.status = Array.from($event.target.selectedOptions).map(option => option.value); onFilterChange()"
+            @change="internalFilters.status = Array.from(($event.target as HTMLSelectElement).selectedOptions).map(option => option.value); onFilterChange()"
             class="multiselect"
           >
             <option v-for="status in filterOptions.statuses" :key="status" :value="status">

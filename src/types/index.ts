@@ -9,6 +9,7 @@ export interface Manufacturer {
   status: 'Registration' | 'Lead' | 'Prospect' | 'Customer' | 'View';
   registrationDate: string;
   daysSinceStatus: number;
+  [key: string]: any;
 }
 
 export interface Distributor {
@@ -22,6 +23,7 @@ export interface Distributor {
   status: 'Registration' | 'Lead' | 'Prospect' | 'Customer' | 'View';
   registrationDate: string;
   daysSinceStatus: number;
+  [key: string]: any;
 }
 
 export interface Interaction {
