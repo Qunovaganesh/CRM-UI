@@ -724,7 +724,7 @@ const getRouteNameFromStatus = (status) => {
   }
 }
 
-const getStatusBadgeClass = (status) => {
+const getStatusBadgeClass = (status: string) => {
   const base = 'status-badge'
   return `${base} ${{
     Registration: 'status-registration',
