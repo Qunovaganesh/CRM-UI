@@ -963,10 +963,10 @@ const availableManufacturerSubCategories = computed(() => {
 const availableManufacturerDistricts = computed(() => {
   if (manufacturerForm.distributorNeededStates.length > 0) {
     const relatedDistricts = new Set<string>()
-    manufacturerForm.distributorNeededStates.forEach(state => {
-      const mapping = locationMapping[state]
+    manufacturerForm.distributorNeededStates.forEach((state: string) => {
+      const mapping = locationMapping[state as keyof typeof locationMapping]
       if (mapping) {
-        mapping.districts.forEach(district => relatedDistricts.add(district))
+        mapping.districts.forEach((district: string) => relatedDistricts.add(district))
       }
     })
     return Array.from(relatedDistricts)
@@ -977,10 +977,10 @@ const availableManufacturerDistricts = computed(() => {
 const availableManufacturerPresenceDistricts = computed(() => {
   if (manufacturerForm.presenceStates.length > 0) {
     const relatedDistricts = new Set<string>()
-    manufacturerForm.presenceStates.forEach(state => {
-      const mapping = locationMapping[state]
+    manufacturerForm.presenceStates.forEach((state: string) => {
+      const mapping = locationMapping[state as keyof typeof locationMapping]
       if (mapping) {
-        mapping.districts.forEach(district => relatedDistricts.add(district))
+        mapping.districts.forEach((district: string) => relatedDistricts.add(district))
       }
     })
     return Array.from(relatedDistricts)
@@ -1005,10 +1005,10 @@ const availableDistributorSubCategories = computed(() => {
 const availableDistributorNeededDistricts = computed(() => {
   if (distributorForm.needManufacturerStates.length > 0) {
     const relatedDistricts = new Set<string>()
-    distributorForm.needManufacturerStates.forEach(state => {
-      const mapping = locationMapping[state]
+    distributorForm.needManufacturerStates.forEach((state: string) => {
+      const mapping = locationMapping[state as keyof typeof locationMapping]
       if (mapping) {
-        mapping.districts.forEach(district => relatedDistricts.add(district))
+        mapping.districts.forEach((district: string) => relatedDistricts.add(district))
       }
     })
     return Array.from(relatedDistricts)
@@ -1096,26 +1096,26 @@ const handleFileUpload = (event: Event) => {
 const resetForm = () => {
   // Reset address form
   Object.keys(addressForm).forEach(key => {
-    addressForm[key] = ''
+    (addressForm as any)[key] = ''
   })
   
   // Reset manufacturer form
   Object.keys(manufacturerForm).forEach(key => {
-    if (Array.isArray(manufacturerForm[key])) {
-      manufacturerForm[key] = []
+    if (Array.isArray((manufacturerForm as any)[key])) {
+      (manufacturerForm as any)[key] = []
     } else {
-      manufacturerForm[key] = ''
+      (manufacturerForm as any)[key] = ''
     }
   })
   
   // Reset distributor form
   Object.keys(distributorForm).forEach(key => {
     if (key === 'leadOwner') {
-      distributorForm[key] = 'ganesh.t@qunovatec.com'
-    } else if (Array.isArray(distributorForm[key])) {
-      distributorForm[key] = []
+      (distributorForm as any)[key] = 'ganesh.t@qunovatec.com'
+    } else if (Array.isArray((distributorForm as any)[key])) {
+      (distributorForm as any)[key] = []
     } else {
-      distributorForm[key] = ''
+      (distributorForm as any)[key] = ''
     }
   })
   

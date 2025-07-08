@@ -87,3 +87,12 @@ export interface TermsOptions {
   clauses: string[];
   responses: Record<string, string[]>;
 }
+
+export interface LocationMapping {
+  districts: string[];
+  cities: string[];
+}
+
+export interface LocationMappingData {
+  [key: string]: LocationMapping;
+}

@@ -1,4 +1,4 @@
-import type { Manufacturer, Distributor, Interaction, Agreement, Invoice, FilterOptions } from '../types';
+import type { Manufacturer, Distributor, Interaction, Agreement, Invoice, FilterOptions, LocationMappingData } from '../types';
 
 // Expanded manufacturers with FMCG focus and status
 export const mockManufacturers: Manufacturer[] = [
@@ -798,7 +798,7 @@ export const filterOptions: FilterOptions = {
 };
 
 // Location mapping for dependent multiselect
-export const locationMapping = {
+export const locationMapping: LocationMappingData = {
   'Maharashtra': {
     districts: ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad'],
     cities: ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad']

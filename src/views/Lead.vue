@@ -208,7 +208,7 @@ const selectedInteraction = ref<Interaction | null>(null);
 const newInteraction = ref({
   interactedBy: 'Current User',
   dateInteracted: new Date().toISOString().split('T')[0],
-  mode: '',
+  mode: '' as 'Phone' | 'FtoF' | '',
   notes: '',
   hasReminder: false,
   reminderDate: '',
@@ -252,7 +252,8 @@ const today = computed(() => {
   return new Date().toISOString().split('T')[0];
 });
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -288,6 +289,7 @@ const handleFileUpload = (event: Event) => {
 const submitNotes = () => {
   const interaction = {
     ...newInteraction.value,
+    mode: newInteraction.value.mode as 'Phone' | 'FtoF',
     timeElapsed: 'Just now'
   };
 

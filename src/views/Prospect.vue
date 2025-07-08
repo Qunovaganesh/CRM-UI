@@ -350,7 +350,7 @@ const onClauseChange = (term: TermsCondition) => {
 };
 
 const getResponseOptions = (clause: string) => {
-  return termsOptions.responses[clause] || [];
+  return termsOptions.responses[clause as keyof typeof termsOptions.responses] || [];
 };
 
 const toggleEditMode = () => {

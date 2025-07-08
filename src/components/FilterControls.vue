@@ -232,9 +232,9 @@ const availableDistricts = computed(() => {
   if (internalFilters.value.state.length > 0) {
     const relatedDistricts = new Set<string>();
     (Array.isArray(internalFilters.value.state) ? internalFilters.value.state : []).forEach((state: string) => {
-      const mapping = locationMapping[state];
+      const mapping = locationMapping[state as keyof typeof locationMapping];
       if (mapping) {
-        mapping.districts.forEach(district => relatedDistricts.add(district));
+        mapping.districts.forEach((district: string) => relatedDistricts.add(district));
       }
     });
     return Array.from(relatedDistricts);
@@ -246,9 +246,9 @@ const availableCities = computed(() => {
   if (internalFilters.value.state.length > 0) {
     const relatedCities = new Set<string>();
     (Array.isArray(internalFilters.value.state) ? internalFilters.value.state : []).forEach((state: string) => {
-      const mapping = locationMapping[state];
+      const mapping = locationMapping[state as keyof typeof locationMapping];
       if (mapping) {
-        mapping.cities.forEach(city => relatedCities.add(city));
+        mapping.cities.forEach((city: string) => relatedCities.add(city));
       }
     });
     return Array.from(relatedCities);

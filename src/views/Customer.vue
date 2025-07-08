@@ -372,7 +372,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useBusinessLogic } from '../composables/useBusinessLogic';
 import { mockManufacturers, mockDistributors } from '../data/mockData';
 import type { Invoice } from '../types';
@@ -382,8 +381,7 @@ const props = defineProps<{
   id: string;
 }>();
 
-const router = useRouter();
-const { invoices, addInvoice, updateDistributorStatus } = useBusinessLogic();
+const { invoices, addInvoice } = useBusinessLogic();
 
 const uploadType = ref<'proforma' | 'tax'>('proforma');
 const invoiceFilter = ref('all');
@@ -481,8 +479,7 @@ const calculateCommission = () => {
     (newInvoice.value.amount * newInvoice.value.commissionPercent) / 100;
 };
 
-const handleFileUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement;
+const handleFileUpload = (_: Event) => {
   // Handle file upload logic
 };
 
@@ -577,22 +574,6 @@ const submitPayment = () => {
   } else {
     alert('Please fill all required fields');
   }
-};
-
-const convertToRegistered = () => {
-  if (isManufacturerCustomer.value) {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      manufacturer.status = 'View';
-      manufacturer.daysSinceStatus = 0;
-    }
-  } else {
-    updateDistributorStatus(props.id, 'View');
-  }
-  alert('Customer converted to registered status! Redirecting...');
-  setTimeout(() => {
-    router.push({ name: 'ViewOnly', params: { id: props.id } });
-  }, 1000);
 };
 
 const convertToCustomer = () => {
