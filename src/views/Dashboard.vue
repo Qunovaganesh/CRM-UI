@@ -4,7 +4,7 @@
       <h1>Manufacturer-Distributor Management</h1>
       <p>Manage your business relationships and workflow processes</p>
       <div class="header-actions">
-        <button class="btn-add-new" @click="$router.push('/')">
+        <button class="btn-add-new" @click="$router.push('/registration')">
           <span>➕</span> Add New Lead
         </button>
       </div>

@@ -8,7 +8,7 @@ import Registration from '../views/Registration.vue';
 
 const routes = [
   {
-    path: '/',
+    path: '/registration',
     name: 'Registration',
     component: Registration,
     meta: {
@@ -16,8 +16,16 @@ const routes = [
     }
   },
   {
-    path: '/dashboard',
+    path: '/',
     name: 'Dashboard',
+    component: Dashboard,
+    meta: {
+      title: 'Dashboard - Manufacturer-Distributor Management'
+    }
+  },
+  {
+    path: '/dashboard',
+    name: 'DashboardView',
     component: Dashboard,
     meta: {
       title: 'Dashboard - Manufacturer-Distributor Management'
