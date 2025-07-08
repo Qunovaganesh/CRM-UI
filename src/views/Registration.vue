@@ -88,7 +88,7 @@
               <input 
                 type="tel" 
                 v-model="manufacturerForm.mobile" 
-                placeholder="Enter mobile number"
+                placeholder="Enter mobile"
                 class="form-input"
               />
             </div>
