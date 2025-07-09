@@ -855,6 +855,7 @@ import { useRouter } from 'vue-router'
 import { useBusinessLogic } from '../composables/useBusinessLogic'
 import ModernMultiSelect from '../components/ModernMultiSelect.vue'
 import { filterOptions, locationMapping, industryToCategoryMapping } from '../data/mockData'
+import { apiService, type LeadData } from '../services/api'
 
 const router = useRouter()
 const { manufacturers, distributors } = useBusinessLogic()
@@ -1126,78 +1127,299 @@ const navigateToDashboard = () => {
   router.push('/dashboard')
 }
 
+// Form validation helper
+const validateForm = (): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+
+  // Common validations
+  if (!addressForm.pincode || addressForm.pincode.length !== 6) {
+    errors.push('Valid 6-digit pincode is required')
+  }
+
+  if (!addressForm.city.trim()) {
+    errors.push('City is required')
+  }
+
+  if (!addressForm.state.trim()) {
+    errors.push('State is required')
+  }
+
+  if (leadCategory.value === 'manufacturer') {
+    if (!manufacturerForm.name.trim()) {
+      errors.push('Contact name is required')
+    }
+    if (!manufacturerForm.companyName.trim()) {
+      errors.push('Company name is required')
+    }
+    if (manufacturerForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manufacturerForm.email)) {
+      errors.push('Valid email address is required')
+    }
+    if (manufacturerForm.mobile && !/^[6-9]\d{9}$/.test(manufacturerForm.mobile)) {
+      errors.push('Valid 10-digit mobile number is required')
+    }
+  } else {
+    if (!distributorForm.name.trim()) {
+      errors.push('Contact name is required')
+    }
+    if (!distributorForm.companyName.trim()) {
+      errors.push('Company name is required')
+    }
+    if (!distributorForm.status) {
+      errors.push('Status is required')
+    }
+    if (!distributorForm.type) {
+      errors.push('Distributor type is required')
+    }
+    if (distributorForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(distributorForm.email)) {
+      errors.push('Valid email address is required')
+    }
+    if (distributorForm.mobile && !/^[6-9]\d{9}$/.test(distributorForm.mobile)) {
+      errors.push('Valid 10-digit mobile number is required')
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Submit form
 const submitForm = async () => {
   isSubmitting.value = true
   
   try {
-    // Generate unique ID
-    const timestamp = Date.now()
-    const id = leadCategory.value === 'manufacturer' ? `M${timestamp}` : `D${timestamp}`
-    
-    // Prepare the record based on lead category
-    if (leadCategory.value === 'manufacturer') {
-      const newManufacturer = {
-        id,
-        name: manufacturerForm.companyName || manufacturerForm.name,
+    // Validate required fields
+    const { isValid, errors } = validateForm()
+    if (!isValid) {
+      alert(`Please fix the following errors:\n- ${errors.join('\n- ')}`)
+      return
+    }
+
+    // Prepare lead data for API
+    const leadData: LeadData = {
+      leadCategory: leadCategory.value,
+      contactInfo: {
+        salutation: leadCategory.value === 'manufacturer' ? manufacturerForm.salutation : distributorForm.salutation,
+        name: leadCategory.value === 'manufacturer' ? manufacturerForm.name : distributorForm.name,
+        designation: leadCategory.value === 'manufacturer' ? manufacturerForm.designation : distributorForm.designation,
+        mobile: leadCategory.value === 'manufacturer' ? manufacturerForm.mobile : distributorForm.mobile,
+        email: leadCategory.value === 'manufacturer' ? manufacturerForm.email : distributorForm.email,
+        phone2: leadCategory.value === 'manufacturer' ? manufacturerForm.phone2 : distributorForm.phone2,
+        ...(leadCategory.value !== 'manufacturer' && {
+          middleName: distributorForm.middleName,
+          lastName: distributorForm.lastName,
+        }),
+      },
+      companyInfo: {
+        companyName: leadCategory.value === 'manufacturer' ? manufacturerForm.companyName : distributorForm.companyName,
+        staffStrength: leadCategory.value === 'manufacturer' ? manufacturerForm.staffStrength : distributorForm.staffStrength,
+        ...(leadCategory.value !== 'manufacturer' && {
+          website: distributorForm.website,
+          type: distributorForm.type,
+          status: distributorForm.status,
+          source: distributorForm.source,
+          leadOwner: distributorForm.leadOwner,
+        }),
+      },
+      address: {
+        streetAddress: addressForm.streetAddress,
+        pincode: addressForm.pincode,
         city: addressForm.city,
         district: addressForm.district,
         state: addressForm.state,
-        category: manufacturerForm.categories[0] || 'General',
-        subCategory: manufacturerForm.subCategories[0] || 'General',
-        status: 'Registration' as const,
-        registrationDate: new Date().toISOString(),
-        daysSinceStatus: 0,
-        // Store additional manufacturer data
-        contactName: manufacturerForm.name,
-        email: manufacturerForm.email,
-        mobile: manufacturerForm.mobile,
-        companyName: manufacturerForm.companyName,
-        address: addressForm.streetAddress,
-        pincode: addressForm.pincode
+      },
+      businessInfo: {
+        categories: leadCategory.value === 'manufacturer' ? manufacturerForm.categories : distributorForm.categories,
+        subCategories: leadCategory.value === 'manufacturer' ? manufacturerForm.subCategories : distributorForm.subCategories,
+        ...(leadCategory.value === 'manufacturer' ? {
+          // Manufacturer specific fields
+          brandNames: [manufacturerForm.brandName1, manufacturerForm.brandName2, manufacturerForm.brandName3].filter(Boolean),
+          exporting: manufacturerForm.exporting,
+          currentDistributors: manufacturerForm.currentDistributors,
+          presenceStates: manufacturerForm.presenceStates,
+          presenceDistricts: manufacturerForm.presenceDistricts,
+          annualRevenue: manufacturerForm.annualRevenue,
+          listed: manufacturerForm.listed,
+          distributorsNeeded: manufacturerForm.distributorsNeeded,
+          distributorNeededStates: manufacturerForm.distributorNeededStates,
+          distributorNeededDistricts: manufacturerForm.distributorNeededDistricts,
+          minimumOrderValue: manufacturerForm.minimumOrderValue,
+          distributorMargin: manufacturerForm.distributorMargin,
+          logistics: manufacturerForm.logistics,
+          marginRange: manufacturerForm.marginRange,
+          warehouseSpace: manufacturerForm.warehouseSpace,
+          inspirational: manufacturerForm.inspirational,
+        } : {
+          // Distributor specific fields
+          brandsCount: distributorForm.brandsCount,
+          manufacturerStates: distributorForm.manufacturerStates,
+          manufacturerDistricts: distributorForm.manufacturerDistricts,
+          accountingSystem: distributorForm.accountingSystem,
+          logisticsWillingness: distributorForm.logisticsWillingness,
+          sfaApp: distributorForm.sfaApp,
+          warehouseCount: distributorForm.warehouseCount,
+          dmsApp: distributorForm.dmsApp,
+          totalSpace: distributorForm.totalSpace,
+          warehouseManagementSystem: distributorForm.warehouseManagementSystem,
+          salesForceCount: distributorForm.salesForceCount,
+          ownSalesForce: distributorForm.ownSalesForce,
+          categoriesInterested: distributorForm.categoriesInterested,
+          needManufacturerStates: distributorForm.needManufacturerStates,
+          needManufacturerDistricts: distributorForm.needManufacturerDistricts,
+          newBrandsInterest: distributorForm.newBrandsInterest,
+        }),
+      },
+    }
+
+    const erpLeadObj = {
+      // =======
+      // Manufacturer
+      // =======
+
+      // Contact Details
+      custom_lead_category: leadCategory.value == 'manufacturer' ? 'Manufacturer Lead': 'SS / Distributor Lead',
+      salutation: leadData.contactInfo.salutation,
+      job_title: leadData.contactInfo.designation,
+      phone: leadData.contactInfo.phone2,
+      first_name: leadData.contactInfo.name,
+      mobile_no: leadData.contactInfo.mobile,
+      email_id: leadData.contactInfo.email,
+
+      // Company profile
+      company_name: leadData.companyInfo.companyName,
+      no_of_employees: leadData.companyInfo.staffStrength,
+      custom_brand_name: leadCategory.value === 'manufacturer' ? manufacturerForm.companyName : distributorForm.companyName,
+      custom_brand_name_2: leadCategory.value === 'manufacturer' ? manufacturerForm.brandName2 : '',
+      custom_brand_name_3: leadCategory.value === 'manufacturer' ? manufacturerForm.brandName3 : '',
+      custom_inspirational: leadCategory.value === 'manufacturer' ? manufacturerForm.inspirational : '',
+
+      // Address
+      custom_address: leadData.address.streetAddress,
+      custom_pincode: leadData.address.pincode,
+      city: leadData.address.city,
+      custom_districts: leadData.address.district,
+      custom_states: leadData.address.state,
+
+      // Presense
+
+      // Financial Stance
+      annual_revenue: leadCategory.value === 'manufacturer' ? manufacturerForm.annualRevenue : distributorForm.annualRevenue,
+      custom_listed: leadCategory.value === 'manufacturer' ? manufacturerForm.listed : '',
+
+      // Expansion Appetite
+
+      // Desired Distributor Profile
+      custom_minimum_order_value: leadCategory.value === 'manufacturer' ? manufacturerForm.minimumOrderValue : '',
+      custom_logistics: leadCategory.value === 'manufacturer' ? manufacturerForm.logistics : '',
+      custom_warehouse_needs: leadCategory.value === 'manufacturer' ? manufacturerForm.warehouseSpace : '',
+      custom_margin_for_the_distributor: leadCategory.value === 'manufacturer' ? manufacturerForm.distributorMargin : '',
+      custom_margin_range: leadCategory.value === 'manufacturer' ? manufacturerForm.marginRange : '',
+      
+      // =======
+      // Distributor
+      // =======
+
+      // Contact Info
+      middle_name: leadData.contactInfo.middleName || '',
+      last_name: leadData.contactInfo.lastName || '',
+      source: distributorForm.source || '',
+
+      // Company Profile
+      custom_super_stockiest_or_distributor: leadCategory.value === 'super-stockist' ? 'Super Stockiest' : leadCategory.value === 'distributor' ? 'Distributor' : '',
+      custom_staff_strength_copy: leadData.companyInfo.staffStrength,
+      custom_distributor_company_name: leadData.companyInfo.companyName,
+      custom_no_of_brands_dealing_with_currently: distributorForm.brandsCount,
+      website: leadData.companyInfo.website || '',
+      // ignoring manufacturerStates, category, district for distributor
+
+      // Operational Information
+      custom_which_accounting_system_you_are_using: leadData.businessInfo.accountingSystem || '',
+      custom_which_app_you_are_using_for_sfa: leadData.businessInfo.sfaApp || '',
+      custom_which_app_you_are_using_for_dms: leadData.businessInfo.dmsApp || '',
+      custom_which_warehouse_management_system_you_are_using_: leadData.businessInfo.warehouseManagementSystem || '',
+      custom_do_you_have_your_own_sales_force: leadData.businessInfo.ownSalesForce || '',
+      custom_ready_to_bear_logistics: leadData.businessInfo.logisticsWillingness || '',
+      custom_no_of_warehouses_you_have: leadData.businessInfo.warehouseCount || '',
+      custom_total_space_in_sq_ft: leadData.businessInfo.totalSpace || '',
+      custom_count_of_field_sales_force: leadData.businessInfo.salesForceCount || '',
+    }
+
+    console.log('Submitting lead data:', leadData)
+    // Send ERP Lead Object to Frappe backend
+    try {
+      const response = await fetch('/api/resource/Lead', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Frappe-CSRF-Token': (window as any).frappe?.csrf_token || ''
+      },
+      body: JSON.stringify(erpLeadObj)
+      })
+      const data = await response.json()
+      console.info('ERP Lead API response:', data)
+      if (data && data.data && !data.exc) {
+      router.push('/dashboard')
+      return
+      }
+    } catch (err) {
+      console.error('Error posting ERP Lead:', err)
+    }
+
+    return
+    // Make API call to save lead
+    const response = await apiService.saveLead(leadData)
+
+    if (response.success) {
+      // Success - show success message and redirect
+      alert(`${leadCategory.value === 'manufacturer' ? 'Manufacturer' : 'Distributor'} lead saved successfully!`)
+      
+      // Optionally update local state for immediate UI updates
+      if (leadCategory.value === 'manufacturer') {
+        const newManufacturer = {
+          id: response.data?.id || `M${Date.now()}`,
+          name: manufacturerForm.companyName || manufacturerForm.name,
+          city: addressForm.city,
+          district: addressForm.district,
+          state: addressForm.state,
+          category: manufacturerForm.categories[0] || 'General',
+          subCategory: manufacturerForm.subCategories[0] || 'General',
+          status: 'Registration' as const,
+          registrationDate: new Date().toISOString(),
+          daysSinceStatus: 0,
+        }
+        manufacturers.value.push(newManufacturer)
+      } else {
+        const newDistributor = {
+          id: response.data?.id || `D${Date.now()}`,
+          name: distributorForm.companyName || distributorForm.name,
+          city: addressForm.city,
+          district: addressForm.district,
+          state: addressForm.state,
+          category: distributorForm.categories[0] || 'General',
+          subCategory: distributorForm.subCategories[0] || 'General',
+          status: 'Registration' as const,
+          registrationDate: new Date().toISOString(),
+          daysSinceStatus: 0,
+        }
+        distributors.value.push(newDistributor)
       }
       
-      // Add to manufacturers array
-      manufacturers.value.push(newManufacturer)
+      // Reset form and redirect
+      resetForm()
+      router.push('/dashboard')
       
     } else {
-      // For both super-stockist and distributor, treat as distributor
-      const newDistributor = {
-        id,
-        name: distributorForm.companyName || distributorForm.name,
-        city: addressForm.city,
-        district: addressForm.district,
-        state: addressForm.state,
-        category: distributorForm.categories[0] || 'General',
-        subCategory: distributorForm.subCategories[0] || 'General',
-        status: 'Registration' as const,
-        registrationDate: new Date().toISOString(),
-        daysSinceStatus: 0,
-        // Store additional distributor data
-        contactName: distributorForm.name,
-        email: distributorForm.email,
-        mobile: distributorForm.mobile,
-        companyName: distributorForm.companyName,
-        address: addressForm.streetAddress,
-        pincode: addressForm.pincode,
-        type: distributorForm.type || leadCategory.value
-      }
-      
-      // Add to distributors array
-      distributors.value.push(newDistributor)
+      // Error - show error message
+      const errorMessage = response.message || 'Failed to save lead'
+      const errors = response.errors?.join(', ') || ''
+      alert(`Error: ${errorMessage}${errors ? `\nDetails: ${errors}` : ''}`)
+      console.error('API Error:', response)
     }
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    alert(`${leadCategory.value === 'manufacturer' ? 'Manufacturer' : 'Distributor'} registered successfully!`)
-    
-    // Reset form and redirect to dashboard
-    resetForm()
-    router.push('/dashboard')
     
   } catch (error) {
     console.error('Error submitting form:', error)
-    alert('Error submitting form. Please try again.')
+    alert('Network error occurred. Please check your connection and try again.')
   } finally {
     isSubmitting.value = false
   }
