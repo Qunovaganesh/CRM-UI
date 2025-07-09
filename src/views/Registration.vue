@@ -682,9 +682,8 @@
             <div class="form-group">
               <label>Willingness to bear logistics</label>
               <select v-model="distributorForm.logisticsWillingness" class="form-select">
-                <option value="">Select Yes or No</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
               </select>
             </div>
             <div class="form-group">
