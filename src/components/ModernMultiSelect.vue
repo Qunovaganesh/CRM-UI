@@ -2,7 +2,8 @@
   <div class="modern-multiselect" ref="dropdown">
     <div 
       class="multiselect-trigger" 
-      @click="toggleDropdown" 
+      @click="toggleDropdown"
+      @mousedown.prevent
       :class="{ 
         open: isOpen, 
         'has-selections': selected.length > 0
@@ -22,13 +23,15 @@
     </div>
 
     <!-- Portal the dropdown to body to avoid clipping -->
-    <Teleport to="body" v-if="isOpen">
+    <Teleport to="body" v-if="isOpen" :disabled="false">
       <div 
         class="dropdown-panel" 
         ref="panel"
         :style="panelStyles"
         @mousedown.prevent
         @click.stop
+        @wheel.stop
+        @touchmove.prevent
       >
         <div class="search-container" v-if="searchable">
           <div class="search-input-wrapper">
@@ -52,7 +55,7 @@
             <button 
               class="select-all-btn" 
               @mousedown.prevent
-              @click.stop="selectAll"
+              @click="selectAll($event)"
               v-if="filteredOptions.length > selected.length"
             >
               SELECT ALL ({{ filteredOptions.length }})
@@ -60,7 +63,7 @@
             <button 
               class="clear-all-btn" 
               @mousedown.prevent
-              @click.stop="clearAll"
+              @click="clearAll($event)"
               v-if="selected.length > 0"
             >
               CLEAR ALL
@@ -74,7 +77,7 @@
               class="option-item"
               :class="{ selected: isSelected(option) }"
               @mousedown.prevent
-              @click.stop="toggleOption(option)"
+              @click="toggleOption(option, $event)"
             >
               <div class="option-checkbox">
                 <div class="checkbox-custom" :class="{ checked: isSelected(option) }">
@@ -142,16 +145,34 @@ const isSelected = (option: string) => {
   return localSelected.value.includes(option)
 }
 
-const toggleOption = (option: string) => {
-  const index = localSelected.value.indexOf(option)
-  if (index > -1) {
-    localSelected.value = localSelected.value.filter(item => item !== option)
-  } else {
-    localSelected.value = [...localSelected.value, option]
+const toggleOption = (option: string, event?: Event) => {
+  // Prevent default behavior and scrolling
+  if (event) {
+    event.preventDefault()
+    event.stopPropagation()
   }
+  
+  const index = localSelected.value.indexOf(option)
+  let newSelected: string[]
+  
+  if (index > -1) {
+    newSelected = localSelected.value.filter(item => item !== option)
+  } else {
+    newSelected = [...localSelected.value, option]
+  }
+  
+  localSelected.value = newSelected
+  // Emit immediately to prevent reactivity issues in production
+  emit('update:selected', newSelected)
 }
 
-const toggleDropdown = () => {
+const toggleDropdown = (event?: Event) => {
+  // Prevent default behavior and scrolling
+  if (event) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  
   if (isOpen.value) {
     closeDropdown()
   } else {
@@ -160,13 +181,24 @@ const toggleDropdown = () => {
 }
 
 const openDropdown = () => {
+  // Prevent page scroll when opening dropdown
+  const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop
+  
   isOpen.value = true
   searchTerm.value = ''
   
+  // Add body class to prevent scrolling (optional, but helpful for mobile)
+  document.body.style.setProperty('--scroll-y', `${currentScrollPosition}px`)
+  
   nextTick(() => {
     positionDropdown()
+    
+    // Ensure page doesn't scroll
+    window.scrollTo(0, currentScrollPosition)
+    
+    // Focus search input if searchable, but prevent scroll
     if (props.searchable && searchInput.value) {
-      searchInput.value.focus()
+      searchInput.value.focus({ preventScroll: true })
     }
   })
 }
@@ -175,98 +207,144 @@ const closeDropdown = () => {
   isOpen.value = false
   searchTerm.value = ''
   panelStyles.value = {}
+  
+  // Restore scrolling capability
+  document.body.style.removeProperty('--scroll-y')
 }
 
 const positionDropdown = () => {
   if (!dropdown.value || !panel.value) return
   
-  const triggerRect = dropdown.value.getBoundingClientRect()
-  const viewportHeight = window.innerHeight
-  const viewportWidth = window.innerWidth
-  
-  // Calculate available space
-  const spaceBelow = viewportHeight - triggerRect.bottom - 10
-  const spaceAbove = triggerRect.top - 10
-  const maxPanelHeight = 320
-  const minPanelHeight = 200
-  
-  let top = 0
-  let maxHeight = maxPanelHeight
-  
-  // Determine if dropdown should open above or below
-  if (spaceBelow >= minPanelHeight || spaceBelow >= spaceAbove) {
-    // Position below
-    top = triggerRect.bottom + 4
-    maxHeight = Math.min(maxPanelHeight, spaceBelow - 10)
-  } else {
-    // Position above
-    top = triggerRect.top - Math.min(maxPanelHeight, spaceAbove - 10) - 4
-    maxHeight = Math.min(maxPanelHeight, spaceAbove - 10)
-  }
-  
-  // Ensure minimum height
-  maxHeight = Math.max(maxHeight, 150)
-  
-  // Calculate horizontal position
-  let left = triggerRect.left
-  const panelWidth = triggerRect.width
-  
-  // Ensure panel doesn't go off screen horizontally
-  if (left + panelWidth > viewportWidth - 10) {
-    left = viewportWidth - panelWidth - 10
-  }
-  if (left < 10) {
-    left = 10
-  }
-  
-  panelStyles.value = {
-    position: 'fixed',
-    top: `${top}px`,
-    left: `${left}px`,
-    width: `${triggerRect.width}px`,
-    maxHeight: `${maxHeight}px`,
-    zIndex: '999999',
-    transform: 'none'
+  try {
+    const triggerRect = dropdown.value.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+    const viewportWidth = window.innerWidth
+    
+    // Calculate available space
+    const spaceBelow = viewportHeight - triggerRect.bottom - 10
+    const spaceAbove = triggerRect.top - 10
+    const maxPanelHeight = 320
+    const minPanelHeight = 200
+    
+    let top = 0
+    let maxHeight = maxPanelHeight
+    
+    // Determine if dropdown should open above or below
+    if (spaceBelow >= minPanelHeight || spaceBelow >= spaceAbove) {
+      // Position below
+      top = triggerRect.bottom + 4
+      maxHeight = Math.min(maxPanelHeight, spaceBelow - 10)
+    } else {
+      // Position above
+      top = triggerRect.top - Math.min(maxPanelHeight, spaceAbove - 10) - 4
+      maxHeight = Math.min(maxPanelHeight, spaceAbove - 10)
+    }
+    
+    // Ensure minimum height
+    maxHeight = Math.max(maxHeight, 150)
+    
+    // Calculate horizontal position
+    let left = triggerRect.left
+    const panelWidth = triggerRect.width
+    
+    // Ensure panel doesn't go off screen horizontally
+    if (left + panelWidth > viewportWidth - 10) {
+      left = viewportWidth - panelWidth - 10
+    }
+    if (left < 10) {
+      left = 10
+    }
+    
+    panelStyles.value = {
+      position: 'fixed',
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${triggerRect.width}px`,
+      maxHeight: `${maxHeight}px`,
+      zIndex: '999999',
+      transform: 'none'
+    }
+  } catch (error) {
+    console.warn('Error positioning dropdown:', error)
+    // Fallback positioning
+    panelStyles.value = {
+      position: 'fixed',
+      top: '100px',
+      left: '50px',
+      width: '200px',
+      maxHeight: '300px',
+      zIndex: '999999',
+      transform: 'none'
+    }
   }
 }
 
-const selectAll = () => {
+const selectAll = (event?: Event) => {
+  if (event) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  
   const newSelected = [...new Set([...localSelected.value, ...filteredOptions.value])]
   localSelected.value = newSelected
+  emit('update:selected', newSelected)
 }
 
-const clearAll = () => {
+const clearAll = (event?: Event) => {
+  if (event) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  
   localSelected.value = []
+  emit('update:selected', [])
 }
 
 const handleClickOutside = (event: Event) => {
-  if (dropdown.value && !dropdown.value.contains(event.target as Node) && 
-      panel.value && !panel.value.contains(event.target as Node)) {
-    closeDropdown()
+  try {
+    if (dropdown.value && !dropdown.value.contains(event.target as Node) && 
+        panel.value && !panel.value.contains(event.target as Node)) {
+      closeDropdown()
+    }
+  } catch (error) {
+    console.warn('Error in click outside handler:', error)
   }
 }
 
+let resizeTimeout: number | null = null
 const handleResize = () => {
-  if (isOpen.value) {
-    positionDropdown()
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout)
   }
+  resizeTimeout = window.setTimeout(() => {
+    if (isOpen.value) {
+      positionDropdown()
+    }
+  }, 100)
 }
 
+let scrollTimeout: number | null = null
 const handleScroll = () => {
-  if (isOpen.value) {
-    positionDropdown()
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout)
   }
+  scrollTimeout = window.setTimeout(() => {
+    if (isOpen.value) {
+      positionDropdown()
+    }
+  }, 50)
 }
 
 // Watch for prop changes
 watch(() => props.selected, (newVal) => {
-  localSelected.value = [...newVal]
+  // Only update if the values are actually different to prevent loops
+  if (JSON.stringify(newVal) !== JSON.stringify(localSelected.value)) {
+    localSelected.value = [...newVal]
+  }
 }, { immediate: true })
 
-// Emit changes
-watch(localSelected, (newVal) => {
-  emit('update:selected', newVal)
-}, { deep: true })
+// Remove the deep watcher that can cause infinite loops in production
+// Instead, emit directly in the methods above
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
@@ -278,6 +356,14 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('resize', handleResize)
   document.removeEventListener('scroll', handleScroll, true)
+  
+  // Clean up timeouts
+  if (resizeTimeout) {
+    clearTimeout(resizeTimeout)
+  }
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout)
+  }
 })
 </script>
 
@@ -299,6 +385,10 @@ onUnmounted(() => {
   transition: all 0.15s ease;
   min-height: 44px;
   user-select: none;
+  /* Prevent layout shifts and scrolling */
+  position: relative;
+  overflow: hidden;
+  contain: layout style;
 }
 
 .multiselect-trigger:hover {
@@ -361,6 +451,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 150px;
+  /* Ensure the panel doesn't affect page layout */
+  contain: layout style;
+  will-change: transform;
 }
 
 .search-container {
