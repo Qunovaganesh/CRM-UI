@@ -20,7 +20,7 @@
         >
           <span class="entity-icon">🏭</span>
           <span>Manufacturers</span>
-          <span class="entity-count">{{ manufacturers.length }}</span>
+          <span class="entity-count">{{ displayManufacturerCount }}</span>
         </button>
         <button 
           class="entity-toggle-btn"
@@ -29,7 +29,7 @@
         >
           <span class="entity-icon">🏪</span>
           <span>Distributors</span>
-          <span class="entity-count">{{ distributors.length }}</span>
+          <span class="entity-count">{{ displayDistributorCount }}</span>
         </button>
       </div>
     </div>
@@ -56,8 +56,9 @@
               <ModernMultiSelect 
                 :options="availableStates"
                 :selected="filters.state"
-                placeholder="Select states..."
+                :placeholder="isLoadingStates ? 'Loading states...' : 'Select states...'"
                 @update:selected="(val) => updateLocationFilters('state', val)"
+                @dropdown-opened="onStatesDropdownOpened"
               />
             </div>
             <div class="filter-row">
@@ -65,8 +66,9 @@
               <ModernMultiSelect 
                 :options="availableDistricts"
                 :selected="filters.district"
-                placeholder="Select districts..."
+                :placeholder="isLoadingDistricts ? 'Loading districts...' : 'Select districts...'"
                 @update:selected="(val) => updateLocationFilters('district', val)"
+                @dropdown-opened="onDistrictsDropdownOpened"
               />
             </div>
             <div class="filter-row">
@@ -74,8 +76,9 @@
               <ModernMultiSelect 
                 :options="availableCities"
                 :selected="filters.city"
-                placeholder="Select cities..."
+                :placeholder="isLoadingCities ? 'Loading cities...' : 'Select cities...'"
                 @update:selected="(val) => updateLocationFilters('city', val)"
+                @dropdown-opened="onCitiesDropdownOpened"
               />
             </div>
           </div>
@@ -93,8 +96,9 @@
               <ModernMultiSelect 
                 :options="availableCategories"
                 :selected="filters.category"
-                placeholder="Select categories..."
+                :placeholder="isLoadingCategories ? 'Loading categories...' : 'Select categories...'"
                 @update:selected="(val) => updateCategoryFilters('category', val)"
+                @dropdown-opened="onCategoriesDropdownOpened"
               />
             </div>
             <div class="filter-row">
@@ -159,7 +163,7 @@
           <select v-model="selectedEntityId" @change="onEntitySelect" class="modern-select">
             <option value="">Choose {{ selectedEntity === 'manufacturer' ? 'a Manufacturer' : 'a Distributor' }}</option>
             <option v-for="entity in currentEntityList" :key="entity.id" :value="entity.id">
-              {{ entity.name }} - {{ entity.city }}, {{ entity.state }} ({{ entity.category }})
+              {{ entity.name }}
             </option>
           </select>
           <div class="selection-stats">
@@ -176,14 +180,14 @@
       <div class="selected-entity-header">
         <div class="entity-info-card">
           <div class="entity-avatar">
-            {{ selectedEntityItem.name.charAt(0) }}
+            {{ selectedEntityItem?.name?.charAt(0) || '?' }}
           </div>
           <div class="entity-details">
-            <h3>{{ selectedEntityItem.name }}</h3>
-            <p class="entity-location">📍 {{ selectedEntityItem.city }}, {{ selectedEntityItem.state }}</p>
-            <p class="entity-category">📦 {{ selectedEntityItem.category }} - {{ selectedEntityItem.subCategory }}</p>
-            <span :class="getStatusBadgeClass(selectedEntityItem.status)">
-              {{ selectedEntityItem.status }}
+            <h3>{{ selectedEntityItem?.name || 'Unknown' }}</h3>
+            <p class="entity-location">📍 {{ selectedEntityItem?.city || 'Unknown' }}, {{ selectedEntityItem?.state || 'Unknown' }}</p>
+            <p class="entity-category">📦 {{ selectedEntityItem?.category || 'Unknown' }} - {{ selectedEntityItem?.subCategory || 'Unknown' }}</p>
+            <span :class="getStatusBadgeClass(selectedEntityItem?.status || 'unknown')">
+              {{ selectedEntityItem?.status || 'Unknown' }}
             </span>
           </div>
           <button class="btn-change-selection" @click="clearSelection">
@@ -214,8 +218,9 @@
                 <ModernMultiSelect 
                   :options="availableAssociatedStates"
                   :selected="associatedFilters.state"
-                  placeholder="Select states..."
+                  :placeholder="isLoadingStates ? 'Loading states...' : 'Select states...'"
                   @update:selected="(val) => updateAssociatedLocationFilters('state', val)"
+                  @dropdown-opened="onAssociatedStatesDropdownOpened"
                 />
               </div>
               <div class="filter-row">
@@ -223,8 +228,9 @@
                 <ModernMultiSelect 
                   :options="availableAssociatedDistricts"
                   :selected="associatedFilters.district"
-                  placeholder="Select districts..."
+                  :placeholder="isLoadingDistricts ? 'Loading districts...' : 'Select districts...'"
                   @update:selected="(val) => updateAssociatedLocationFilters('district', val)"
+                  @dropdown-opened="onAssociatedDistrictsDropdownOpened"
                 />
               </div>
               <div class="filter-row">
@@ -232,8 +238,9 @@
                 <ModernMultiSelect 
                   :options="availableAssociatedCities"
                   :selected="associatedFilters.city"
-                  placeholder="Select cities..."
+                  :placeholder="isLoadingCities ? 'Loading cities...' : 'Select cities...'"
                   @update:selected="(val) => updateAssociatedLocationFilters('city', val)"
+                  @dropdown-opened="onAssociatedCitiesDropdownOpened"
                 />
               </div>
             </div>
@@ -251,8 +258,9 @@
                 <ModernMultiSelect 
                   :options="availableAssociatedCategories"
                   :selected="associatedFilters.category"
-                  placeholder="Select categories..."
+                  :placeholder="isLoadingCategories ? 'Loading categories...' : 'Select categories...'"
                   @update:selected="(val) => updateAssociatedCategoryFilters('category', val)"
+                  @dropdown-opened="onAssociatedCategoriesDropdownOpened"
                 />
               </div>
               <div class="filter-row">
@@ -360,11 +368,290 @@ import { filterOptions } from '../data/mockData'
 // Local state
 const selectedEntityItem = ref<Manufacturer | Distributor | null>(null)
 
+// API data state
+const statesData = ref<string[]>([])
+const districtsData = ref<string[]>([])
+const citiesData = ref<string[]>([])
+const categoriesData = ref<string[]>([])
+const leadsData = ref<any[]>([])
+const hasApiData = ref(false) // Flag to track if we have fetched API data
+const isLoadingStates = ref(false)
+const isLoadingDistricts = ref(false)
+const isLoadingCities = ref(false)
+const isLoadingCategories = ref(false)
+const isLoadingLeads = ref(false)
+
+// Dynamic counts based on filtered leads
+const dynamicManufacturerCount = ref(0)
+const dynamicDistributorCount = ref(0)
+
+// API functions
+const fetchStates = async () => {
+  if (isLoadingStates.value) return // Prevent multiple concurrent requests
+  
+  isLoadingStates.value = true
+  try {
+    const response = await fetch('/api/resource/States')
+    const data = await response.json()
+    
+    if (data && data.data) {
+      statesData.value = data.data.map((item: { name: string }) => item.name)
+    }
+  } catch (error) {
+    console.error('Error fetching states:', error)
+    // Fallback to mock data
+    statesData.value = filterOptions.states
+  } finally {
+    isLoadingStates.value = false
+  }
+}
+
+const fetchDistricts = async (stateNames?: string[]) => {
+  if (isLoadingDistricts.value) return []
+  
+  isLoadingDistricts.value = true
+  try {
+    let url = '/api/resource/Districts'
+    if (stateNames && stateNames.length > 0) {
+      // Create filter for multiple states: {"state":["in",["State1","State2"]]}
+      const filters = {
+        "state": ["in", stateNames]
+      }
+      url += `?filters=${encodeURIComponent(JSON.stringify(filters))}`
+    }
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data && data.data) {
+      return data.data.map((item: { name: string }) => item.name)
+    }
+    return []
+  } catch (error) {
+    console.error('Error fetching districts:', error)
+    // Fallback to mock data
+    return filterOptions.districts
+  } finally {
+    isLoadingDistricts.value = false
+  }
+}
+
+const fetchCities = async (districtNames?: string[]) => {
+  if (isLoadingCities.value) return []
+  
+  isLoadingCities.value = true
+  try {
+    let url = '/api/resource/Cities'
+    if (districtNames && districtNames.length > 0) {
+      // Create filter for multiple districts: {"district":["in",["District1","District2"]]}
+      const filters = {
+        "district": ["in", districtNames]
+      }
+      url += `?filters=${encodeURIComponent(JSON.stringify(filters))}`
+    }
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data && data.data) {
+      return data.data.map((item: { name: string }) => item.name)
+    }
+    return []
+  } catch (error) {
+    console.error('Error fetching cities:', error)
+    // Fallback to mock data
+    return filterOptions.cities
+  } finally {
+    isLoadingCities.value = false
+  }
+}
+
+const fetchCategories = async () => {
+  if (isLoadingCategories.value) return // Prevent multiple concurrent requests
+  
+  isLoadingCategories.value = true
+  try {
+    const response = await fetch('/api/resource/Category')
+    const data = await response.json()
+    
+    if (data && data.data) {
+      categoriesData.value = data.data.map((item: { name: string }) => item.name)
+    }
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    // Fallback to mock data
+    categoriesData.value = filterOptions.categories
+  } finally {
+    isLoadingCategories.value = false
+  }
+}
+
+const fetchLeads = async () => {
+  if (isLoadingLeads.value) return
+  
+  isLoadingLeads.value = true
+  try {
+    let url = '/api/resource/Lead?fields=["name","custom_lead_category","company_name"]'
+    
+    // Build filters based on selected states, districts, and categories
+    const apiFilters: any = {}
+    
+    if (filters.state?.length > 0) {
+      apiFilters.custom_states = ["in", filters.state]
+    }
+    
+    if (filters.district?.length > 0) {
+      apiFilters.custom_districts = ["in", filters.district]
+    }
+    
+    if (filters.category?.length > 0) {
+      apiFilters.custom_categories = ["in", filters.category]
+    }
+    
+    // Add filters to URL if any exist
+    if (Object.keys(apiFilters).length > 0) {
+      url += `&filters=${encodeURIComponent(JSON.stringify(apiFilters))}`
+    }
+    
+    console.log('Fetching leads with URL:', url)
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    console.log('Leads API response:', data)
+    
+    if (data && data.data) {
+      leadsData.value = data.data
+      
+      // Count manufacturers and distributors
+      let manufacturerCount = 0
+      let distributorCount = 0
+      
+      data.data.forEach((lead: any) => {
+        if (lead.custom_lead_category === "Manufacturer Lead") {
+          manufacturerCount++
+        } else if (lead.custom_lead_category === "SS / Distributor Lead") {
+          distributorCount++
+        }
+      })
+      
+      console.log(`Found ${manufacturerCount} manufacturers, ${distributorCount} distributors`)
+      
+      dynamicManufacturerCount.value = manufacturerCount
+      dynamicDistributorCount.value = distributorCount
+      hasApiData.value = true // Set flag to indicate we have API data
+    }
+  } catch (error) {
+    console.error('Error fetching leads:', error)
+    // Reset counts on error
+    dynamicManufacturerCount.value = manufacturers.value.length
+    dynamicDistributorCount.value = distributors.value.length
+  } finally {
+    isLoadingLeads.value = false
+  }
+}
+
+const fetchInitialCounts = async () => {
+  // Fetch initial lead counts without any filters
+  if (isLoadingLeads.value) return
+  
+  isLoadingLeads.value = true
+  try {
+    const url = '/api/resource/Lead?fields=["name","custom_lead_category","company_name"]'
+    
+    console.log('Fetching initial lead counts with URL:', url)
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    console.log('Initial leads API response:', data)
+    
+    // Log the structure of the first lead to see what fields are available
+    if (data && data.data && data.data.length > 0) {
+      console.log('First lead structure:', data.data[0])
+      console.log('Available fields:', Object.keys(data.data[0]))
+    }
+    
+    if (data && data.data) {
+      leadsData.value = data.data
+      
+      // Count manufacturers and distributors
+      let manufacturerCount = 0
+      let distributorCount = 0
+      
+      data.data.forEach((lead: any) => {
+        if (lead.custom_lead_category === "Manufacturer Lead") {
+          manufacturerCount++
+        } else if (lead.custom_lead_category === "SS / Distributor Lead") {
+          distributorCount++
+        }
+      })
+      
+      console.log(`Initial counts: ${manufacturerCount} manufacturers, ${distributorCount} distributors`)
+      
+      dynamicManufacturerCount.value = manufacturerCount
+      dynamicDistributorCount.value = distributorCount
+      
+      // Force update of currentEntityList by setting a flag to indicate we have API data
+      hasApiData.value = true
+    }
+  } catch (error) {
+    console.error('Error fetching initial lead counts:', error)
+    // Fallback to mock data counts on error
+    dynamicManufacturerCount.value = manufacturers.value.length
+    dynamicDistributorCount.value = distributors.value.length
+    hasApiData.value = false
+  } finally {
+    isLoadingLeads.value = false
+  }
+}
+
 // Computed properties
 const currentEntityList = computed(() => {
+  // If we have API leads data, use it to generate the entity list (with or without filters)
+  if (leadsData.value.length > 0) {
+    const filteredLeads = leadsData.value.filter((lead: any) => {
+      const isManufacturer = lead.custom_lead_category === "Manufacturer Lead"
+      const isDistributor = lead.custom_lead_category === "SS / Distributor Lead"
+      
+      if (selectedEntity.value === 'manufacturer') {
+        return isManufacturer
+      } else {
+        return isDistributor
+      }
+    })
+    
+    // Convert leads to entity format for the dropdown
+    // We need to determine the actual field names from the API response
+    return filteredLeads.map((lead: any) => ({
+      id: lead.name,
+      name: lead.company_name || lead.name, // Use company_name if available, fallback to name
+      city: 'Unknown', // We'll update this once we know the correct field names
+      district: 'Unknown',
+      state: 'Unknown',
+      category: selectedEntity.value === 'manufacturer' ? 'Manufacturer' : 'Distributor',
+      subCategory: 'Unknown',
+      status: 'Lead' as const,
+      registrationDate: new Date().toISOString().split('T')[0],
+      daysSinceStatus: 0
+    }))
+  }
+  
+  // Fallback to original filtered data when no API data is available
   return selectedEntity.value === 'manufacturer' 
     ? filteredManufacturers.value 
     : filteredDistributors.value
+})
+
+// Dynamic counts based on filters
+const displayManufacturerCount = computed(() => {
+  // Use API data if available, otherwise fallback to mock data
+  return hasApiData.value ? dynamicManufacturerCount.value : manufacturers.value.length
+})
+
+const displayDistributorCount = computed(() => {
+  // Use API data if available, otherwise fallback to mock data
+  return hasApiData.value ? dynamicDistributorCount.value : distributors.value.length
 })
 
 const filteredPairedList = computed(() => {
@@ -415,6 +702,9 @@ const tableColumns = computed(() => [
 
 // Filter availability computed properties
 const availableStates = computed(() => {
+  // If we have API data, use it; otherwise fallback to mock data
+  const statesList = statesData.value.length > 0 ? statesData.value : filterOptions.states
+  
   if (filters.city.length > 0 || filters.district.length > 0) {
     const relatedStates = new Set<string>()
     
@@ -434,12 +724,20 @@ const availableStates = computed(() => {
       })
     }
     
-    return Array.from(relatedStates)
+    // Filter the API data based on related states
+    return statesList.filter(state => relatedStates.has(state))
   }
-  return filterOptions.states
+  
+  return statesList
 })
 
 const availableDistricts = computed(() => {
+  // Always prioritize API data when available
+  if (districtsData.value.length > 0) {
+    return districtsData.value
+  }
+  
+  // Fallback to mock data mapping when no API data is available
   if (filters.state.length > 0) {
     const relatedDistricts = new Set<string>()
     filters.state.forEach((state: string) => {
@@ -450,10 +748,18 @@ const availableDistricts = computed(() => {
     })
     return Array.from(relatedDistricts)
   }
+  
+  // Final fallback to all mock districts
   return filterOptions.districts
 })
 
 const availableCities = computed(() => {
+  // Always prioritize API data when available
+  if (citiesData.value.length > 0) {
+    return citiesData.value
+  }
+  
+  // Fallback to mock data mapping when no API data is available
   if (filters.state.length > 0) {
     const relatedCities = new Set<string>()
     filters.state.forEach((state: string) => {
@@ -464,6 +770,8 @@ const availableCities = computed(() => {
     })
     return Array.from(relatedCities)
   }
+  
+  // Final fallback to all mock cities
   return filterOptions.cities
 })
 
@@ -479,7 +787,8 @@ const availableCategories = computed(() => {
     })
     return Array.from(relatedCategories)
   }
-  return filterOptions.categories
+  // Use API data if available, otherwise fallback to mock data
+  return categoriesData.value.length > 0 ? categoriesData.value : filterOptions.categories
 })
 
 const availableSubCategories = computed(() => {
@@ -498,6 +807,9 @@ const availableSubCategories = computed(() => {
 
 // Associated filters availability
 const availableAssociatedStates = computed(() => {
+  // Use API data or fallback to mock data
+  const statesList = statesData.value.length > 0 ? statesData.value : filterOptions.states
+  
   if (associatedFilters.city.length > 0 || associatedFilters.district.length > 0) {
     const relatedStates = new Set<string>()
     
@@ -517,9 +829,9 @@ const availableAssociatedStates = computed(() => {
       })
     }
     
-    return Array.from(relatedStates)
+    return statesList.filter(state => relatedStates.has(state))
   }
-  return filterOptions.states
+  return statesList
 })
 
 const availableAssociatedDistricts = computed(() => {
@@ -533,7 +845,7 @@ const availableAssociatedDistricts = computed(() => {
     })
     return Array.from(relatedDistricts)
   }
-  return filterOptions.districts
+  return districtsData.value.length > 0 ? districtsData.value : filterOptions.districts
 })
 
 const availableAssociatedCities = computed(() => {
@@ -547,7 +859,7 @@ const availableAssociatedCities = computed(() => {
     })
     return Array.from(relatedCities)
   }
-  return filterOptions.cities
+  return citiesData.value.length > 0 ? citiesData.value : filterOptions.cities
 })
 
 const availableAssociatedCategories = computed(() => {
@@ -562,7 +874,8 @@ const availableAssociatedCategories = computed(() => {
     })
     return Array.from(relatedCategories)
   }
-  return filterOptions.categories
+  // Use API data if available, otherwise fallback to mock data
+  return categoriesData.value.length > 0 ? categoriesData.value : filterOptions.categories
 })
 
 const availableAssociatedSubCategories = computed(() => {
@@ -618,6 +931,9 @@ const clearAllFilters = () => {
   filters.subCategory = []
   filters.status = []
   
+  // Fetch initial counts (without filters) when clearing all filters
+  fetchInitialCounts()
+  
   // Call the composable's clear function
   clearFilters()
 }
@@ -645,7 +961,8 @@ const clearSelection = () => {
 const onEntityChange = (newEntity: 'manufacturer' | 'distributor') => {
   setSelectedEntity(newEntity)
   clearSelection()
-  clearFilters()
+  // Don't clear filters - just clear the selection
+  // The filters should remain the same for both manufacturers and distributors
 }
 
 const onFilterChange = (updated: Record<string, unknown>) => {
@@ -735,8 +1052,88 @@ const getStatusBadgeClass = (status: string) => {
   }[status] || ''}`
 }
 
+// Dropdown event handlers for lazy loading
+const onStatesDropdownOpened = () => {
+  if (statesData.value.length === 0) {
+    fetchStates()
+  }
+}
+
+const onDistrictsDropdownOpened = () => {
+  // Fetch districts if we have selected states but no district data
+  if (filters.state.length > 0) {
+    fetchDistricts(filters.state)
+      .then(districts => {
+        districtsData.value = districts
+      })
+      .catch(error => console.error('Error fetching districts:', error))
+  }
+}
+
+const onCitiesDropdownOpened = () => {
+  // Fetch cities if we have selected districts but no city data
+  if (filters.district.length > 0) {
+    fetchCities(filters.district)
+      .then(cities => {
+        citiesData.value = cities
+      })
+      .catch(error => console.error('Error fetching cities:', error))
+  }
+}
+
+const onCategoriesDropdownOpened = () => {
+  // Fetch categories if not already loaded
+  if (categoriesData.value.length === 0) {
+    fetchCategories()
+  }
+}
+
+// Associated filters dropdown handlers
+const onAssociatedStatesDropdownOpened = () => {
+  if (statesData.value.length === 0) {
+    fetchStates()
+  }
+}
+
+const onAssociatedDistrictsDropdownOpened = () => {
+  // Fetch districts if we have selected states but no district data
+  if (associatedFilters.state.length > 0) {
+    fetchDistricts(associatedFilters.state)
+      .then(districts => {
+        districtsData.value = districts
+      })
+      .catch(error => console.error('Error fetching districts:', error))
+  }
+}
+
+const onAssociatedCitiesDropdownOpened = () => {
+  // Fetch cities if we have selected districts but no city data
+  if (associatedFilters.district.length > 0) {
+    fetchCities(associatedFilters.district)
+      .then(cities => {
+        citiesData.value = cities
+      })
+      .catch(error => console.error('Error fetching cities:', error))
+  }
+}
+
+const onAssociatedCategoriesDropdownOpened = () => {
+  // Fetch categories if not already loaded
+  if (categoriesData.value.length === 0) {
+    fetchCategories()
+  }
+}
+
 // Lifecycle hooks
 onMounted(() => {
+  // Initialize dynamic counts with default values
+  dynamicManufacturerCount.value = manufacturers.value.length
+  dynamicDistributorCount.value = distributors.value.length
+  
+  // Fetch initial lead counts from API
+  fetchInitialCounts()
+  
+  // Only set up initial entity selection, no automatic API fetching
   if (selectedEntityId.value) {
     selectedEntityItem.value = currentEntityList.value.find(e => e.id === selectedEntityId.value) || null
   }
@@ -745,6 +1142,41 @@ onMounted(() => {
 watch(selectedEntityId, (newId) => {
   selectedEntityItem.value = currentEntityList.value.find(e => e.id === newId) || null
 })
+
+// Watch for filter changes to update lead counts
+watch([
+  () => filters.state,
+  () => filters.district, 
+  () => filters.category
+], () => {
+  // Fetch leads when location or category filters change
+  if (filters.state.length > 0 || filters.district.length > 0 || filters.category.length > 0) {
+    fetchLeads()
+  } else {
+    // Fetch initial counts when no filters are applied
+    fetchInitialCounts()
+  }
+}, { deep: true })
+
+// Watch for state filter changes to clear related data when states are removed
+watch(() => filters.state, (newStates) => {
+  if (newStates.length === 0) {
+    // Clear districts and cities when no states are selected
+    districtsData.value = []
+    filters.district = []
+    citiesData.value = []
+    filters.city = []
+  }
+}, { deep: true })
+
+// Watch for district filter changes to clear related data when districts are removed
+watch(() => filters.district, (newDistricts) => {
+  if (newDistricts.length === 0) {
+    // Clear cities when no districts are selected
+    citiesData.value = []
+    filters.city = []
+  }
+}, { deep: true })
 </script>
 
 <style scoped>

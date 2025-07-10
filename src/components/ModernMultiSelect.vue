@@ -123,6 +123,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   'update:selected': [value: string[]]
+  'dropdown-opened': []
 }>()
 
 const dropdown = ref<HTMLElement>()
@@ -186,6 +187,9 @@ const openDropdown = () => {
   
   isOpen.value = true
   searchTerm.value = ''
+  
+  // Emit dropdown opened event for lazy loading
+  emit('dropdown-opened')
   
   // Add body class to prevent scrolling (optional, but helpful for mobile)
   document.body.style.setProperty('--scroll-y', `${currentScrollPosition}px`)
