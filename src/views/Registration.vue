@@ -301,9 +301,9 @@
             <div class="form-group">
               <label>Annual Revenue</label>
               <input 
-                type="text" 
+                type="text"
                 v-model="manufacturerForm.annualRevenue" 
-                placeholder="Figures in Lakhs"
+                placeholder="Figures in Crs"
                 class="form-input"
               />
             </div>

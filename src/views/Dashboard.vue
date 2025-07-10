@@ -184,8 +184,8 @@
           </div>
           <div class="entity-details">
             <h3>{{ selectedEntityItem?.name || 'Unknown' }}</h3>
-            <p class="entity-location">📍 {{ selectedEntityItem?.city || 'Unknown' }}, {{ selectedEntityItem?.state || 'Unknown' }}</p>
-            <p class="entity-category">📦 {{ selectedEntityItem?.category || 'Unknown' }} - {{ selectedEntityItem?.subCategory || 'Unknown' }}</p>
+            <p class="entity-location">📍 {{ selectedEntityItem?.district || 'Unknown' }}, {{ selectedEntityItem?.state || 'Unknown' }}</p>
+            <p class="entity-category">📦 {{ selectedEntityItem?.category || 'Unknown' }}</p>
             <span :class="getStatusBadgeClass(selectedEntityItem?.status || 'unknown')">
               {{ selectedEntityItem?.status || 'Unknown' }}
             </span>
@@ -374,12 +374,14 @@ const districtsData = ref<string[]>([])
 const citiesData = ref<string[]>([])
 const categoriesData = ref<string[]>([])
 const leadsData = ref<any[]>([])
+const associatedLeadsData = ref<any[]>([]) // For associated entities
 const hasApiData = ref(false) // Flag to track if we have fetched API data
 const isLoadingStates = ref(false)
 const isLoadingDistricts = ref(false)
 const isLoadingCities = ref(false)
 const isLoadingCategories = ref(false)
 const isLoadingLeads = ref(false)
+const isLoadingAssociatedLeads = ref(false)
 
 // Dynamic counts based on filtered leads
 const dynamicManufacturerCount = ref(0)
@@ -491,7 +493,7 @@ const fetchLeads = async () => {
   
   isLoadingLeads.value = true
   try {
-    let url = '/api/resource/Lead?fields=["name","custom_lead_category","company_name"]'
+    let url = '/api/resource/Lead?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories"]'
     
     // Build filters based on selected states, districts, and categories
     const apiFilters: any = {}
@@ -506,6 +508,10 @@ const fetchLeads = async () => {
     
     if (filters.category?.length > 0) {
       apiFilters.custom_categories = ["in", filters.category]
+    }
+    
+    if (filters.status?.length > 0) {
+      apiFilters.custom_new_status = ["in", filters.status]
     }
     
     // Add filters to URL if any exist
@@ -557,7 +563,7 @@ const fetchInitialCounts = async () => {
   
   isLoadingLeads.value = true
   try {
-    const url = '/api/resource/Lead?fields=["name","custom_lead_category","company_name"]'
+    const url = '/api/resource/Lead?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories"]'
     
     console.log('Fetching initial lead counts with URL:', url)
     
@@ -626,12 +632,12 @@ const currentEntityList = computed(() => {
     return filteredLeads.map((lead: any) => ({
       id: lead.name,
       name: lead.company_name || lead.name, // Use company_name if available, fallback to name
-      city: 'Unknown', // We'll update this once we know the correct field names
-      district: 'Unknown',
-      state: 'Unknown',
-      category: selectedEntity.value === 'manufacturer' ? 'Manufacturer' : 'Distributor',
+      city: 'Unknown', // City is not in the API response yet
+      district: lead.custom_districts || 'Unknown',
+      state: lead.custom_states || 'Unknown',
+      category: lead.custom_categories || (selectedEntity.value === 'manufacturer' ? 'Manufacturer' : 'Distributor'),
       subCategory: 'Unknown',
-      status: 'Lead' as const,
+      status: lead.custom_new_status || 'Lead',
       registrationDate: new Date().toISOString().split('T')[0],
       daysSinceStatus: 0
     }))
@@ -657,6 +663,23 @@ const displayDistributorCount = computed(() => {
 const filteredPairedList = computed(() => {
   if (!selectedEntityItem.value) return []
   
+  // If we have API data for associated leads, use it
+  if (associatedLeadsData.value.length > 0) {
+    return associatedLeadsData.value.map((lead: any) => ({
+      id: lead.name,
+      name: lead.company_name || lead.name,
+      city: 'Unknown', // City not in API response yet
+      district: lead.custom_districts || 'Unknown',
+      state: lead.custom_states || 'Unknown',
+      category: lead.custom_categories || (selectedEntity.value === 'manufacturer' ? 'Distributor' : 'Manufacturer'),
+      subCategory: 'Unknown',
+      status: lead.custom_new_status || 'Lead',
+      registrationDate: new Date().toISOString().split('T')[0],
+      daysSinceStatus: 0
+    }))
+  }
+  
+  // Fallback to original mock data logic
   let list = selectedEntity.value === 'manufacturer' 
     ? distributors.value 
     : manufacturers.value
@@ -946,6 +969,8 @@ const onEntitySelect = () => {
     } else {
       setSelectedDistributor(selectedEntityItem.value)
     }
+    // Fetch associated leads when entity is selected
+    fetchAssociatedLeads()
   }
   clearAssociatedFilters()
 }
@@ -955,6 +980,7 @@ const clearSelection = () => {
   selectedEntityItem.value = null
   setSelectedManufacturer(null)
   setSelectedDistributor(null)
+  associatedLeadsData.value = [] // Clear associated data
   clearAssociatedFilters()
 }
 
@@ -975,14 +1001,26 @@ const onFilterChange = (updated: Record<string, unknown>) => {
 
 const onAssociatedFilterChange = (type: string, values: string[]) => {
   (associatedFilters as any)[type] = values
+  // Fetch updated associated leads when filters change
+  if (selectedEntityItem.value) {
+    fetchAssociatedLeads()
+  }
 }
 
 const updateAssociatedLocationFilters = (type: string, values: string[]) => {
   (associatedFilters as any)[type] = values
+  // Fetch updated associated leads when filters change
+  if (selectedEntityItem.value) {
+    fetchAssociatedLeads()
+  }
 }
 
 const updateAssociatedCategoryFilters = (type: string, values: string[]) => {
   (associatedFilters as any)[type] = values
+  // Fetch updated associated leads when filters change
+  if (selectedEntityItem.value) {
+    fetchAssociatedLeads()
+  }
 }
 
 const removeFilterValue = (filterType: string, value: string) => {
@@ -1147,10 +1185,11 @@ watch(selectedEntityId, (newId) => {
 watch([
   () => filters.state,
   () => filters.district, 
-  () => filters.category
+  () => filters.category,
+  () => filters.status
 ], () => {
-  // Fetch leads when location or category filters change
-  if (filters.state.length > 0 || filters.district.length > 0 || filters.category.length > 0) {
+  // Fetch leads when location, category, or status filters change
+  if (filters.state.length > 0 || filters.district.length > 0 || filters.category.length > 0 || filters.status.length > 0) {
     fetchLeads()
   } else {
     // Fetch initial counts when no filters are applied
@@ -1177,6 +1216,75 @@ watch(() => filters.district, (newDistricts) => {
     filters.city = []
   }
 }, { deep: true })
+
+// New API function to fetch associated leads (distributors for manufacturer and vice versa)
+const fetchAssociatedLeads = async () => {
+  if (isLoadingAssociatedLeads.value || !selectedEntityItem.value) return
+  
+  isLoadingAssociatedLeads.value = true
+  try {
+    // Determine the opposite entity type
+    const oppositeEntityType = selectedEntity.value === 'manufacturer' ? 'SS / Distributor Lead' : 'Manufacturer Lead'
+    
+    let url = `/api/resource/Lead?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories"]`
+    
+    // Build filters for opposite entity type
+    const apiFilters: any = {
+      custom_lead_category: oppositeEntityType
+    }
+    
+    // Apply associated filters if any
+    if (associatedFilters.state?.length > 0) {
+      apiFilters.custom_states = ["in", associatedFilters.state]
+    }
+    
+    if (associatedFilters.district?.length > 0) {
+      apiFilters.custom_districts = ["in", associatedFilters.district]
+    }
+    
+    if (associatedFilters.category?.length > 0) {
+      apiFilters.custom_categories = ["in", associatedFilters.category]
+    }
+    
+    if (associatedFilters.status?.length > 0) {
+      apiFilters.custom_new_status = ["in", associatedFilters.status]
+    }
+    
+    // Add filters to URL
+    url += `&filters=${encodeURIComponent(JSON.stringify(apiFilters))}`
+    
+    console.log('Fetching associated leads with URL:', url)
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    console.log('Associated leads API response:', data)
+    
+    if (data && data.data) {
+      associatedLeadsData.value = data.data
+    }
+  } catch (error) {
+    console.error('Error fetching associated leads:', error)
+    associatedLeadsData.value = []
+  } finally {
+    isLoadingAssociatedLeads.value = false
+  }
+}
+
+// Call fetchAssociatedLeads when the component is mounted and selectedEntityItem is available
+onMounted(() => {
+  // ...existing code...
+  
+  // Fetch associated leads for the initially selected entity
+  fetchAssociatedLeads()
+})
+
+// Watch for changes to selectedEntityItem to refetch associated leads
+watch(selectedEntityItem, (newItem, oldItem) => {
+  if (newItem && newItem !== oldItem) {
+    fetchAssociatedLeads()
+  }
+})
 </script>
 
 <style scoped>
