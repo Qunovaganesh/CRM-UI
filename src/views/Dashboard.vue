@@ -1064,7 +1064,21 @@ const getFilterLabel = (key: string) => {
 const handleActionClick = (row: Manufacturer | Distributor) => {
   const routeName = getRouteNameFromStatus(row.status)
   if (routeName) {
-    router.push({ name: routeName, params: { id: row.id } })
+    // Same routing logic for both Lead and Prospect pages
+    // Pass the clicked row as main id and selected entity as parentId
+    console.log('Navigation:', {
+      clickedRow: row,
+      selectedEntity: selectedEntityItem.value,
+      route: routeName
+    })
+    
+    router.push({ 
+      name: routeName, 
+      params: { 
+        id: row.id,  // The clicked row (associated entity)
+        parentId: selectedEntityItem.value?.id || ''  // The selected entity (parent)
+      }
+    })
   }
 }
 

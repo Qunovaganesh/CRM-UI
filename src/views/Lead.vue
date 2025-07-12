@@ -27,6 +27,13 @@
       </button>
     </div>
 
+    <!-- Floating Promote to Prospect Button (shown when there's at least one interaction) -->
+    <div class="floating-promote-button" v-if="apiInteractions.length > 0">
+      <button class="btn-floating-promote" @click="navigateToProspect">
+        Promote to Prospect →
+      </button>
+    </div>
+
     <div class="content-wrapper">
       <div class="lead-content">
         <div class="interactions-section">
@@ -216,7 +223,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import type { Interaction } from '../types';
+
+const router = useRouter();
 
 const props = defineProps<{
   id: string;
@@ -651,6 +661,17 @@ const resetForm = () => {
   };
 };
 
+// Function to navigate to prospect page
+const navigateToProspect = () => {
+  router.push({ 
+    name: 'Prospect', 
+    params: { 
+      id: props.id,
+      parentId: props.parentId || ''
+    }
+  });
+};
+
 onMounted(async () => {
   console.log('Loading lead data for ID:', props.id, 'ParentID:', props.parentId);
   
@@ -741,6 +762,32 @@ onMounted(async () => {
   background: #000000;
   transform: translateY(-2px);
   box-shadow: 0 6px 25px rgba(28, 28, 30, 0.4);
+}
+
+.floating-promote-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.btn-floating-promote {
+  background: #007AFF;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-floating-promote:hover {
+  background: #0056CC;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 122, 255, 0.4);
 }
 
 .relationship-header h1 {

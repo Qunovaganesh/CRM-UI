@@ -12,7 +12,10 @@
           <span :class="!isManufacturerProspect ? 'distributor selected-entity' : 'distributor'">
             {{ distributorName }}
           </span>
-          <span class="status-badge status-prospect">Prospect</span>
+          <span :class="getStatusBadgeClass(prospectStatus)">{{ prospectStatus }}</span>
+          <span v-if="currentLeadMapping?.last_status_change" class="status-date">
+            Since {{ formatDate(currentLeadMapping.last_status_change) }}
+          </span>
         </div>
       </div>
       <p>Manage terms & conditions and agreement generation</p>
@@ -54,8 +57,8 @@
                       class="modern-select"
                     >
                       <option value="">Select Clause</option>
-                      <option v-for="clause in termsOptions.clauses" :key="clause" :value="clause">
-                        {{ clause }}
+                      <option v-for="clause in clauseData" :key="clause.name" :value="clause.clause">
+                        {{ clause.clause }}
                       </option>
                     </select>
                   </div>
@@ -268,16 +271,15 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBusinessLogic } from '../composables/useBusinessLogic';
-import { mockManufacturers, mockDistributors } from '../data/mockData';
-import { termsOptions } from '../data/mockData';
 import type { TermsCondition } from '../types';
 
 const props = defineProps<{
   id: string;
+  parentId?: string;
 }>();
 
 const router = useRouter();
-const { agreement, updateAgreement, updateDistributorStatus } = useBusinessLogic();
+const { agreement, updateAgreement } = useBusinessLogic();
 
 const editMode = ref(false);
 const showPreviewModal = ref(false);
@@ -285,26 +287,121 @@ const showUploadModal = ref(false);
 const selectedFile = ref<File | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
+// API data state
+const selectedEntityData = ref<any>(null); // Main selected entity from Dashboard
+const associatedEntityData = ref<any>(null); // Associated entity clicked from table
+const currentLeadMapping = ref<any>(null); // Current lead mapping record
+const prospectStatus = ref('Prospect'); // Default status
+const clauseData = ref<any[]>([]); // Clause data from API
+
 const distributorData = computed(() => {
-  return mockDistributors.find(d => d.id === props.id) || mockDistributors[0];
+  // First check if selectedEntityData is a distributor
+  if (selectedEntityData.value && selectedEntityData.value.custom_lead_category === 'SS / Distributor Lead') {
+    return {
+      id: selectedEntityData.value.name,
+      name: selectedEntityData.value.company_name || selectedEntityData.value.name,
+      category: selectedEntityData.value.custom_categories || '',
+      subCategory: '',
+      city: selectedEntityData.value.custom_cities || '',
+      district: selectedEntityData.value.custom_districts || '',
+      state: selectedEntityData.value.custom_states || '',
+      status: prospectStatus.value,
+      registrationDate: selectedEntityData.value.creation ? new Date(selectedEntityData.value.creation).toISOString().split('T')[0] : '',
+      daysSinceStatus: 0
+    };
+  }
+  
+  // Then check if associatedEntityData is a distributor
+  if (associatedEntityData.value && associatedEntityData.value.custom_lead_category === 'SS / Distributor Lead') {
+    return {
+      id: associatedEntityData.value.name,
+      name: associatedEntityData.value.company_name || associatedEntityData.value.name,
+      category: associatedEntityData.value.custom_categories || '',
+      subCategory: '',
+      city: associatedEntityData.value.custom_cities || '',
+      district: associatedEntityData.value.custom_districts || '',
+      state: associatedEntityData.value.custom_states || '',
+      status: prospectStatus.value,
+      registrationDate: associatedEntityData.value.creation ? new Date(associatedEntityData.value.creation).toISOString().split('T')[0] : '',
+      daysSinceStatus: 0
+    };
+  }
+  
+  // Default empty distributor if neither is a distributor
+  return {
+    id: 'unknown',
+    name: 'No Distributor Data',
+    category: '',
+    subCategory: '',
+    city: '',
+    district: '',
+    state: '',
+    status: 'Unknown',
+    registrationDate: '',
+    daysSinceStatus: 0
+  };
 });
 
 const manufacturerData = computed(() => {
-  const distributor = mockDistributors.find(d => d.id === props.id);
-  if (distributor) {
-    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
-  } else {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      return manufacturer;
-    }
-    return mockManufacturers[0];
+  // First check if selectedEntityData is a manufacturer
+  if (selectedEntityData.value && selectedEntityData.value.custom_lead_category === 'Manufacturer Lead') {
+    return {
+      id: selectedEntityData.value.name,
+      name: selectedEntityData.value.company_name || selectedEntityData.value.name,
+      category: selectedEntityData.value.custom_categories || '',
+      subCategory: '',
+      city: selectedEntityData.value.custom_cities || '',
+      district: selectedEntityData.value.custom_districts || '',
+      state: selectedEntityData.value.custom_states || '',
+      status: prospectStatus.value,
+      registrationDate: selectedEntityData.value.creation ? new Date(selectedEntityData.value.creation).toISOString().split('T')[0] : '',
+      daysSinceStatus: 0
+    };
   }
+  
+  // Then check if associatedEntityData is a manufacturer
+  if (associatedEntityData.value && associatedEntityData.value.custom_lead_category === 'Manufacturer Lead') {
+    return {
+      id: associatedEntityData.value.name,
+      name: associatedEntityData.value.company_name || associatedEntityData.value.name,
+      category: associatedEntityData.value.custom_categories || '',
+      subCategory: '',
+      city: associatedEntityData.value.custom_cities || '',
+      district: associatedEntityData.value.custom_districts || '',
+      state: associatedEntityData.value.custom_states || '',
+      status: prospectStatus.value,
+      registrationDate: associatedEntityData.value.creation ? new Date(associatedEntityData.value.creation).toISOString().split('T')[0] : '',
+      daysSinceStatus: 0
+    };
+  }
+  
+  // Default empty manufacturer if neither is a manufacturer
+  return {
+    id: 'unknown',
+    name: 'No Manufacturer Data',
+    category: '',
+    subCategory: '',
+    city: '',
+    district: '',
+    state: '',
+    status: 'Unknown',
+    registrationDate: '',
+    daysSinceStatus: 0
+  };
 });
 
 const distributorName = computed(() => distributorData.value.name);
 const isManufacturerProspect = computed(() => {
-  return mockManufacturers.some(m => m.id === props.id);
+  // Check if the associated entity (clicked from table) is a manufacturer
+  if (associatedEntityData.value && associatedEntityData.value.custom_lead_category === 'Manufacturer Lead') {
+    return true;
+  }
+  // Check if the selected entity (from Dashboard) is a manufacturer
+  if (selectedEntityData.value && selectedEntityData.value.custom_lead_category === 'Manufacturer Lead') {
+    return true;
+  }
+  // Default to false if we don't have clear manufacturer data
+  return false;
 });
 const manufacturerName = computed(() => manufacturerData.value.name);
 
@@ -350,7 +447,12 @@ const onClauseChange = (term: TermsCondition) => {
 };
 
 const getResponseOptions = (clause: string) => {
-  return termsOptions.responses[clause as keyof typeof termsOptions.responses] || [];
+  const clauseItem = clauseData.value.find(item => item.clause === clause);
+  if (clauseItem && clauseItem.responses) {
+    // Split responses by newline and filter out empty lines
+    return clauseItem.responses.split('\n').filter((response: string) => response.trim() !== '');
+  }
+  return [];
 };
 
 const toggleEditMode = () => {
@@ -421,23 +523,128 @@ const submitUpload = () => {
 };
 
 const convertToCustomer = () => {
-  if (isManufacturerProspect.value) {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      manufacturer.status = 'Customer';
-      manufacturer.daysSinceStatus = 0;
-    }
-  } else {
-    updateDistributorStatus(props.id, 'Customer');
-  }
+  // Note: This function should be updated to use proper API calls
+  // For now, we'll just show the alert and redirect
   alert('Status updated to Customer! Redirecting...');
   setTimeout(() => {
     router.push({ name: 'Customer', params: { id: props.id } });
   }, 1000);
 };
 
-onMounted(() => {
-  console.log('Loading prospect data for ID:', props.id);
+// Function to fetch clause data from API
+const fetchClauseData = async () => {
+  try {
+    const response = await fetch('/api/resource/Lead%20Mapping%20TnC%20Master?fields=["name","clause","responses"]');
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Clause data API response:', data);
+      
+      if (data && data.data && data.data.length > 0) {
+        clauseData.value = data.data;
+        console.log('Loaded clause data:', clauseData.value);
+      } else {
+        console.warn('No clause data found');
+        clauseData.value = [];
+      }
+    } else {
+      console.error('Failed to fetch clause data:', response.status);
+      clauseData.value = [];
+    }
+  } catch (error) {
+    console.error('Error fetching clause data:', error);
+    clauseData.value = [];
+  }
+};
+
+// Function to fetch current Lead Mapping
+const fetchLeadMapping = async () => {
+  try {
+    const filters: any = {};
+    
+    if (props.id) {
+      filters.mapped_lead = props.id;
+    }
+    
+    if (props.parentId) {
+      filters.parent_lead = props.parentId;
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      const url = `/api/resource/Lead Mapping?fields=["name","parent_lead","mapped_lead","status","last_status_change"]&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+      
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Lead Mapping API response:', data);
+        
+        if (data && data.data && data.data.length > 0) {
+          currentLeadMapping.value = data.data[0];
+          prospectStatus.value = currentLeadMapping.value.status || 'Prospect';
+          console.log('Current Lead Mapping:', currentLeadMapping.value);
+        } else {
+          // No mapping found, keep default status
+          prospectStatus.value = 'Prospect';
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching lead mapping:', error);
+    prospectStatus.value = 'Prospect';
+  }
+};
+
+// Function to get status badge class
+const getStatusBadgeClass = (status: string) => {
+  const base = 'status-badge';
+  return `${base} ${{
+    Registration: 'status-registration',
+    Lead: 'status-lead',
+    Prospect: 'status-prospect',
+    Customer: 'status-customer',
+    View: 'status-view'
+  }[status] || 'status-prospect'}`;
+};
+
+onMounted(async () => {
+  console.log('Loading prospect data for ID:', props.id, 'ParentID:', props.parentId);
+  
+  try {
+    // Fetch clause data first
+    await fetchClauseData();
+    
+    // Fetch the associated entity (clicked from table)
+    const associatedResponse = await fetch(`/api/resource/Lead/${props.id}?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories","custom_cities","creation"]`);
+    if (associatedResponse.ok) {
+      const associatedData = await associatedResponse.json();
+      if (associatedData.data) {
+        associatedEntityData.value = associatedData.data;
+      }
+    }
+    
+    // Fetch the selected entity (main entity from Dashboard) if parentId is provided
+    if (props.parentId) {
+      const selectedResponse = await fetch(`/api/resource/Lead/${props.parentId}?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories","custom_cities","creation"]`);
+      if (selectedResponse.ok) {
+        const selectedData = await selectedResponse.json();
+        if (selectedData.data) {
+          selectedEntityData.value = selectedData.data;
+        }
+      }
+    }
+    
+    console.log('Selected Entity Data:', selectedEntityData.value);
+    console.log('Associated Entity Data:', associatedEntityData.value);
+    console.log('Manufacturer Data:', manufacturerData.value);
+    console.log('Distributor Data:', distributorData.value);
+    console.log('Is Manufacturer Prospect:', isManufacturerProspect.value);
+    
+    // Fetch current Lead Mapping to get the current status
+    await fetchLeadMapping();
+    
+  } catch (error) {
+    console.error('Error fetching prospect data:', error);
+    // Keep default values if API calls fail
+  }
 });
 </script>
 
@@ -543,10 +750,41 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
+.status-registration {
+  background: #ede9fe;
+  color: #7c3aed;
+  border: 1px solid #c4b5fd;
+}
+
+.status-lead {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fcd34d;
+}
+
 .status-prospect {
   background: #e8f4fd;
   color: #1e40af;
   border: 1px solid #bfdbfe;
+}
+
+.status-customer {
+  background: #d1fae5;
+  color: #059669;
+  border: 1px solid #86efac;
+}
+
+.status-view {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.status-date {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-left: 8px;
 }
 
 .selected-entity {

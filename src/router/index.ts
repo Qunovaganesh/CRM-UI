@@ -33,7 +33,7 @@ const routes = [
     }
   },
   {
-    path: '/prospect/:id',
+    path: '/prospect/:id/:parentId?',
     name: 'Prospect',
     component: Prospect,
     props: true,
