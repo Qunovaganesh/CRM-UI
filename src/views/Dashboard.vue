@@ -1171,10 +1171,8 @@ onMounted(() => {
   // Fetch initial lead counts from API
   fetchInitialCounts()
   
-  // Only set up initial entity selection, no automatic API fetching
-  if (selectedEntityId.value) {
-    selectedEntityItem.value = currentEntityList.value.find(e => e.id === selectedEntityId.value) || null
-  }
+  // Reset entity selection when returning to Dashboard
+  clearSelection()
 })
 
 watch(selectedEntityId, (newId) => {
@@ -1313,14 +1311,6 @@ const fetchAssociatedLeads = async () => {
     isLoadingAssociatedLeads.value = false
   }
 }
-
-// Call fetchAssociatedLeads when the component is mounted and selectedEntityItem is available
-onMounted(() => {
-  // ...existing code...
-  
-  // Fetch associated leads for the initially selected entity
-  fetchAssociatedLeads()
-})
 
 // Watch for changes to selectedEntityItem to refetch associated leads
 watch(selectedEntityItem, (newItem, oldItem) => {
