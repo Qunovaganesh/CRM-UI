@@ -51,7 +51,7 @@
               <input 
                 type="text" 
                 v-model="manufacturerForm.salutation" 
-                placeholder="Enter salutation"
+                placeholder="Enter salutations"
                 class="form-input"
               />
             </div>
@@ -419,7 +419,7 @@
               <input 
                 type="text" 
                 v-model="distributorForm.salutation" 
-                placeholder="Enter salutation"
+                placeholder="Enter salutations"
                 class="form-input"
               />
             </div>

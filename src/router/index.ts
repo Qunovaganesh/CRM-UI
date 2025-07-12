@@ -24,7 +24,7 @@ const routes = [
     }
   },
   {
-    path: '/lead/:id',
+    path: '/lead/:id/:parentId?',
     name: 'Lead',
     component: Lead,
     props: true,

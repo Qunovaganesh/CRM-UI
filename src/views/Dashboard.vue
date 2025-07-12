@@ -673,7 +673,7 @@ const filteredPairedList = computed(() => {
       state: lead.custom_states || 'Unknown',
       category: lead.custom_categories || (selectedEntity.value === 'manufacturer' ? 'Distributor' : 'Manufacturer'),
       subCategory: 'Unknown',
-      status: lead.custom_new_status || 'Lead',
+      status: lead.finalStatus || 'Registration', // Use finalStatus from Lead Mapping or default to Registration
       registrationDate: new Date().toISOString().split('T')[0],
       daysSinceStatus: 0
     }))
@@ -1217,6 +1217,32 @@ watch(() => filters.district, (newDistricts) => {
   }
 }, { deep: true })
 
+// Function to fetch all Lead Mappings for a parent lead
+const fetchLeadMappings = async (parentLeadId: string) => {
+  try {
+    const url = `/api/resource/Lead Mapping?filters={"parent_lead":"${parentLeadId}"}&fields=["name","status","mapped_lead","parent_lead"]`
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    console.log('Lead Mapping API response for parent:', parentLeadId, data)
+    
+    if (data && data.data && data.data.length > 0) {
+      // Create a mapping object: { mappedLeadId: status }
+      const mappingStatus: Record<string, string> = {}
+      data.data.forEach((mapping: any) => {
+        if (mapping.mapped_lead) {
+          mappingStatus[mapping.mapped_lead] = mapping.status
+        }
+      })
+      return mappingStatus
+    }
+    return {} // No mappings found
+  } catch (error) {
+    console.error('Error fetching lead mappings:', error)
+    return {}
+  }
+}
+
 // New API function to fetch associated leads (distributors for manufacturer and vice versa)
 const fetchAssociatedLeads = async () => {
   if (isLoadingAssociatedLeads.value || !selectedEntityItem.value) return
@@ -1261,7 +1287,24 @@ const fetchAssociatedLeads = async () => {
     console.log('Associated leads API response:', data)
     
     if (data && data.data) {
-      associatedLeadsData.value = data.data
+      // Fetch all Lead Mappings for the selected parent lead (only once!)
+      const leadMappings = await fetchLeadMappings(selectedEntityItem.value?.id || '')
+      
+      // Apply mapping status to each lead
+      const leadsWithMappingStatus = data.data.map((lead: any) => {
+        // Check if this lead has a mapping status
+        const mappingStatus = leadMappings[lead.name] // lead.name is the lead ID
+        
+        return {
+          ...lead,
+          // If mapping exists, use mapping status, otherwise use "Registration"
+          finalStatus: mappingStatus || 'Registration'
+        }
+      })
+      
+      console.log('Leads with mapping status:', leadsWithMappingStatus)
+      
+      associatedLeadsData.value = leadsWithMappingStatus
     }
   } catch (error) {
     console.error('Error fetching associated leads:', error)

@@ -12,7 +12,10 @@
           <span :class="!isManufacturerLead ? 'distributor selected-entity' : 'distributor'">
             {{ distributorName }}
           </span>
-          <span class="status-badge status-lead">Lead</span>
+          <span :class="getStatusBadgeClass(leadStatus)">{{ leadStatus }}</span>
+          <span v-if="currentLeadMapping?.last_status_change" class="status-date">
+            Since {{ formatDate(currentLeadMapping.last_status_change) }}
+          </span>
         </div>
       </div>
     </div>
@@ -30,7 +33,7 @@
           <div class="section-header">
             <h2>Past Interactions</h2>
             <div class="section-stats">
-              <span class="stat-badge">{{ interactions.length }} interactions</span>
+              <span class="stat-badge">{{ apiInteractions.length }} interactions</span>
             </div>
           </div>
           
@@ -44,31 +47,47 @@
                     <th>Time Elapsed</th>
                     <th>Mode</th>
                     <th>Reminder</th>
+                    <th>Reminder Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="interaction in interactions" :key="interaction.id" class="table-row">
+                  <tr v-if="isLoadingInteractions">
+                    <td colspan="7" style="text-align: center; padding: 20px;">
+                      <span>Loading interactions...</span>
+                    </td>
+                  </tr>
+                  <tr v-else-if="apiInteractions.length === 0">
+                    <td colspan="7" style="text-align: center; padding: 20px;">
+                      <span>No interactions found</span>
+                    </td>
+                  </tr>
+                  <tr v-else v-for="interaction in apiInteractions" :key="interaction.name" class="table-row">
                     <td>
                       <div class="user-cell">
-                        <div class="user-avatar">{{ interaction.interactedBy.charAt(0) }}</div>
-                        <span class="user-name">{{ interaction.interactedBy }}</span>
+                        <div class="user-avatar">{{ (interaction.owner || 'U').charAt(0) }}</div>
+                        <span class="user-name">{{ interaction.owner || 'Unknown' }}</span>
                       </div>
                     </td>
                     <td>
-                      <span class="date-cell">{{ formatDate(interaction.dateInteracted) }}</span>
+                      <span class="date-cell">{{ formatDate(interaction.creation) }}</span>
                     </td>
                     <td>
-                      <span class="time-elapsed">{{ interaction.timeElapsed }}</span>
+                      <span class="time-elapsed">{{ getTimeElapsed(interaction.creation) }}</span>
                     </td>
                     <td>
-                      <span :class="getModeClass(interaction.mode)" class="mode-badge">
-                        {{ interaction.mode }}
+                      <span :class="getModeClass(interaction.interaction_mode)" class="mode-badge">
+                        {{ interaction.interaction_mode }}
                       </span>
                     </td>
                     <td>
-                      <span :class="getReminderClass(interaction.hasReminder)" class="reminder-badge">
-                        {{ interaction.hasReminder ? 'Yes' : 'No' }}
+                      <span :class="getReminderClass(!!interaction.reminder_date)" class="reminder-badge">
+                        {{ interaction.reminder_date ? 'Yes' : 'No' }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="reminder-date-cell">
+                        {{ interaction.reminder_date ? formatDate(interaction.reminder_date) : '—' }}
                       </span>
                     </td>
                     <td>
@@ -90,13 +109,14 @@
           </div>
           
           <form @submit.prevent="submitNotes" class="modern-form">
+            
             <div class="form-grid">
               <div class="form-group">
                 <label>Interaction Mode</label>
                 <select v-model="newInteraction.mode" required class="modern-select">
                   <option value="">Select Mode</option>
                   <option value="Phone">📞 Phone</option>
-                  <option value="FtoF">🤝 Face to Face</option>
+                  <option value="Face to Face">🤝 Face to Face</option>
                 </select>
               </div>
 
@@ -146,11 +166,11 @@
             </div>
 
             <div class="form-actions">
-              <button type="button" class="btn-secondary" @click="resetForm">
+              <button type="button" class="btn-secondary" @click="resetForm" :disabled="isSubmittingInteraction">
                 Reset
               </button>
-              <button type="submit" class="btn-primary">
-                Save Interaction
+              <button type="submit" class="btn-primary" :disabled="isSubmittingInteraction">
+                {{ isSubmittingInteraction ? 'Saving...' : 'Save Interaction' }}
               </button>
             </div>
           </form>
@@ -183,6 +203,10 @@
               <span class="detail-label">Notes:</span>
               <div class="detail-notes">{{ selectedInteraction?.notes }}</div>
             </div>
+            <div class="detail-row" v-if="selectedInteraction?.hasReminder">
+              <span class="detail-label">Reminder Date:</span>
+              <span class="detail-value">{{ formatDate(selectedInteraction?.reminderDate) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -192,15 +216,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useBusinessLogic } from '../composables/useBusinessLogic';
-import { mockManufacturers, mockDistributors } from '../data/mockData';
 import type { Interaction } from '../types';
 
 const props = defineProps<{
   id: string;
+  parentId?: string;
 }>();
 
-const { interactions, addInteraction } = useBusinessLogic();
+const leadStatus = ref('Registration'); // Default to 'Registration', will be updated based on interactions
+const selectedEntityData = ref<any>(null); // Main selected entity from Dashboard
+const associatedEntityData = ref<any>(null); // Associated entity clicked from table
+const apiInteractions = ref<any[]>([]); // API interactions data
+const isLoadingInteractions = ref(false);
+const isSubmittingInteraction = ref(false);
+const currentLeadMapping = ref<any>(null); // Current lead mapping record
 
 const showNotesModal = ref(false);
 const selectedInteraction = ref<Interaction | null>(null);
@@ -208,7 +237,7 @@ const selectedInteraction = ref<Interaction | null>(null);
 const newInteraction = ref({
   interactedBy: 'Current User',
   dateInteracted: new Date().toISOString().split('T')[0],
-  mode: '' as 'Phone' | 'FtoF' | '',
+  mode: '' as 'Phone' | 'Face to Face' | '',
   notes: '',
   hasReminder: false,
   reminderDate: '',
@@ -216,37 +245,255 @@ const newInteraction = ref({
 });
 
 const manufacturerData = computed(() => {
-  const distributor = mockDistributors.find(d => d.id === props.id);
-  if (distributor) {
-    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
-  } else {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      return manufacturer;
+  // If we have actual entity data, use it
+  if (selectedEntityData.value) {
+    // Check if selected entity is a manufacturer
+    if (selectedEntityData.value.custom_lead_category === 'Manufacturer Lead') {
+      return {
+        id: selectedEntityData.value.name,
+        name: selectedEntityData.value.company_name || selectedEntityData.value.name,
+        category: selectedEntityData.value.custom_categories || '',
+        subCategory: '',
+        city: selectedEntityData.value.custom_cities || '',
+        district: selectedEntityData.value.custom_districts || '',
+        state: selectedEntityData.value.custom_states || '',
+        status: selectedEntityData.value.custom_new_status || '',
+        registrationDate: selectedEntityData.value.creation ? new Date(selectedEntityData.value.creation).toISOString().split('T')[0] : '',
+        daysSinceStatus: 0
+      };
     }
-    return mockManufacturers[0];
   }
+  
+  // If associated entity is a manufacturer
+  if (associatedEntityData.value && associatedEntityData.value.custom_lead_category === 'Manufacturer Lead') {
+    return {
+      id: associatedEntityData.value.name,
+      name: associatedEntityData.value.company_name || associatedEntityData.value.name,
+      category: associatedEntityData.value.custom_categories || '',
+      subCategory: '',
+      city: associatedEntityData.value.custom_cities || '',
+      district: associatedEntityData.value.custom_districts || '',
+      state: associatedEntityData.value.custom_states || '',
+      status: associatedEntityData.value.custom_new_status || '',
+      registrationDate: associatedEntityData.value.creation ? new Date(associatedEntityData.value.creation).toISOString().split('T')[0] : '',
+      daysSinceStatus: 0
+    };
+  }
+  
+  // Default fallback
+  return {
+    id: '',
+    name: 'Select Manufacturer',
+    category: '',
+    subCategory: '',
+    city: '',
+    district: '',
+    state: '',
+    status: '',
+    registrationDate: '',
+    daysSinceStatus: 0
+  };
 });
 
 const distributorData = computed(() => {
-  const distributor = mockDistributors.find(d => d.id === props.id);
-  if (distributor) {
-    return distributor;
-  } else {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      return mockDistributors.find(d => d.category === manufacturer.category) || mockDistributors[0];
+  // If we have actual entity data, use it
+  if (selectedEntityData.value) {
+    // Check if selected entity is a distributor
+    if (selectedEntityData.value.custom_lead_category === 'SS / Distributor Lead') {
+      return {
+        id: selectedEntityData.value.name,
+        name: selectedEntityData.value.company_name || selectedEntityData.value.name,
+        category: selectedEntityData.value.custom_categories || '',
+        subCategory: '',
+        city: selectedEntityData.value.custom_cities || '',
+        district: selectedEntityData.value.custom_districts || '',
+        state: selectedEntityData.value.custom_states || '',
+        status: selectedEntityData.value.custom_new_status || '',
+        registrationDate: selectedEntityData.value.creation ? new Date(selectedEntityData.value.creation).toISOString().split('T')[0] : '',
+        daysSinceStatus: 0
+      };
     }
-    return mockDistributors[0];
   }
+  
+  // If associated entity is a distributor
+  if (associatedEntityData.value && associatedEntityData.value.custom_lead_category === 'SS / Distributor Lead') {
+    return {
+      id: associatedEntityData.value.name,
+      name: associatedEntityData.value.company_name || associatedEntityData.value.name,
+      category: associatedEntityData.value.custom_categories || '',
+      subCategory: '',
+      city: associatedEntityData.value.custom_cities || '',
+      district: associatedEntityData.value.custom_districts || '',
+      state: associatedEntityData.value.custom_states || '',
+      status: associatedEntityData.value.custom_new_status || '',
+      registrationDate: associatedEntityData.value.creation ? new Date(associatedEntityData.value.creation).toISOString().split('T')[0] : '',
+      daysSinceStatus: 0
+    };
+  }
+  
+  // Default fallback
+  return {
+    id: '',
+    name: 'Select Distributor',
+    category: '',
+    subCategory: '',
+    city: '',
+    district: '',
+    state: '',
+    status: '',
+    registrationDate: '',
+    daysSinceStatus: 0
+  };
 });
 
 const isManufacturerLead = computed(() => {
-  return mockManufacturers.some(m => m.id === props.id);
+  // Determine based on the selected entity or associated entity
+  if (selectedEntityData.value) {
+    return selectedEntityData.value.custom_lead_category === 'Manufacturer Lead';
+  }
+  if (associatedEntityData.value) {
+    return associatedEntityData.value.custom_lead_category === 'Manufacturer Lead';
+  }
+  return false;
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
 const distributorName = computed(() => distributorData.value.name);
+
+// API function to fetch interactions
+const fetchInteractions = async () => {
+  if (isLoadingInteractions.value) return;
+  
+  isLoadingInteractions.value = true;
+  
+  try {
+    // Build the API URL with filters
+    let url = '/api/resource/Lead Interaction?fields=["name","interaction_mode","interaction_notes","reminder_date","parent_lead","mapped_lead","creation","owner"]';
+    
+    // Add filters based on current lead IDs
+    const filters: any = {};
+    
+    if (props.id) {
+      filters.mapped_lead = props.id;
+    }
+    
+    if (props.parentId) {
+      filters.parent_lead = props.parentId;
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+    }
+    
+    console.log('Fetching interactions with URL:', url);
+    
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Interactions API response:', data);
+      
+      if (data && data.data) {
+        apiInteractions.value = data.data;
+        
+        // Update status based on interactions
+        await updateStatusBasedOnInteractions();
+      }
+    } else {
+      console.error('Error fetching interactions:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching interactions:', error);
+  } finally {
+    isLoadingInteractions.value = false;
+  }
+};
+
+// Function to update status based on interactions
+const updateStatusBasedOnInteractions = async () => {
+  const hasInteractions = apiInteractions.value.length > 0;
+  const newStatus = hasInteractions ? 'Lead' : 'Registration';
+  
+  if (leadStatus.value !== newStatus) {
+    leadStatus.value = newStatus;
+    
+    // Update or create Lead Mapping entry
+    await updateLeadMapping(newStatus);
+  }
+};
+
+// Function to fetch current Lead Mapping
+const fetchLeadMapping = async () => {
+  try {
+    const filters: any = {};
+    
+    if (props.id) {
+      filters.mapped_lead = props.id;
+    }
+    
+    if (props.parentId) {
+      filters.parent_lead = props.parentId;
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      const url = `/api/resource/Lead Mapping?fields=["name","parent_lead","mapped_lead","status","last_status_change"]&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+      
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.data && data.data.length > 0) {
+          currentLeadMapping.value = data.data[0];
+          leadStatus.value = currentLeadMapping.value.status;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching lead mapping:', error);
+  }
+};
+
+// Function to update or create Lead Mapping
+const updateLeadMapping = async (status: string) => {
+  try {
+    const mappingData = {
+      parent_lead: props.parentId || null,
+      mapped_lead: props.id,
+      status: status,
+      last_status_change: new Date().toISOString().split('T')[0]
+    };
+    
+    let response;
+    
+    if (currentLeadMapping.value) {
+      // Update existing mapping
+      response = await fetch(`/api/resource/Lead Mapping/${currentLeadMapping.value.name}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mappingData)
+      });
+    } else {
+      // Create new mapping
+      response = await fetch('/api/resource/Lead Mapping', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mappingData)
+      });
+    }
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Lead Mapping updated/created:', result);
+      currentLeadMapping.value = result.data;
+    } else {
+      console.error('Error updating lead mapping:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error updating lead mapping:', error);
+  }
+};
 
 const today = computed(() => {
   return new Date().toISOString().split('T')[0];
@@ -261,6 +508,23 @@ const formatDate = (dateString: string | undefined) => {
   });
 };
 
+const getTimeElapsed = (creationDate: string | undefined) => {
+  if (!creationDate) return '';
+  const now = new Date();
+  const created = new Date(creationDate);
+  const diffInMs = now.getTime() - created.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const diffInMonths = Math.floor(diffInDays / 30);
+  
+  if (diffInMonths > 0) {
+    return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'}`;
+  } else if (diffInDays > 0) {
+    return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'}`;
+  } else {
+    return 'Today';
+  }
+};
+
 const getModeClass = (mode: string) => {
   return mode === 'Phone' ? 'mode-phone' : 'mode-face';
 };
@@ -269,8 +533,36 @@ const getReminderClass = (hasReminder: boolean) => {
   return hasReminder ? 'reminder-yes' : 'reminder-no';
 };
 
-const viewNotes = (interaction: Interaction) => {
-  selectedInteraction.value = interaction;
+const getStatusBadgeClass = (status: string) => {
+  const baseClass = 'status-badge';
+  switch (status) {
+    case 'Registration':
+      return `${baseClass} status-registration`;
+    case 'Lead':
+      return `${baseClass} status-lead`;
+    case 'Prospect':
+      return `${baseClass} status-prospect`;
+    case 'Customer':
+      return `${baseClass} status-customer`;
+    case 'View':
+      return `${baseClass} status-view`;
+    default:
+      return `${baseClass} status-registration`;
+  }
+};
+
+const viewNotes = (interaction: any) => {
+  selectedInteraction.value = {
+    id: interaction.name,
+    interactedBy: interaction.owner || 'Unknown',
+    dateInteracted: interaction.creation,
+    mode: interaction.interaction_mode,
+    notes: interaction.interaction_notes || '',
+    hasReminder: !!interaction.reminder_date,
+    reminderDate: interaction.reminder_date || '',
+    timeElapsed: getTimeElapsed(interaction.creation),
+    attachments: []
+  };
   showNotesModal.value = true;
 };
 
@@ -286,17 +578,65 @@ const handleFileUpload = (event: Event) => {
   }
 };
 
-const submitNotes = () => {
-  const interaction = {
-    ...newInteraction.value,
-    mode: newInteraction.value.mode as 'Phone' | 'FtoF',
-    timeElapsed: 'Just now'
-  };
+const submitNotes = async () => {
+  if (!newInteraction.value.mode || !newInteraction.value.notes) {
+    alert('Please fill in all required fields');
+    return;
+  }
 
-  addInteraction(interaction);
-  resetForm();
+  isSubmittingInteraction.value = true;
   
-  alert('Interaction added successfully!');
+  try {
+    const interactionData = {
+      interaction_mode: newInteraction.value.mode,
+      interaction_notes: newInteraction.value.notes,
+      reminder_date: newInteraction.value.hasReminder ? newInteraction.value.reminderDate : null,
+      parent_lead: props.parentId || null,
+      mapped_lead: props.id
+    };
+
+    console.log('Submitting interaction:', interactionData);
+
+    const response = await fetch('/api/resource/Lead Interaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(interactionData)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Interaction created:', result);
+      
+      // Check if this is the first interaction
+      const isFirstInteraction = apiInteractions.value.length === 0;
+      
+      // Refresh the interactions list
+      await fetchInteractions();
+      
+      // If this was the first interaction, status should automatically change to 'Lead'
+      // (This will be handled by updateStatusBasedOnInteractions in fetchInteractions)
+      
+      // Reset form
+      resetForm();
+      
+      if (isFirstInteraction) {
+        alert('First interaction added successfully! Status updated to Lead.');
+      } else {
+        alert('Interaction added successfully!');
+      }
+    } else {
+      const error = await response.json();
+      console.error('Error creating interaction:', error);
+      alert('Failed to save interaction. Please try again.');
+    }
+  } catch (error) {
+    console.error('Error submitting interaction:', error);
+    alert('Failed to save interaction. Please try again.');
+  } finally {
+    isSubmittingInteraction.value = false;
+  }
 };
 
 const resetForm = () => {
@@ -311,8 +651,43 @@ const resetForm = () => {
   };
 };
 
-onMounted(() => {
-  console.log('Loading lead data for ID:', props.id);
+onMounted(async () => {
+  console.log('Loading lead data for ID:', props.id, 'ParentID:', props.parentId);
+  
+  try {
+    // Fetch the associated entity (clicked from table)
+    const associatedResponse = await fetch(`/api/resource/Lead/${props.id}?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories","custom_cities","creation"]`);
+    if (associatedResponse.ok) {
+      const associatedData = await associatedResponse.json();
+      if (associatedData.data) {
+        associatedEntityData.value = associatedData.data;
+      }
+    }
+    
+    // Fetch the selected entity (main entity from Dashboard) if parentId is provided
+    if (props.parentId) {
+      const selectedResponse = await fetch(`/api/resource/Lead/${props.parentId}?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories","custom_cities","creation"]`);
+      if (selectedResponse.ok) {
+        const selectedData = await selectedResponse.json();
+        if (selectedData.data) {
+          selectedEntityData.value = selectedData.data;
+        }
+      }
+    }
+    
+    console.log('Selected Entity Data:', selectedEntityData.value);
+    console.log('Associated Entity Data:', associatedEntityData.value);
+    
+    // Fetch current Lead Mapping to get the current status
+    await fetchLeadMapping();
+    
+    // Fetch interactions after loading entity data
+    await fetchInteractions();
+    
+  } catch (error) {
+    console.error('Error fetching lead data:', error);
+    // Keep default values if API calls fail
+  }
 });
 </script>
 
@@ -418,10 +793,100 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
+.status-registration {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
 .status-lead {
   background: #fff3cd;
   color: #856404;
   border: 1px solid #ffeaa7;
+}
+
+.status-prospect {
+  background: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.status-customer {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #ce93d8;
+}
+
+.status-view {
+  background: #f5f5f5;
+  color: #616161;
+  border: 1px solid #e0e0e0;
+}
+
+.category-manufacturer {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-distributor {
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.entity-name {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.entity-location {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.entity-category-sub {
+  color: #86868b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-action-primary {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-action-primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.status-date {
+  font-size: 11px;
+  color: #86868b;
+  background: #f5f5f7;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 .selected-entity {
@@ -433,10 +898,30 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
+  grid-template-rows: auto auto auto;
 }
 
-.interactions-section,
+.associated-section,
+.potential-section {
+  grid-column: span 2;
+  background: white;
+  border: 1px solid #d2d2d7;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.interactions-section {
+  grid-column: span 1;
+  background: white;
+  border: 1px solid #d2d2d7;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
 .notes-section {
+  grid-column: span 1;
   background: white;
   border: 1px solid #d2d2d7;
   border-radius: 16px;
@@ -594,6 +1079,12 @@ onMounted(() => {
   font-style: italic;
 }
 
+.reminder-date-cell {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 13px;
+}
+
 .mode-badge,
 .reminder-badge {
   padding: 4px 10px;
@@ -645,6 +1136,33 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.status-change-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.notice-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notice-text {
+  color: #1565c0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.notice-text strong {
+  font-weight: 600;
 }
 
 .form-grid {
