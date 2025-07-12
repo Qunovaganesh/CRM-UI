@@ -405,8 +405,8 @@ const fetchInteractions = async () => {
       if (data && data.data) {
         apiInteractions.value = data.data;
         
-        // Update status based on interactions
-        await updateStatusBasedOnInteractions();
+        // Do not update status based on interactions here
+        // Status should only be updated when first interaction is posted
       }
     } else {
       console.error('Error fetching interactions:', response.statusText);
@@ -415,19 +415,6 @@ const fetchInteractions = async () => {
     console.error('Error fetching interactions:', error);
   } finally {
     isLoadingInteractions.value = false;
-  }
-};
-
-// Function to update status based on interactions
-const updateStatusBasedOnInteractions = async () => {
-  const hasInteractions = apiInteractions.value.length > 0;
-  const newStatus = hasInteractions ? 'Lead' : 'Registration';
-  
-  if (leadStatus.value !== newStatus) {
-    leadStatus.value = newStatus;
-    
-    // Update or create Lead Mapping entry
-    await updateLeadMapping(newStatus);
   }
 };
 
@@ -590,7 +577,7 @@ const handleFileUpload = (event: Event) => {
 
 const submitNotes = async () => {
   if (!newInteraction.value.mode || !newInteraction.value.notes) {
-    alert('Please fill in all required fields');
+    console.error('Please fill in all required fields');
     return;
   }
 
@@ -625,25 +612,27 @@ const submitNotes = async () => {
       // Refresh the interactions list
       await fetchInteractions();
       
-      // If this was the first interaction, status should automatically change to 'Lead'
-      // (This will be handled by updateStatusBasedOnInteractions in fetchInteractions)
+      // If this was the first interaction, update status to 'Lead'
+      if (isFirstInteraction) {
+        leadStatus.value = 'Lead';
+        await updateLeadMapping('Lead');
+        console.log('First interaction added - status updated to Lead');
+      }
       
       // Reset form
       resetForm();
       
       if (isFirstInteraction) {
-        alert('First interaction added successfully! Status updated to Lead.');
+        console.log('First interaction added successfully! Status updated to Lead.');
       } else {
-        alert('Interaction added successfully!');
+        console.log('Interaction added successfully!');
       }
     } else {
       const error = await response.json();
       console.error('Error creating interaction:', error);
-      alert('Failed to save interaction. Please try again.');
     }
   } catch (error) {
     console.error('Error submitting interaction:', error);
-    alert('Failed to save interaction. Please try again.');
   } finally {
     isSubmittingInteraction.value = false;
   }

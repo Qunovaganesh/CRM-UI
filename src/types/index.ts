@@ -51,6 +51,7 @@ export interface TermsCondition {
   id: string;
   clause: string;
   response: string;
+  originalData?: any; // Store original term data from API
 }
 
 export interface Invoice {

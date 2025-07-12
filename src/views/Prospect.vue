@@ -70,6 +70,15 @@
                       class="modern-select"
                     >
                       <option value="">Select Response</option>
+                      <!-- Show current response if it doesn't match predefined options -->
+                      <option 
+                        v-if="term.response && !isValidResponse(term.clause, term.response)"
+                        :value="term.response"
+                        style="color: #ff6b35; font-style: italic;"
+                      >
+                        {{ term.response }} (Custom)
+                      </option>
+                      <!-- Show predefined options -->
                       <option 
                         v-for="response in getResponseOptions(term.clause)" 
                         :key="response" 
@@ -147,6 +156,10 @@
                 <span class="info-label">Signed</span>
                 <span class="info-value">{{ formatDate(agreement.signedDate) }}</span>
               </div>
+              <div class="info-item" v-if="currentLeadMapping?.signed_agreement">
+                <span class="info-label">Signed File</span>
+                <span class="info-value">✅ Uploaded</span>
+              </div>
             </div>
           </div>
 
@@ -178,9 +191,9 @@
             <button 
               class="btn-success" 
               @click="convertToCustomer"
-              v-if="agreement.status === 'Signed'"
+              v-if="canConvertToCustomer"
             >
-              ✅ Convert to Customer
+              ✅ Proceed to Customer Conversion
             </button>
           </div>
         </div>
@@ -405,6 +418,11 @@ const isManufacturerProspect = computed(() => {
 });
 const manufacturerName = computed(() => manufacturerData.value.name);
 
+// Check if signed agreement is available for customer conversion
+const canConvertToCustomer = computed(() => {
+  return agreement.value.status === 'Signed' || (currentLeadMapping.value?.signed_agreement);
+});
+
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -431,6 +449,7 @@ const addTerm = () => {
     id: `T${Date.now()}`,
     clause: '',
     response: ''
+    // No originalData for new terms
   };
   agreement.value.terms.push(newTerm);
 };
@@ -447,17 +466,109 @@ const onClauseChange = (term: TermsCondition) => {
 };
 
 const getResponseOptions = (clause: string) => {
+  console.log('Getting response options for clause:', clause);
+  console.log('Available clauseData:', clauseData.value);
+  
   const clauseItem = clauseData.value.find(item => item.clause === clause);
+  console.log('Found clause item:', clauseItem);
+  
   if (clauseItem && clauseItem.responses) {
     // Split responses by newline and filter out empty lines
-    return clauseItem.responses.split('\n').filter((response: string) => response.trim() !== '');
+    const responses = clauseItem.responses.split('\n').filter((response: string) => response.trim() !== '');
+    console.log('Extracted responses:', responses);
+    return responses;
   }
+  console.log('No responses found for clause:', clause);
   return [];
 };
 
-const toggleEditMode = () => {
+// Helper function to check if a response is valid for a clause
+const isValidResponse = (clause: string, response: string) => {
+  const validResponses = getResponseOptions(clause);
+  return validResponses.includes(response);
+};
+
+// Function to save terms and conditions to API
+const saveTermsAndConditions = async () => {
+  try {
+    if (!currentLeadMapping.value || !currentLeadMapping.value.name) {
+      console.error('No Lead Mapping found to save terms');
+      return;
+    }
+
+    // Prepare terms data in the required format
+    const termsData = agreement.value.terms.map((term, index) => {
+      // Find the clause data to get the clause ID
+      const clauseItem = clauseData.value.find(item => item.clause === term.clause);
+      
+      const termData: any = {
+        docstatus: 0,
+        doctype: "Lead Mapping TnC",
+        owner: "Administrator",
+        parent: currentLeadMapping.value.name,
+        parentfield: "terms_and_conditions",
+        parenttype: "Lead Mapping",
+        idx: index + 1,
+        clause_text: term.clause,
+        clause: clauseItem ? clauseItem.name : "",
+        response: term.response
+      };
+      
+      // If term has originalData, it's an existing term
+      if (term.originalData) {
+        termData.name = term.originalData.name;
+        termData.creation = term.originalData.creation;
+        termData.modified = term.originalData.modified;
+        termData.modified_by = term.originalData.modified_by;
+      } else {
+        // For new terms, add the __islocal and __unsaved flags
+        termData.__islocal = 1;
+        termData.__unsaved = 1;
+        termData.__unedited = false;
+      }
+      
+      return termData;
+    });
+
+    const requestData = {
+      terms_and_conditions: termsData
+    };
+
+    console.log('Saving terms to Lead Mapping:', currentLeadMapping.value.name);
+    console.log('Current agreement terms:', agreement.value.terms);
+    console.log('Prepared terms data:', termsData);
+    console.log('Request data:', requestData);
+
+    const response = await fetch(`/api/resource/Lead Mapping/${currentLeadMapping.value.name}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Terms saved successfully:', data);
+      
+      // Reload the Lead Mapping data to get updated terms
+      await fetchLeadMapping();
+      
+      // Update the agreement state
+      updateAgreement(agreement.value);
+    } else {
+      const errorData = await response.json();
+      console.error('Failed to save terms:', errorData);
+    }
+  } catch (error) {
+    console.error('Error saving terms and conditions:', error);
+  }
+};
+
+const toggleEditMode = async () => {
   if (editMode.value) {
-    updateAgreement(agreement.value);
+    // Save terms & conditions to API
+    await saveTermsAndConditions();
   }
   editMode.value = !editMode.value;
 };
@@ -480,15 +591,23 @@ const confirmGeneration = () => {
   
   updateAgreement(updatedAgreement);
   showPreviewModal.value = false;
-  alert('Agreement generated successfully!');
+  console.log('Agreement generated successfully');
 };
 
 const downloadAgreement = () => {
+  if (!currentLeadMapping.value || !currentLeadMapping.value.name) {
+    console.error('Error: No Lead Mapping found to download agreement');
+    return;
+  }
+
   const link = document.createElement('a');
-  link.href = '#';
+  link.href = `/api/method/frappe.utils.print_format.download_pdf?doctype=Lead%20Mapping&name=${currentLeadMapping.value.name}&format=Standard&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en`;
   link.download = `Agreement_${manufacturerName.value}_${distributorName.value}_v${agreement.value.version}.pdf`;
+  link.target = '_blank';
+  document.body.appendChild(link);
   link.click();
-  alert('Agreement downloaded!');
+  document.body.removeChild(link);
+  console.log('Agreement download initiated');
 };
 
 const uploadSigned = () => {
@@ -507,28 +626,80 @@ const handleFileUpload = (event: Event) => {
   }
 };
 
-const submitUpload = () => {
+const submitUpload = async () => {
   if (selectedFile.value) {
-    const updatedAgreement = {
-      ...agreement.value,
-      status: 'Signed' as const,
-      signedDate: new Date().toISOString()
-    };
-    
-    updateAgreement(updatedAgreement);
-    showUploadModal.value = false;
-    selectedFile.value = null;
-    alert('Signed agreement uploaded successfully!');
+    try {
+      if (!currentLeadMapping.value || !currentLeadMapping.value.name) {
+        console.error('Error: No Lead Mapping found to upload signed agreement');
+        return;
+      }
+
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append('file', selectedFile.value);
+      formData.append('doctype', 'Lead Mapping');
+      formData.append('docname', currentLeadMapping.value.name);
+      formData.append('fieldname', 'signed_agreement');
+      formData.append('is_private', '0');
+
+      // Upload file to Frappe
+      const uploadResponse = await fetch('/api/method/upload_file', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (uploadResponse.ok) {
+        const uploadData = await uploadResponse.json();
+        console.log('File uploaded successfully:', uploadData);
+
+        // Update the Lead Mapping with both file and status in one API call
+        const updateData = {
+          signed_agreement: uploadData.message.file_url,
+          status: 'Prospect'
+        };
+
+        const updateResponse = await fetch(`/api/resource/Lead Mapping/${currentLeadMapping.value.name}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        if (updateResponse.ok) {
+          const updatedAgreement = {
+            ...agreement.value,
+            status: 'Signed' as const,
+            signedDate: new Date().toISOString()
+          };
+          
+          updateAgreement(updatedAgreement);
+          showUploadModal.value = false;
+          selectedFile.value = null;
+          
+          // Refresh the lead mapping data
+          await fetchLeadMapping();
+          
+          console.log('Signed agreement uploaded successfully! Status updated to Prospect.');
+        } else {
+          const errorData = await updateResponse.json();
+          console.error('Failed to update Lead Mapping:', errorData);
+        }
+      } else {
+        const errorData = await uploadResponse.json();
+        console.error('Failed to upload file:', errorData);
+      }
+    } catch (error) {
+      console.error('Error uploading signed agreement:', error);
+    }
   }
 };
 
 const convertToCustomer = () => {
   // Note: This function should be updated to use proper API calls
-  // For now, we'll just show the alert and redirect
-  alert('Status updated to Customer! Redirecting...');
-  setTimeout(() => {
-    router.push({ name: 'Customer', params: { id: props.id } });
-  }, 1000);
+  // For now, we'll just redirect to the customer page
+  console.log('Redirecting to customer conversion...');
+  router.push({ name: 'Customer', params: { id: props.id } });
 };
 
 // Function to fetch clause data from API
@@ -542,6 +713,7 @@ const fetchClauseData = async () => {
       if (data && data.data && data.data.length > 0) {
         clauseData.value = data.data;
         console.log('Loaded clause data:', clauseData.value);
+        console.log('First clause example:', clauseData.value[0]);
       } else {
         console.warn('No clause data found');
         clauseData.value = [];
@@ -553,6 +725,62 @@ const fetchClauseData = async () => {
   } catch (error) {
     console.error('Error fetching clause data:', error);
     clauseData.value = [];
+  }
+};
+
+// Function to load existing terms & conditions
+const loadExistingTerms = async (existingTerms: any[]) => {
+  try {
+    console.log('Loading existing terms:', existingTerms);
+    console.log('Available clause data:', clauseData.value);
+    
+    // Clear current terms
+    agreement.value.terms = [];
+    
+    // Convert existing terms to our format and store original data
+    const loadedTerms = existingTerms.map((term, index) => {
+      // Find the matching clause from clauseData to get the correct clause text
+      let matchingClause = clauseData.value.find(clause => clause.name === term.clause);
+      let clauseText = '';
+      
+      if (matchingClause) {
+        clauseText = matchingClause.clause;
+        console.log(`Term ${index}: Found exact match by ID - clause="${clauseText}"`);
+      } else {
+        // Fallback: try to match by clause_text
+        matchingClause = clauseData.value.find(clause => clause.clause === term.clause_text);
+        if (matchingClause) {
+          clauseText = matchingClause.clause;
+          console.log(`Term ${index}: Found match by text - clause="${clauseText}"`);
+        } else {
+          // Last fallback: use clause_text as is
+          clauseText = term.clause_text || '';
+          console.log(`Term ${index}: No match found, using clause_text="${clauseText}"`);
+        }
+      }
+      
+      console.log(`Term ${index}: API clause_text="${term.clause_text}", API clause="${term.clause}", final clause="${clauseText}"`);
+      console.log(`Term ${index}: Response="${term.response}"`);
+      
+      return {
+        id: term.name || `T${Date.now()}-${index}`, // Use original name as ID
+        clause: clauseText, // Use the clause text that matches dropdown options
+        response: term.response || '',
+        originalData: term // Store original term data for updates
+      };
+    });
+    
+    // Update agreement with loaded terms
+    agreement.value.terms = loadedTerms;
+    
+    console.log('Final loaded terms into agreement:', loadedTerms);
+    console.log('All clause options available:', clauseData.value.map(c => c.clause));
+    
+    // Update the agreement state
+    updateAgreement(agreement.value);
+    
+  } catch (error) {
+    console.error('Error loading existing terms:', error);
   }
 };
 
@@ -570,17 +798,37 @@ const fetchLeadMapping = async () => {
     }
     
     if (Object.keys(filters).length > 0) {
-      const url = `/api/resource/Lead Mapping?fields=["name","parent_lead","mapped_lead","status","last_status_change"]&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+      // First get the Lead Mapping to find the ID
+      const filterUrl = `/api/resource/Lead Mapping?fields=["name"]&filters=${encodeURIComponent(JSON.stringify(filters))}`;
       
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Lead Mapping API response:', data);
+      const filterResponse = await fetch(filterUrl);
+      if (filterResponse.ok) {
+        const filterData = await filterResponse.json();
+        console.log('Lead Mapping filter response:', filterData);
         
-        if (data && data.data && data.data.length > 0) {
-          currentLeadMapping.value = data.data[0];
-          prospectStatus.value = currentLeadMapping.value.status || 'Prospect';
-          console.log('Current Lead Mapping:', currentLeadMapping.value);
+        if (filterData && filterData.data && filterData.data.length > 0) {
+          const leadMappingId = filterData.data[0].name;
+          console.log('Found Lead Mapping ID:', leadMappingId);
+          
+          // Now fetch the complete Lead Mapping with all fields
+          const detailUrl = `/api/resource/Lead Mapping/${leadMappingId}`;
+          const detailResponse = await fetch(detailUrl);
+          
+          if (detailResponse.ok) {
+            const detailData = await detailResponse.json();
+            console.log('Lead Mapping detail response:', detailData);
+            
+            if (detailData && detailData.data) {
+              currentLeadMapping.value = detailData.data;
+              prospectStatus.value = currentLeadMapping.value.status || 'Prospect';
+              console.log('Current Lead Mapping:', currentLeadMapping.value);
+              
+              // Load existing terms & conditions if available
+              if (currentLeadMapping.value.terms_and_conditions && currentLeadMapping.value.terms_and_conditions.length > 0) {
+                await loadExistingTerms(currentLeadMapping.value.terms_and_conditions);
+              }
+            }
+          }
         } else {
           // No mapping found, keep default status
           prospectStatus.value = 'Prospect';
@@ -609,8 +857,9 @@ onMounted(async () => {
   console.log('Loading prospect data for ID:', props.id, 'ParentID:', props.parentId);
   
   try {
-    // Fetch clause data first
+    // Fetch clause data first - this is crucial for term mapping
     await fetchClauseData();
+    console.log('Clause data loaded, now fetching entities...');
     
     // Fetch the associated entity (clicked from table)
     const associatedResponse = await fetch(`/api/resource/Lead/${props.id}?fields=["name","custom_lead_category","company_name","custom_new_status","custom_states","custom_districts","custom_categories","custom_cities","creation"]`);
@@ -638,7 +887,8 @@ onMounted(async () => {
     console.log('Distributor Data:', distributorData.value);
     console.log('Is Manufacturer Prospect:', isManufacturerProspect.value);
     
-    // Fetch current Lead Mapping to get the current status
+    // Fetch current Lead Mapping to get the current status - this will trigger loadExistingTerms
+    console.log('Now fetching Lead Mapping...');
     await fetchLeadMapping();
     
   } catch (error) {
