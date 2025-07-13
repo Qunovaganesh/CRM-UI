@@ -699,7 +699,14 @@ const convertToCustomer = () => {
   // Note: This function should be updated to use proper API calls
   // For now, we'll just redirect to the customer page
   console.log('Redirecting to customer conversion...');
-  router.push({ name: 'Customer', params: { id: props.id } });
+  
+  // Navigate to Customer page with both id and parentId (if available)
+  const params: any = { id: props.id };
+  if (props.parentId) {
+    params.parentId = props.parentId;
+  }
+  
+  router.push({ name: 'Customer', params });
 };
 
 // Function to fetch clause data from API

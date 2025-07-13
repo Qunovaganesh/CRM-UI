@@ -42,7 +42,7 @@ const routes = [
     }
   },
   {
-    path: '/customer/:id',
+    path: '/customer/:id/:parentId?',
     name: 'Customer',
     component: Customer,
     props: true,
