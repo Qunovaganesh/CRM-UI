@@ -258,47 +258,145 @@
           <div v-if="activeTab === 'invoices'" class="tab-panel">
             <div class="panel-header">
               <h3>Invoices and Payments</h3>
-              <div class="invoice-filters">
-                <select v-model="invoiceFilter" @change="filterInvoices" class="modern-select">
-                  <option value="all">All Invoices</option>
-                  <option value="7days">Last 7 Days</option>
-                  <option value="month">This Month</option>
-                  <option value="lastmonth">Last Month</option>
-                  <option value="quarter">This Quarter</option>
-                </select>
+              <div class="panel-stats">
+                <span class="stat-badge">{{ filteredTaxInvoices.length }} invoices</span>
+                <span class="stat-badge">{{ paymentHistory.length }} payments</span>
               </div>
             </div>
-            
-            <div class="table-container">
-              <div class="table-wrapper">
-                <table class="modern-table">
-                  <thead>
-                    <tr>
-                      <th>Type</th>
-                      <th>Invoice No</th>
-                      <th>Amount</th>
-                      <th>Commission</th>
-                      <th>Upload Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="invoice in filteredInvoices" :key="invoice.id" class="table-row">
-                      <td>
-                        <span :class="getInvoiceTypeClass(invoice.type)" class="type-badge">
-                          {{ invoice.type }}
-                        </span>
-                      </td>
-                      <td class="invoice-number">{{ invoice.invoiceNo }}</td>
-                      <td class="amount">₹{{ invoice.amount.toLocaleString() }}</td>
-                      <td class="commission">₹{{ invoice.commissionAmount.toLocaleString() }}</td>
-                      <td class="date">{{ formatDate(invoice.uploadDate) }}</td>
-                      <td>
-                        <span class="status-completed">Completed</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+
+            <!-- Tab Navigation for Invoices and Payments -->
+            <div class="invoice-payment-tabs">
+              <button 
+                class="invoice-tab-button"
+                :class="{ active: invoiceActiveTab === 'invoices' }"
+                @click="invoiceActiveTab = 'invoices'"
+              >
+                📄 Invoices ({{ filteredTaxInvoices.length }})
+              </button>
+              <button 
+                class="invoice-tab-button"
+                :class="{ active: invoiceActiveTab === 'payments' }"
+                @click="invoiceActiveTab = 'payments'"
+              >
+                💳 Payments ({{ paymentHistory.length }})
+              </button>
+            </div>
+
+            <!-- Invoices Tab Content -->
+            <div v-if="invoiceActiveTab === 'invoices'" class="invoice-tab-content">
+              <div class="invoices-summary">
+                <div class="summary-grid-invoices">
+                  <div class="summary-item-invoice">
+                    <span class="summary-label">Total Invoices</span>
+                    <span class="summary-value">{{ filteredTaxInvoices.length }}</span>
+                  </div>
+                  <div class="summary-item-invoice">
+                    <span class="summary-label">Total Invoice Amount</span>
+                    <span class="summary-value">₹{{ totalInvoiceAmount.toLocaleString() }}</span>
+                  </div>
+                  <div class="summary-item-invoice">
+                    <span class="summary-label">Average Invoice Value</span>
+                    <span class="summary-value">₹{{ filteredTaxInvoices.length > 0 ? Math.round(totalInvoiceAmount / filteredTaxInvoices.length).toLocaleString() : '0' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <div class="table-wrapper">
+                  <table class="modern-table">
+                    <thead>
+                      <tr>
+                        <th>Invoice Number</th>
+                        <th>Amount</th>
+                        <th>Commission %</th>
+                        <th>Commission Amount</th>
+                        <th>Date</th>
+                        <th>Attachment</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-if="isLoadingInvoices">
+                        <td colspan="6" class="loading-cell">Loading invoices...</td>
+                      </tr>
+                      <tr v-else-if="filteredTaxInvoices.length === 0">
+                        <td colspan="6" class="no-data-cell">No invoices found</td>
+                      </tr>
+                      <tr v-else v-for="invoice in filteredTaxInvoices" :key="invoice.name" class="table-row">
+                        <td>{{ invoice.invoice_number || 'N/A' }}</td>
+                        <td class="amount">₹{{ (invoice.amount || 0).toLocaleString() }}</td>
+                        <td>{{ invoice.commission_percent || 0 }}%</td>
+                        <td class="commission">₹{{ (invoice.commission_amount || 0).toLocaleString() }}</td>
+                        <td class="date">{{ formatDate(invoice.creation) }}</td>
+                        <td>
+                          <a v-if="invoice.attachment" :href="invoice.attachment" target="_blank" class="attachment-link">
+                            📎 View
+                          </a>
+                          <span v-else class="no-attachment">No attachment</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payments Tab Content -->
+            <div v-if="invoiceActiveTab === 'payments'" class="invoice-tab-content">
+              <div class="payments-summary">
+                <div class="summary-grid-invoices">
+                  <div class="summary-item-invoice">
+                    <span class="summary-label">Total Payments</span>
+                    <span class="summary-value">{{ paymentHistory.length }}</span>
+                  </div>
+                  <div class="summary-item-invoice">
+                    <span class="summary-label">Total Payment Amount</span>
+                    <span class="summary-value">₹{{ totalPaymentAmount.toLocaleString() }}</span>
+                  </div>
+                  <div class="summary-item-invoice">
+                    <span class="summary-label">Average Payment Value</span>
+                    <span class="summary-value">₹{{ paymentHistory.length > 0 ? Math.round(totalPaymentAmount / paymentHistory.length).toLocaleString() : '0' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <div class="table-wrapper">
+                  <table class="modern-table">
+                    <thead>
+                      <tr>
+                        <th>Reference Number</th>
+                        <th>Amount</th>
+                        <th>Commission %</th>
+                        <th>Commission Amount</th>
+                        <th>Payment Method</th>
+                        <th>Payment Date</th>
+                        <th>Attachment</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-if="isLoadingPayments">
+                        <td colspan="7" class="loading-cell">Loading payments...</td>
+                      </tr>
+                      <tr v-else-if="paymentHistory.length === 0">
+                        <td colspan="7" class="no-data-cell">No payments found</td>
+                      </tr>
+                      <tr v-else v-for="payment in paymentHistory" :key="payment.name" class="table-row">
+                        <td>{{ payment.payment_reference_number || 'N/A' }}</td>
+                        <td class="amount">₹{{ (payment.amount || 0).toLocaleString() }}</td>
+                        <td>{{ payment.commission_percent || 0 }}%</td>
+                        <td class="commission">₹{{ (payment.commission_amount || 0).toLocaleString() }}</td>
+                        <td>{{ payment.payment_method || 'N/A' }}</td>
+                        <td class="date">{{ formatDate(payment.payment_date) }}</td>
+                        <td>
+                          <a v-if="payment.attachment" :href="payment.attachment" target="_blank" class="attachment-link">
+                            📎 View
+                          </a>
+                          <span v-else class="no-attachment">No attachment</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -324,21 +422,28 @@
                 <div class="summary-icon">📄</div>
                 <div class="summary-content">
                   <h4>Total Invoices</h4>
-                  <p class="summary-value">{{ invoices.length }}</p>
+                  <p class="summary-value">{{ filteredTaxInvoices.length }}</p>
                 </div>
               </div>
               <div class="summary-card">
-                <div class="summary-icon">💰</div>
+                <div class="summary-icon">�</div>
+                <div class="summary-content">
+                  <h4>Total Payments</h4>
+                  <p class="summary-value">{{ paymentHistory.length }}</p>
+                </div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-icon">�💰</div>
                 <div class="summary-content">
                   <h4>Total Business Value</h4>
-                  <p class="summary-value">₹{{ totalAmount.toLocaleString() }}</p>
+                  <p class="summary-value">₹{{ totalInvoiceAmount.toLocaleString() }}</p>
                 </div>
               </div>
               <div class="summary-card">
                 <div class="summary-icon">💸</div>
                 <div class="summary-content">
                   <h4>Total Commission</h4>
-                  <p class="summary-value">₹{{ totalCommission.toLocaleString() }}</p>
+                  <p class="summary-value">₹{{ totalDynamicCommission.toLocaleString() }}</p>
                 </div>
               </div>
               <div class="summary-card">
@@ -373,7 +478,7 @@ const props = defineProps<{
 }>();
 
 const activeTab = ref('interactions');
-const invoiceFilter = ref('all');
+const invoiceActiveTab = ref('invoices'); // New tab state for invoices/payments
 
 // Real API data state
 const apiInteractions = ref<any[]>([]);
@@ -382,6 +487,15 @@ const apiAgreements = ref<any[]>([]);
 const apiInvoices = ref<any[]>([]);
 const isLoadingAgreements = ref(false);
 const isLoadingInvoices = ref(false);
+const isLoadingPayments = ref(false);
+
+// Invoices and Payments data from Lead Mapping API
+const taxInvoiceHistory = ref<any[]>([]);
+const paymentHistory = ref<any[]>([]);
+
+// Terms & Conditions data from API
+const currentLeadMapping = ref<any>(null); // Current lead mapping record
+const isLoadingLeadMapping = ref(false);
 
 // Computed property for Partnership ID
 const partnershipId = computed(() => {
@@ -482,7 +596,7 @@ const fetchInteractions = async () => {
   }
 };
 
-// API function to fetch agreements with real backend structure
+// API function to fetch agreements with dynamic Terms & Conditions
 const fetchAgreements = async () => {
   if (isLoadingAgreements.value) return;
   
@@ -491,8 +605,25 @@ const fetchAgreements = async () => {
   try {
     console.log('Fetching agreements...');
     
-    // Try to fetch from real API first - you need to tell me the exact doctype name
-    // For now using sample data that matches your backend structure
+    // Ensure we have Lead Mapping data
+    if (!currentLeadMapping.value) {
+      await fetchLeadMapping();
+    }
+    
+    // Generate dynamic terms from Lead Mapping terms_and_conditions
+    let dynamicTerms = [];
+    
+    if (currentLeadMapping.value && currentLeadMapping.value.terms_and_conditions && currentLeadMapping.value.terms_and_conditions.length > 0) {
+      // Use terms from Lead Mapping
+      dynamicTerms = currentLeadMapping.value.terms_and_conditions.map((term: any, index: number) => ({
+        no: index + 1,
+        clause: term.clause_text || term.clause || 'Unknown Clause', // Use clause_text for display
+        clauseText: term.clause_text || term.clause || 'Unknown Clause', // Use clause_text for display
+        response: term.response || 'No Response'
+      }));
+    }
+    
+    // Create agreement with dynamic T&C or fallback to sample
     const sampleAgreement = {
       id: '1',
       status: 'Draft',
@@ -500,7 +631,7 @@ const fetchAgreements = async () => {
       createdDate: new Date().toISOString(),
       signedDate: null,
       parties: `${manufacturerName.value} ↔ ${distributorName.value}`,
-      terms: [
+      terms: dynamicTerms.length > 0 ? dynamicTerms : [
         {
           no: 1,
           clause: 'Payment Terms',
@@ -523,7 +654,7 @@ const fetchAgreements = async () => {
     };
     
     apiAgreements.value = [sampleAgreement];
-    console.log('Agreements fetched:', apiAgreements.value);
+    console.log('Agreements fetched with dynamic T&C:', apiAgreements.value);
   } catch (error) {
     console.error('Error fetching agreements:', error);
   } finally {
@@ -577,7 +708,145 @@ const fetchInvoices = async () => {
   }
 };
 
-// Computed properties
+// Fetch Tax Invoice History from Lead Mapping
+const fetchTaxInvoiceHistory = async () => {
+  try {
+    console.log('Fetching tax invoice history from Lead Mapping...');
+    
+    if (!currentLeadMapping.value?.name) {
+      console.log('No Lead Mapping found, skipping tax invoice history fetch');
+      taxInvoiceHistory.value = [];
+      return;
+    }
+
+    // Get tax invoices from Lead Mapping record
+    const leadMappingId = currentLeadMapping.value.name;
+    const detailUrl = `/api/resource/Lead Mapping/${encodeURIComponent(leadMappingId)}`;
+    const detailParams = new URLSearchParams({
+      fields: JSON.stringify(["tax_invoices"])
+    });
+    
+    const response = await fetch(`${detailUrl}?${detailParams}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Lead Mapping tax invoice response:', data);
+      
+      // Extract tax_invoices from Lead Mapping
+      const taxInvoices = data.data?.tax_invoices || [];
+      taxInvoiceHistory.value = taxInvoices;
+      console.log('Tax invoices from Lead Mapping:', taxInvoices);
+    } else {
+      console.error('Failed to fetch tax invoices:', response.status, response.statusText);
+      taxInvoiceHistory.value = [];
+    }
+  } catch (error) {
+    console.error('Error fetching tax invoice history:', error);
+    taxInvoiceHistory.value = [];
+  }
+};
+
+// Fetch Payment History from Lead Mapping
+const fetchPaymentHistory = async () => {
+  try {
+    console.log('Fetching payment history from Lead Mapping...');
+    
+    if (!currentLeadMapping.value?.name) {
+      console.log('No Lead Mapping found, skipping payment history fetch');
+      paymentHistory.value = [];
+      return;
+    }
+
+    // Get payments from Lead Mapping record
+    const leadMappingId = currentLeadMapping.value.name;
+    const detailUrl = `/api/resource/Lead Mapping/${encodeURIComponent(leadMappingId)}`;
+    const detailParams = new URLSearchParams({
+      fields: JSON.stringify(["payments"])
+    });
+    
+    const response = await fetch(`${detailUrl}?${detailParams}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Lead Mapping payment response:', data);
+      
+      // Extract payments from Lead Mapping
+      const payments = data.data?.payments || [];
+      paymentHistory.value = payments;
+      console.log('Payments from Lead Mapping:', payments);
+    } else {
+      console.error('Failed to fetch payments:', response.status, response.statusText);
+      paymentHistory.value = [];
+    }
+  } catch (error) {
+    console.error('Error fetching payment history:', error);
+    paymentHistory.value = [];
+  }
+};
+
+// Function to fetch current Lead Mapping
+const fetchLeadMapping = async () => {
+  try {
+    isLoadingLeadMapping.value = true
+    
+    const filters: any = {};
+    
+    if (props.parentId) {
+      filters.mapped_lead = props.parentId;
+    }
+    
+    if (props.id) {
+      filters.parent_lead = props.id;
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      // First get the Lead Mapping to find the ID
+      const filterUrl = `/api/resource/Lead Mapping?fields=["name"]&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+      
+      const filterResponse = await fetch(filterUrl);
+      if (filterResponse.ok) {
+        const filterData = await filterResponse.json();
+        console.log('Lead Mapping filter response:', filterData);
+        
+        if (filterData && filterData.data && filterData.data.length > 0) {
+          const leadMappingId = filterData.data[0].name;
+          console.log('Found Lead Mapping ID:', leadMappingId);
+          
+          // Now fetch the complete Lead Mapping with all fields
+          const detailUrl = `/api/resource/Lead Mapping/${leadMappingId}`;
+          const detailResponse = await fetch(detailUrl);
+          
+          if (detailResponse.ok) {
+            const detailData = await detailResponse.json();
+            console.log('Lead Mapping detail response:', detailData);
+            
+            if (detailData && detailData.data) {
+              currentLeadMapping.value = detailData.data;
+              console.log('Current Lead Mapping:', currentLeadMapping.value);
+              
+              // Update prospect status from lead mapping
+              if (currentLeadMapping.value.status) {
+                // Here you can update any status display if needed
+                console.log('Lead Mapping status:', currentLeadMapping.value.status);
+              }
+
+              // Fetch invoices and payments after getting lead mapping
+              await fetchTaxInvoiceHistory();
+              await fetchPaymentHistory();
+            }
+          }
+        } else {
+          console.log('No Lead Mapping found for the relationship');
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching lead mapping:', error);
+  } finally {
+    isLoadingLeadMapping.value = false
+  }
+};
+
 const manufacturerData = computed(() => {
   if (!currentLead.value || !associatedLead.value) {
     return {
@@ -691,14 +960,6 @@ const getAgreementStatusClass = (status: string) => {
   return `status-${status.toLowerCase().replace(' ', '-')}`
 }
 
-const getInvoiceTypeClass = (type: string) => {
-  return `type-${type.toLowerCase().replace(' ', '-')}`
-}
-
-const filterInvoices = () => {
-  // This will trigger the computed property to recalculate
-}
-
 // Load data and find associated lead
 const loadData = async () => {
   isLoading.value = true
@@ -733,6 +994,9 @@ const loadData = async () => {
     // Fetch agreements and invoices (sample data or real API)
     await fetchAgreements()
     await fetchInvoices()
+
+    // Fetch Lead Mapping data for this relationship
+    await fetchLeadMapping()
   } catch (error) {
     console.error('Error loading data:', error)
   } finally {
@@ -762,55 +1026,24 @@ const agreement = computed(() => {
   return result;
 });
 
-const invoices = computed(() => {
-  return apiInvoices.value;
+// Computed Properties for Invoices and Payments Tab (using Lead Mapping API)
+const filteredTaxInvoices = computed(() => {
+  return taxInvoiceHistory.value;
 });
 
-const filteredInvoices = computed(() => {
-  let filtered = invoices.value;
-  
-  const now = new Date();
-  const today = new Date(now.setHours(0, 0, 0, 0));
-  
-  switch (invoiceFilter.value) {
-    case '7days':
-      const weekAgo = new Date(today);
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      filtered = invoices.value.filter((invoice: any) => 
-        new Date(invoice.uploadDate) >= weekAgo
-      );
-      break;
-    case 'month':
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-      filtered = invoices.value.filter((invoice: any) => 
-        new Date(invoice.uploadDate) >= monthStart
-      );
-      break;
-    case 'lastmonth':
-      const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-      filtered = invoices.value.filter((invoice: any) => {
-        const invoiceDate = new Date(invoice.uploadDate);
-        return invoiceDate >= lastMonthStart && invoiceDate <= lastMonthEnd;
-      });
-      break;
-    case 'quarter':
-      const quarterStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
-      filtered = invoices.value.filter((invoice: any) => 
-        new Date(invoice.uploadDate) >= quarterStart
-      );
-      break;
-  }
-  
-  return filtered;
+const totalInvoiceAmount = computed(() => {
+  return filteredTaxInvoices.value.reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
 });
 
-const totalAmount = computed(() => {
-  return invoices.value.reduce((sum: number, invoice: any) => sum + invoice.amount, 0);
+const totalPaymentAmount = computed(() => {
+  return paymentHistory.value.reduce((sum, payment) => sum + (payment.amount || 0), 0);
 });
 
-const totalCommission = computed(() => {
-  return invoices.value.reduce((sum: number, invoice: any) => sum + invoice.commissionAmount, 0);
+// New computed property for dynamic total commission from Lead Mapping data
+const totalDynamicCommission = computed(() => {
+  const invoiceCommission = filteredTaxInvoices.value.reduce((sum, invoice) => sum + (invoice.commission_amount || 0), 0);
+  const paymentCommission = paymentHistory.value.reduce((sum, payment) => sum + (payment.commission_amount || 0), 0);
+  return invoiceCommission + paymentCommission;
 });
 
 // Lifecycle hook
@@ -1752,5 +1985,96 @@ onMounted(() => {
   .summary-icon {
     font-size: 24px;
   }
+}
+
+/* Invoice and Payment Tab Styles */
+.invoice-payment-tabs {
+  display: flex;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.invoice-tab-button {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #86868b;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.invoice-tab-button:hover {
+  color: #1d1d1f;
+  background: #f5f5f7;
+}
+
+.invoice-tab-button.active {
+  color: #1d1d1f;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.invoice-tab-content {
+  margin-top: 20px;
+}
+
+.invoices-summary, .payments-summary {
+  margin-bottom: 24px;
+}
+
+.summary-grid-invoices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-item-invoice {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.summary-item-invoice .summary-label {
+  display: block;
+  font-size: 14px;
+  color: #86868b;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.summary-item-invoice .summary-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.attachment-link {
+  color: #007aff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.attachment-link:hover {
+  color: #0056b3;
+}
+
+.no-attachment {
+  color: #86868b;
+  font-style: italic;
 }
 </style>
