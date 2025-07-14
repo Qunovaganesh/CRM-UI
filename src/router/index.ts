@@ -51,7 +51,7 @@ const routes = [
     }
   },
   {
-    path: '/view/:id',
+    path: '/view/:id/:parentId',
     name: 'ViewOnly',
     component: ViewOnly,
     props: true,

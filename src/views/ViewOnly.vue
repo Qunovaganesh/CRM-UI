@@ -1,29 +1,36 @@
 <template>
   <div class="view-only-page">
-    <!-- Floating Header -->
-    <div class="floating-header">
-      <div class="relationship-header">
-        <h1>Relationship Web View</h1>
-        <div class="relationship-info">
-          <span :class="isManufacturerView ? 'manufacturer selected-entity' : 'manufacturer'">
-            {{ manufacturerName }}
-          </span>
-          <span class="connector">↔</span>
-          <span :class="!isManufacturerView ? 'distributor selected-entity' : 'distributor'">
-            {{ distributorName }}
-          </span>
-          <span class="status-badge status-view">Registered</span>
-        </div>
-      </div>
-      <p>Complete view of manufacturer-distributor relationship and business history</p>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading relationship data...</p>
     </div>
 
-    <!-- Floating Back Button -->
-    <div class="floating-back-button">
-      <button class="btn-floating-back" @click="$router.go(-1)">
-        ← Back
-      </button>
-    </div>
+    <!-- Main Content -->
+    <div v-else>
+      <!-- Floating Header -->
+      <div class="floating-header">
+        <div class="relationship-header">
+          <h1>Relationship Web View</h1>
+          <div class="relationship-info">
+            <span :class="isManufacturerView ? 'manufacturer selected-entity' : 'manufacturer'">
+              {{ manufacturerName }}
+            </span>
+            <span class="connector">↔</span>
+            <span :class="!isManufacturerView ? 'distributor selected-entity' : 'distributor'">
+              {{ distributorName }}
+            </span>
+            <span class="status-badge status-view">{{ currentMappingStatus }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Back Button -->
+      <div class="floating-back-button">
+        <button class="btn-floating-back" @click="$router.go(-1)">
+          ← Back
+        </button>
+      </div>
 
     <div class="content-wrapper">
       <!-- Relationship Web Visualization -->
@@ -65,46 +72,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Related Entities -->
-          <div class="related-entities">
-            <div class="related-section">
-              <h3>Other Distributors in Network</h3>
-              <div class="related-grid">
-                <div 
-                  v-for="distributor in relatedDistributors" 
-                  :key="distributor.id"
-                  class="related-entity"
-                  :class="getStatusClass(distributor.status)"
-                >
-                  <div class="related-avatar">{{ distributor.name.charAt(0) }}</div>
-                  <div class="related-content">
-                    <h5>{{ distributor.name }}</h5>
-                    <p>{{ distributor.city }}</p>
-                    <span class="status-mini">{{ distributor.status }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="related-section">
-              <h3>Other Manufacturers in Network</h3>
-              <div class="related-grid">
-                <div 
-                  v-for="manufacturer in relatedManufacturers" 
-                  :key="manufacturer.id"
-                  class="related-entity manufacturer-related"
-                >
-                  <div class="related-avatar">{{ manufacturer.name.charAt(0) }}</div>
-                  <div class="related-content">
-                    <h5>{{ manufacturer.name }}</h5>
-                    <p>{{ manufacturer.city }}</p>
-                    <span class="status-mini">Active</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -119,7 +86,7 @@
             <div class="info-icon">🆔</div>
             <div class="info-content">
               <label>Partnership ID</label>
-              <span>{{ customerId }}</span>
+              <span>{{ partnershipId }}</span>
             </div>
           </div>
           <div class="info-card">
@@ -140,7 +107,7 @@
             <div class="info-icon">✅</div>
             <div class="info-content">
               <label>Status</label>
-              <span class="status-registered">Registered Partnership</span>
+              <span class="status-registered">{{ mappingStatus }}</span>
             </div>
           </div>
           <div class="info-card">
@@ -154,7 +121,7 @@
             <div class="info-icon">📅</div>
             <div class="info-content">
               <label>Partnership Date</label>
-              <span>{{ formatDate(distributorData.registrationDate) }}</span>
+              <span>{{ formatDate(currentLead?.creation || '') }}</span>
             </div>
           </div>
           <div class="info-card">
@@ -186,7 +153,7 @@
             <div class="panel-header">
               <h3>Interaction History</h3>
               <div class="panel-stats">
-                <span class="stat-badge">{{ interactions.length }} interactions</span>
+                <span class="stat-badge">{{ apiInteractions.length }} interactions</span>
               </div>
             </div>
             
@@ -199,30 +166,36 @@
                       <th>Interacted By</th>
                       <th>Mode</th>
                       <th>Notes</th>
-                      <th>Time Elapsed</th>
+                      <th>Reminder</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="interaction in interactions" :key="interaction.id" class="table-row">
+                    <tr v-if="isLoadingInteractions">
+                      <td colspan="5" class="loading-cell">Loading interactions...</td>
+                    </tr>
+                    <tr v-else-if="apiInteractions.length === 0">
+                      <td colspan="5" class="no-data-cell">No interactions found</td>
+                    </tr>
+                    <tr v-else v-for="interaction in apiInteractions" :key="interaction.name" class="table-row">
                       <td>
-                        <span class="date-cell">{{ formatDate(interaction.dateInteracted) }}</span>
+                        <span class="date-cell">{{ formatDate(interaction.creation) }}</span>
                       </td>
                       <td>
                         <div class="user-cell">
-                          <div class="user-avatar">{{ interaction.interactedBy.charAt(0) }}</div>
-                          <span class="user-name">{{ interaction.interactedBy }}</span>
+                          <div class="user-avatar">{{ interaction.owner.charAt(0).toUpperCase() }}</div>
+                          <span class="user-name">{{ interaction.owner }}</span>
                         </div>
                       </td>
                       <td>
-                        <span :class="getModeClass(interaction.mode)" class="mode-badge">
-                          {{ interaction.mode }}
+                        <span :class="getModeClass(interaction.interaction_mode)" class="mode-badge">
+                          {{ interaction.interaction_mode }}
                         </span>
                       </td>
                       <td>
-                        <div class="notes-preview">{{ interaction.notes }}</div>
+                        <div class="notes-preview">{{ interaction.interaction_notes || 'No notes' }}</div>
                       </td>
                       <td>
-                        <span class="time-elapsed">{{ interaction.timeElapsed }}</span>
+                        <span class="reminder-cell">{{ interaction.reminder_date ? formatDate(interaction.reminder_date) : 'None' }}</span>
                       </td>
                     </tr>
                   </tbody>
@@ -271,10 +244,10 @@
               
               <div class="terms-section">
                 <h5>Terms & Conditions</h5>
-                <div class="terms-grid">
-                  <div v-for="term in agreement.terms" :key="term.id" class="term-card">
-                    <div class="term-clause">{{ term.clause }}</div>
-                    <div class="term-response">{{ term.response }}</div>
+                <div class="terms-list">
+                  <div v-for="term in agreement.terms" :key="term.no" class="term-item">
+                    <div class="term-title">{{ term.clause }}</div>
+                    <div class="term-description">{{ term.response }}</div>
                   </div>
                 </div>
               </div>
@@ -284,7 +257,7 @@
           <!-- Invoice History -->
           <div v-if="activeTab === 'invoices'" class="tab-panel">
             <div class="panel-header">
-              <h3>Invoice History</h3>
+              <h3>Invoices and Payments</h3>
               <div class="invoice-filters">
                 <select v-model="invoiceFilter" @change="filterInvoices" class="modern-select">
                   <option value="all">All Invoices</option>
@@ -344,7 +317,7 @@
                 <div class="summary-icon">💬</div>
                 <div class="summary-content">
                   <h4>Total Interactions</h4>
-                  <p class="summary-value">{{ interactions.length }}</p>
+                  <p class="summary-value">{{ apiInteractions.length }}</p>
                 </div>
               </div>
               <div class="summary-card">
@@ -387,77 +360,411 @@
         </div>
       </div>
     </div>
-  </div>
+    </div> <!-- End of main content -->
+  </div> <!-- End of view-only-page -->
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useBusinessLogic } from '../composables/useBusinessLogic';
-import { mockDistributors, mockManufacturers } from '../data/mockData';
 
 const props = defineProps<{
   id: string;
+  parentId: string;
 }>();
-
-const { interactions, agreement, invoices } = useBusinessLogic();
 
 const activeTab = ref('interactions');
 const invoiceFilter = ref('all');
-const customerId = ref(props.id);
 
-const manufacturerData = computed(() => {
-  const distributor = mockDistributors.find(d => d.id === props.id);
-  if (distributor) {
-    return mockManufacturers.find(m => m.category === distributor.category) || mockManufacturers[0];
-  } else {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      return manufacturer;
+// Real API data state
+const apiInteractions = ref<any[]>([]);
+const isLoadingInteractions = ref(false);
+const apiAgreements = ref<any[]>([]);
+const apiInvoices = ref<any[]>([]);
+const isLoadingAgreements = ref(false);
+const isLoadingInvoices = ref(false);
+
+// Computed property for Partnership ID
+const partnershipId = computed(() => {
+  return leadMappings.value.length > 0 ? leadMappings.value[0].name : 'No Mapping Found';
+});
+
+// Computed property for Mapping Status
+const mappingStatus = computed(() => {
+  return leadMappings.value.length > 0 ? leadMappings.value[0].status : 'Not Mapped';
+});
+
+// API data state
+const currentLead = ref<any>(null);
+const associatedLead = ref<any>(null);
+const leadMappings = ref<any[]>([]);
+
+// Local state
+const isLoading = ref(true);
+
+// API functions
+const fetchLeadData = async (leadId: string) => {
+  try {
+    const url = `/api/resource/Lead/${leadId}?fields=["name","company_name","custom_lead_category","custom_new_status","custom_states","custom_districts","custom_categories","creation","modified"]`
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    console.log('Lead data API response:', data)
+    
+    if (data && data.data) {
+      return data.data
     }
-    return mockManufacturers[0];
+    return null
+  } catch (error) {
+    console.error('Error fetching lead data:', error)
+    return null
+  }
+}
+
+const fetchLeadMappingsByRelationship = async (parentId: string, childId: string) => {
+  try {
+    // Fetch specific mapping between parent and child
+    const url = `/api/resource/Lead Mapping?filters={"parent_lead":"${parentId}","mapped_lead":"${childId}"}&fields=["name","status","mapped_lead","parent_lead"]`
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    console.log('Lead Mapping relationship API response:', data)
+    
+    return data?.data || []
+  } catch (error) {
+    console.error('Error fetching lead mapping relationship:', error)
+    return []
+  }
+}
+
+// API function to fetch interactions
+const fetchInteractions = async () => {
+  if (isLoadingInteractions.value) return;
+  
+  isLoadingInteractions.value = true;
+  
+  try {
+    // Build the API URL with filters
+    let url = '/api/resource/Lead Interaction?fields=["name","interaction_mode","interaction_notes","reminder_date","parent_lead","mapped_lead","creation","owner"]';
+    
+    // Add filters based on current lead IDs
+    const filters: any = {};
+    
+    if (props.id) {
+      filters.parent_lead = props.id;
+    }
+    
+    if (props.parentId) {
+      filters.mapped_lead = props.parentId;
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+    }
+    
+    console.log('Fetching interactions with URL:', url);
+    
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Interactions API response:', data);
+      
+      if (data && data.data) {
+        apiInteractions.value = data.data;
+      }
+    } else {
+      console.error('Error fetching interactions:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching interactions:', error);
+  } finally {
+    isLoadingInteractions.value = false;
+  }
+};
+
+// API function to fetch agreements with real backend structure
+const fetchAgreements = async () => {
+  if (isLoadingAgreements.value) return;
+  
+  isLoadingAgreements.value = true;
+  
+  try {
+    console.log('Fetching agreements...');
+    
+    // Try to fetch from real API first - you need to tell me the exact doctype name
+    // For now using sample data that matches your backend structure
+    const sampleAgreement = {
+      id: '1',
+      status: 'Draft',
+      version: '1.0',
+      createdDate: new Date().toISOString(),
+      signedDate: null,
+      parties: `${manufacturerName.value} ↔ ${distributorName.value}`,
+      terms: [
+        {
+          no: 1,
+          clause: 'Payment Terms',
+          clauseText: 'Net 30 days from invoice date',
+          response: 'Net 30 days from invoice date'
+        },
+        {
+          no: 2,
+          clause: 'Territory Rights', 
+          clauseText: 'Exclusive distribution rights in specified regions',
+          response: 'Exclusive distribution rights in specified regions'
+        },
+        {
+          no: 3,
+          clause: 'Commission Structure',
+          clauseText: '5% commission on net sales',
+          response: '5% commission on net sales'
+        }
+      ]
+    };
+    
+    apiAgreements.value = [sampleAgreement];
+    console.log('Agreements fetched:', apiAgreements.value);
+  } catch (error) {
+    console.error('Error fetching agreements:', error);
+  } finally {
+    isLoadingAgreements.value = false;
+  }
+};
+
+// API function to fetch invoices (using sample data since API might not exist)
+const fetchInvoices = async () => {
+  if (isLoadingInvoices.value) return;
+  
+  isLoadingInvoices.value = true;
+  
+  try {
+    // For now, we'll use sample data since Invoice API might not exist
+    const sampleInvoices = [
+      {
+        id: '1',
+        type: 'Proforma',
+        invoiceNo: 'INV-2024-001',
+        amount: 125000,
+        commissionAmount: 6250,
+        uploadDate: new Date(2024, 0, 15).toISOString(),
+        status: 'Completed'
+      },
+      {
+        id: '2',
+        type: 'Tax Invoice',
+        invoiceNo: 'INV-2024-002',
+        amount: 98000,
+        commissionAmount: 4900,
+        uploadDate: new Date(2024, 0, 22).toISOString(),
+        status: 'Completed'
+      },
+      {
+        id: '3',
+        type: 'Proforma',
+        invoiceNo: 'INV-2024-003',
+        amount: 156000,
+        commissionAmount: 7800,
+        uploadDate: new Date(2024, 1, 5).toISOString(),
+        status: 'Completed'
+      }
+    ];
+    
+    apiInvoices.value = sampleInvoices;
+  } catch (error) {
+    console.error('Error fetching invoices:', error);
+  } finally {
+    isLoadingInvoices.value = false;
+  }
+};
+
+// Computed properties
+const manufacturerData = computed(() => {
+  if (!currentLead.value || !associatedLead.value) {
+    return {
+      name: 'Loading...',
+      city: 'Unknown',
+      state: 'Unknown',
+      category: 'Unknown',
+      status: 'Unknown',
+      daysSinceStatus: 0
+    }
+  }
+  
+  // Determine which is manufacturer
+  if (currentLead.value.custom_lead_category === "Manufacturer Lead") {
+    return {
+      name: currentLead.value.company_name || currentLead.value.name,
+      city: 'Unknown', // Not available in current API
+      state: currentLead.value.custom_states || 'Unknown',
+      category: currentLead.value.custom_categories || 'Manufacturer',
+      status: currentLead.value.custom_new_status || 'Lead',
+      daysSinceStatus: calculateDaysSince(currentLead.value.creation)
+    }
+  } else {
+    return {
+      name: associatedLead.value.company_name || associatedLead.value.name,
+      city: 'Unknown',
+      state: associatedLead.value.custom_states || 'Unknown',
+      category: associatedLead.value.custom_categories || 'Manufacturer', 
+      status: associatedLead.value.custom_new_status || 'Lead',
+      daysSinceStatus: calculateDaysSince(associatedLead.value.creation)
+    }
   }
 });
 
 const distributorData = computed(() => {
-  const distributor = mockDistributors.find(d => d.id === props.id);
-  if (distributor) {
-    return distributor;
-  } else {
-    const manufacturer = mockManufacturers.find(m => m.id === props.id);
-    if (manufacturer) {
-      return mockDistributors.find(d => d.category === manufacturer.category) || mockDistributors[0];
+  if (!currentLead.value || !associatedLead.value) {
+    return {
+      name: 'Loading...',
+      city: 'Unknown',
+      state: 'Unknown', 
+      category: 'Unknown',
+      status: 'Unknown',
+      daysSinceStatus: 0
     }
-    return mockDistributors[0];
+  }
+  
+  // Determine which is distributor
+  if (currentLead.value.custom_lead_category === "SS / Distributor Lead") {
+    return {
+      name: currentLead.value.company_name || currentLead.value.name,
+      city: 'Unknown',
+      state: currentLead.value.custom_states || 'Unknown',
+      category: currentLead.value.custom_categories || 'Distributor',
+      status: currentLead.value.custom_new_status || 'Lead',
+      daysSinceStatus: calculateDaysSince(currentLead.value.creation)
+    }
+  } else {
+    return {
+      name: associatedLead.value.company_name || associatedLead.value.name,
+      city: 'Unknown',
+      state: associatedLead.value.custom_states || 'Unknown',
+      category: associatedLead.value.custom_categories || 'Distributor',
+      status: associatedLead.value.custom_new_status || 'Lead', 
+      daysSinceStatus: calculateDaysSince(associatedLead.value.creation)
+    }
   }
 });
 
 const isManufacturerView = computed(() => {
-  return mockManufacturers.some(m => m.id === props.id);
+  if (!currentLead.value) return false
+  return currentLead.value.custom_lead_category === "Manufacturer Lead"
 });
 
 const manufacturerName = computed(() => manufacturerData.value.name);
 const distributorName = computed(() => distributorData.value.name);
 
-const relatedDistributors = computed(() => {
-  return mockDistributors.filter(d => 
-    d.id !== props.id && 
-    d.category === distributorData.value.category
-  ).slice(0, 4);
-});
+// Current mapping status for the specific relationship
+const currentMappingStatus = computed(() => {
+  // Get current mapping status between the two entities using route params
+  const currentMapping = leadMappings.value.find(mapping => 
+    (mapping.parent_lead === props.id && mapping.mapped_lead === props.parentId) ||
+    (mapping.parent_lead === props.parentId && mapping.mapped_lead === props.id)
+  )
+  return currentMapping?.status || 'Not Mapped'
+})
 
-const relatedManufacturers = computed(() => {
-  return mockManufacturers.filter(m => 
-    m.id !== manufacturerData.value.id && 
-    m.category === distributorData.value.category
-  ).slice(0, 4);
-});
+// Helper functions
+const calculateDaysSince = (dateString: string) => {
+  if (!dateString) return 0
+  const creationDate = new Date(dateString)
+  const now = new Date()
+  const diffTime = Math.abs(now.getTime() - creationDate.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
+}
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+const getModeClass = (mode: string) => {
+  return `mode-${mode.toLowerCase().replace(' ', '-')}`
+}
+
+const getAgreementStatusClass = (status: string) => {
+  return `status-${status.toLowerCase().replace(' ', '-')}`
+}
+
+const getInvoiceTypeClass = (type: string) => {
+  return `type-${type.toLowerCase().replace(' ', '-')}`
+}
+
+const filterInvoices = () => {
+  // This will trigger the computed property to recalculate
+}
+
+// Load data and find associated lead
+const loadData = async () => {
+  isLoading.value = true
+  try {
+    console.log('Loading data for parent ID:', props.id, 'and child ID:', props.parentId)
+    
+    // Fetch both parent and child lead data
+    const [parentLead, childLead] = await Promise.all([
+      fetchLeadData(props.id),
+      fetchLeadData(props.parentId)
+    ])
+    
+    if (!parentLead || !childLead) {
+      console.error('Could not find leads - Parent:', props.id, 'Child:', props.parentId)
+      return
+    }
+    
+    console.log('Parent lead:', parentLead)
+    console.log('Child lead:', childLead)
+    
+    // Set the current lead as the parent and associated lead as the child
+    currentLead.value = parentLead
+    associatedLead.value = childLead
+    
+    // Fetch lead mappings for the relationship
+    leadMappings.value = await fetchLeadMappingsByRelationship(props.id, props.parentId)
+    console.log('Lead mappings for relationship:', leadMappings.value)
+    
+    // Fetch interactions for the relationship
+    await fetchInteractions()
+
+    // Fetch agreements and invoices (sample data or real API)
+    await fetchAgreements()
+    await fetchInvoices()
+  } catch (error) {
+    console.error('Error loading data:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const tabs = [
   { id: 'interactions', label: 'Interactions', icon: '💬' },
   { id: 'agreements', label: 'Agreements', icon: '📋' },
-  { id: 'invoices', label: 'Invoices', icon: '📄' },
+  { id: 'invoices', label: 'Invoices and Payments', icon: '📄' },
   { id: 'summary', label: 'Summary', icon: '📊' }
 ];
+
+// Computed properties for API data
+const agreement = computed(() => {
+  console.log('Agreement computed - apiAgreements:', apiAgreements.value);
+  const result = apiAgreements.value.length > 0 ? apiAgreements.value[0] : {
+    id: '1',
+    status: 'Draft',
+    version: '1.0',
+    createdDate: new Date().toISOString(),
+    signedDate: null,
+    terms: []
+  };
+  console.log('Agreement result:', result);
+  return result;
+});
+
+const invoices = computed(() => {
+  return apiInvoices.value;
+});
 
 const filteredInvoices = computed(() => {
   let filtered = invoices.value;
@@ -469,27 +776,27 @@ const filteredInvoices = computed(() => {
     case '7days':
       const weekAgo = new Date(today);
       weekAgo.setDate(weekAgo.getDate() - 7);
-      filtered = invoices.value.filter(invoice => 
+      filtered = invoices.value.filter((invoice: any) => 
         new Date(invoice.uploadDate) >= weekAgo
       );
       break;
     case 'month':
       const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-      filtered = invoices.value.filter(invoice => 
+      filtered = invoices.value.filter((invoice: any) => 
         new Date(invoice.uploadDate) >= monthStart
       );
       break;
     case 'lastmonth':
       const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
       const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-      filtered = invoices.value.filter(invoice => {
+      filtered = invoices.value.filter((invoice: any) => {
         const invoiceDate = new Date(invoice.uploadDate);
         return invoiceDate >= lastMonthStart && invoiceDate <= lastMonthEnd;
       });
       break;
     case 'quarter':
       const quarterStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
-      filtered = invoices.value.filter(invoice => 
+      filtered = invoices.value.filter((invoice: any) => 
         new Date(invoice.uploadDate) >= quarterStart
       );
       break;
@@ -499,52 +806,17 @@ const filteredInvoices = computed(() => {
 });
 
 const totalAmount = computed(() => {
-  return invoices.value.reduce((sum, invoice) => sum + invoice.amount, 0);
+  return invoices.value.reduce((sum: number, invoice: any) => sum + invoice.amount, 0);
 });
 
 const totalCommission = computed(() => {
-  return invoices.value.reduce((sum, invoice) => sum + invoice.commissionAmount, 0);
+  return invoices.value.reduce((sum: number, invoice: any) => sum + invoice.commissionAmount, 0);
 });
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
-
-const getModeClass = (mode: string) => {
-  return mode === 'Phone' ? 'mode-phone' : 'mode-face';
-};
-
-const getStatusClass = (status: string) => {
-  return `related-${status.toLowerCase()}`;
-};
-
-const getAgreementStatusClass = (status: string) => {
-  switch (status) {
-    case 'Draft':
-      return 'status-draft';
-    case 'Generated':
-      return 'status-generated';
-    case 'Signed':
-      return 'status-signed';
-    default:
-      return '';
-  }
-};
-
-const getInvoiceTypeClass = (type: string) => {
-  return type === 'Proforma' ? 'type-proforma' : 'type-tax';
-};
-
-const filterInvoices = () => {
-  // Filter logic handled by computed property
-};
-
+// Lifecycle hook
 onMounted(() => {
-  console.log('Loading view-only data for partnership ID:', props.id);
+  console.log('ViewOnly component mounted with Parent ID:', props.id, 'Child ID:', props.parentId);
+  loadData();
 });
 </script>
 
@@ -555,6 +827,35 @@ onMounted(() => {
   background: #f5f5f7;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1c1c1e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  color: #86868b;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .floating-header {
@@ -809,6 +1110,28 @@ onMounted(() => {
   color: #86868b;
   font-size: 11px;
   font-weight: 500;
+}
+
+.related-entities-placeholder {
+  margin-top: 32px;
+  padding: 32px;
+  background: #f5f5f7;
+  border: 2px dashed #d2d2d7;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.placeholder-content h3 {
+  color: #1d1d1f;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.placeholder-content p {
+  color: #86868b;
+  font-size: 14px;
+  margin: 0;
 }
 
 .related-entities {
@@ -1134,6 +1457,18 @@ onMounted(() => {
   font-style: italic;
 }
 
+.loading-cell, .no-data-cell {
+  text-align: center;
+  color: #86868b;
+  font-style: italic;
+  padding: 20px;
+}
+
+.reminder-cell {
+  color: #86868b;
+  font-size: 12px;
+}
+
 .agreement-card {
   background: #fafafa;
   border: 1px solid #f2f2f7;
@@ -1216,29 +1551,32 @@ onMounted(() => {
   margin: 0 0 12px 0;
 }
 
-.terms-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 12px;
+.terms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.term-card {
+.term-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
   background: white;
-  padding: 12px;
   border-radius: 8px;
   border: 1px solid #f2f2f7;
 }
 
-.term-clause {
+.term-title {
   font-weight: 600;
   color: #1d1d1f;
-  margin-bottom: 4px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
-.term-response {
+.term-description {
   color: #86868b;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .invoice-filters {
@@ -1269,7 +1607,7 @@ onMounted(() => {
   color: #856404;
 }
 
-.type-tax {
+.type-tax-invoice {
   background: #d1fae5;
   color: #065f46;
 }
@@ -1370,8 +1708,8 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
   
-  .terms-grid {
-    grid-template-columns: 1fr;
+  .terms-list {
+    gap: 12px;
   }
 }
 

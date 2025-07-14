@@ -601,7 +601,7 @@ const downloadAgreement = () => {
   }
 
   const link = document.createElement('a');
-  link.href = `/api/method/frappe.utils.print_format.download_pdf?doctype=Lead%20Mapping&name=${currentLeadMapping.value.name}&format=Standard&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en`;
+  link.href = `/api/method/frappe.utils.print_format.download_pdf?doctype=Lead%20Mapping&name=${currentLeadMapping.value.name}&format=Lead%20Mapping%20Agreement&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en`;
   link.download = `Agreement_${manufacturerName.value}_${distributorName.value}_v${agreement.value.version}.pdf`;
   link.target = '_blank';
   document.body.appendChild(link);

@@ -761,7 +761,7 @@ onMounted(async () => {
 }
 
 .btn-floating-promote {
-  background: #007AFF;
+  background: #020006;
   color: white;
   border: none;
   padding: 12px 20px;

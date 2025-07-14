@@ -190,6 +190,42 @@
               {{ selectedEntityItem?.status || 'Unknown' }}
             </span>
           </div>
+          
+          <!-- Lead Mapping Statistics Cards -->
+          <div class="mapping-stats-cards">
+            <div class="stats-card total">
+              <div class="stats-icon">📊</div>
+              <div class="stats-content">
+                <div class="stats-number">{{ mappingStats.total }}</div>
+                <div class="stats-label">Total Mappings</div>
+              </div>
+            </div>
+            
+            <div class="stats-card lead">
+              <div class="stats-icon">🎯</div>
+              <div class="stats-content">
+                <div class="stats-number">{{ mappingStats.lead }}</div>
+                <div class="stats-label">Lead Status</div>
+              </div>
+            </div>
+            
+            <div class="stats-card prospect">
+              <div class="stats-icon">🔍</div>
+              <div class="stats-content">
+                <div class="stats-number">{{ mappingStats.prospect }}</div>
+                <div class="stats-label">Prospect Status</div>
+              </div>
+            </div>
+            
+            <div class="stats-card customer">
+              <div class="stats-icon">✅</div>
+              <div class="stats-content">
+                <div class="stats-number">{{ mappingStats.customer }}</div>
+                <div class="stats-label">Customer Status</div>
+              </div>
+            </div>
+          </div>
+          
           <button class="btn-change-selection" @click="clearSelection">
             <span>🔄</span> Change Selection
           </button>
@@ -320,6 +356,7 @@
         :columns="tableColumns"
         :data="filteredPairedList"
         @action-click="handleActionClick"
+        @view-click="handleViewClick"
       >
         <template #actions>
           <div class="table-summary">
@@ -386,6 +423,10 @@ const isLoadingAssociatedLeads = ref(false)
 // Dynamic counts based on filtered leads
 const dynamicManufacturerCount = ref(0)
 const dynamicDistributorCount = ref(0)
+
+// Lead Mapping Statistics
+const leadMappingsData = ref<any[]>([])
+const isLoadingMappingStats = ref(false)
 
 // API functions
 const fetchStates = async () => {
@@ -612,6 +653,38 @@ const fetchInitialCounts = async () => {
   }
 }
 
+// Fetch Lead Mapping Statistics for selected entity
+const fetchLeadMappingStats = async () => {
+  try {
+    isLoadingMappingStats.value = true
+    console.log('Fetching Lead Mapping statistics for selected entity...')
+    
+    // Only fetch if we have a selected entity
+    if (!selectedEntityItem.value?.id) {
+      console.log('No selected entity, clearing mapping stats')
+      leadMappingsData.value = []
+      return
+    }
+    
+    const parentLeadId = selectedEntityItem.value.id
+    const response = await fetch(`/api/resource/Lead%20Mapping?fields=["name","status","parent_lead"]&filters={"parent_lead":"${parentLeadId}"}&limit_page_length=500`)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    leadMappingsData.value = data.data || []
+    
+    console.log('Lead Mapping statistics fetched successfully for', parentLeadId, ':', leadMappingsData.value.length, 'records')
+  } catch (error) {
+    console.error('Error fetching Lead Mapping statistics:', error)
+    leadMappingsData.value = []
+  } finally {
+    isLoadingMappingStats.value = false
+  }
+}
+
 // Computed properties
 const currentEntityList = computed(() => {
   // If we have API leads data, use it to generate the entity list (with or without filters)
@@ -720,7 +793,8 @@ const tableColumns = computed(() => [
   { key: 'status', label: 'Status' },
   { key: 'daysSinceStatus', label: 'Days Since Status' },
   { key: 'registrationDate', label: 'Registration Date' },
-  { key: 'action', label: 'Action' }
+  { key: 'action', label: 'Action' },
+  { key: 'view', label: 'View' }
 ])
 
 // Filter availability computed properties
@@ -924,6 +998,33 @@ const hasActiveAssociatedFilters = computed(() => {
   return Object.values(associatedFilters).some((arr: unknown) => Array.isArray(arr) && arr.length > 0)
 })
 
+// Lead Mapping Statistics computed properties
+const totalMappings = computed(() => {
+  return leadMappingsData.value.length
+})
+
+const leadStatusCount = computed(() => {
+  return leadMappingsData.value.filter(mapping => mapping.status === 'Lead').length
+})
+
+const prospectStatusCount = computed(() => {
+  return leadMappingsData.value.filter(mapping => mapping.status === 'Prospect').length
+})
+
+const customerStatusCount = computed(() => {
+  return leadMappingsData.value.filter(mapping => mapping.status === 'Customer').length
+})
+
+// Combined mapping stats object for template
+const mappingStats = computed(() => {
+  return {
+    total: totalMappings.value,
+    lead: leadStatusCount.value,
+    prospect: prospectStatusCount.value,
+    customer: customerStatusCount.value
+  }
+})
+
 const activeFilterTags = computed(() => {
   const tags: Record<string, unknown> = {}
   Object.entries(filters).forEach(([key, values]) => {
@@ -1082,6 +1183,21 @@ const handleActionClick = (row: Manufacturer | Distributor) => {
   }
 }
 
+const handleViewClick = (row: Manufacturer | Distributor) => {
+  console.log('View clicked for:', row)
+  console.log('Selected entity (parent):', selectedEntityItem.value)
+  
+  // Navigate to ViewOnly page with parent-child routing
+  // Parent ID = selected entity, Child ID = clicked row
+  router.push({ 
+    name: 'ViewOnly', 
+    params: { 
+      id: selectedEntityItem.value?.id || '',  // Parent ID (selected entity)
+      parentId: row.id  // Child ID (clicked row)
+    }
+  })
+}
+
 const getRouteNameFromStatus = (status: string) => {
   switch (status) {
     case 'Registration': return 'Lead' // Process registration as lead
@@ -1184,6 +1300,9 @@ onMounted(() => {
   
   // Fetch initial lead counts from API
   fetchInitialCounts()
+  
+  // Don't fetch mapping stats on mount since no entity is selected
+  // Stats will be fetched when entity is selected
   
   // Reset entity selection when returning to Dashboard
   clearSelection()
@@ -1330,6 +1449,11 @@ const fetchAssociatedLeads = async () => {
 watch(selectedEntityItem, (newItem, oldItem) => {
   if (newItem && newItem !== oldItem) {
     fetchAssociatedLeads()
+    // Fetch mapping stats for the selected entity
+    fetchLeadMappingStats()
+  } else if (!newItem) {
+    // Clear mapping stats when no entity is selected
+    leadMappingsData.value = []
   }
 })
 </script>
@@ -1722,6 +1846,73 @@ watch(selectedEntityItem, (newItem, oldItem) => {
   border: 1px solid #d2d2d7;
 }
 
+.mapping-stats-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+.stats-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f5f5f7;
+  border-radius: 8px;
+  border: 1px solid #d2d2d7;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.stats-card:hover {
+  background: #e8e8ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card.total {
+  border-left: 4px solid #1c1c1e;
+}
+
+.stats-card.lead {
+  border-left: 4px solid #007aff;
+}
+
+.stats-card.prospect {
+  border-left: 4px solid #ff9500;
+}
+
+.stats-card.customer {
+  border-left: 4px solid #34c759;
+}
+
+.stats-icon {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.stats-content {
+  flex: 1;
+}
+
+.stats-number {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+  line-height: 1.2;
+}
+
+.stats-label {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
 .entity-avatar {
   width: 64px;
   height: 64px;
@@ -1878,6 +2069,16 @@ watch(selectedEntityItem, (newItem, oldItem) => {
     flex-direction: column;
     text-align: center;
     gap: 16px;
+  }
+  
+  .mapping-stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    margin: 16px 0;
+    width: 100%;
+  }
+  
+  .stats-card {
+    min-width: auto;
   }
   
   .filter-tags {

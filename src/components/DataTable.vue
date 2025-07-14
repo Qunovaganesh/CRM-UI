@@ -34,6 +34,14 @@
                       {{ getActionButton(row) }}
                     </button>
                   </template>
+                  <template v-else-if="column.key === 'view'">
+                    <button 
+                      @click="$emit('view-click', row)"
+                      class="view-btn"
+                    >
+                      👁️ View
+                    </button>
+                  </template>
                   <template v-else-if="column.key === 'status'">
                     <span :class="getStatusClass(row[column.key])" class="status-badge">
                       {{ row[column.key] }}
@@ -100,6 +108,12 @@
           >
             {{ getActionButton(row) }}
           </button>
+          <button 
+            @click="$emit('view-click', row)"
+            class="view-btn mobile-view-btn"
+          >
+            👁️ View
+          </button>
         </div>
       </div>
     </div>
@@ -131,6 +145,7 @@ const props = defineProps<{
 
 defineEmits<{
   'action-click': [row: any];
+  'view-click': [row: any];
 }>();
 
 const isMobile = ref(false)
@@ -350,6 +365,30 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
+.view-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: #1c1c1e;
+  color: white;
+  min-height: 32px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.view-btn:hover {
+  background: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(28, 28, 30, 0.3);
+}
+
 .btn-action {
   background: #6b7280;
   color: white;
@@ -361,30 +400,30 @@ onUnmounted(() => {
 }
 
 .btn-lead {
-  background: #f59e0b;
+  background: #020006;
   color: white;
 }
 
 .btn-lead:hover {
-  background: #d97706;
+  background: #020006;
 }
 
 .btn-prospect {
-  background: #3b82f6;
+  background: #020006;
   color: white;
 }
 
 .btn-prospect:hover {
-  background: #2563eb;
+  background: #020006;
 }
 
 .btn-customer {
-  background: #10b981;
+  background: #020006;
   color: white;
 }
 
 .btn-customer:hover {
-  background: #059669;
+  background: #020006;
 }
 
 .btn-view {
@@ -397,12 +436,12 @@ onUnmounted(() => {
 }
 
 .btn-registration {
-  background: #8b5cf6;
+  background: #020006;
   color: white;
 }
 
 .btn-registration:hover {
-  background: #7c3aed;
+  background: #020006;
 }
 
 .status-badge {
@@ -539,6 +578,13 @@ onUnmounted(() => {
   padding: 10px 20px;
   font-size: 13px;
   min-height: 40px;
+}
+
+.mobile-view-btn {
+  padding: 8px 16px;
+  font-size: 12px;
+  min-height: 36px;
+  margin-left: 8px;
 }
 
 .no-data {
